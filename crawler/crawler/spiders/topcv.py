@@ -2,9 +2,6 @@ from scrapy import Request, FormRequest
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 from ..items import TopCVItem, CompanyItem, MajorItem
-# import sys
-# import pandas as pd
-# from twisted.internet.error import ConnectionLost, TCPTimedOutError, TimeoutError
 
 BASE_URL = "https://www.topcv.vn/"
 USERNAME = "vudat1710@gmail.com"
@@ -15,6 +12,7 @@ class TopCVCrawler(CrawlSpider):
     name = "topcv"
     allowed_domains = ["www.topcv.vn"]
     start_urls = []
+    company_url_list = []
     # rules = (
     #     Rule(
     #         LinkExtractor(restrict_xpaths=('//a[@rel="next"]/@href',), deny=(r"/login",)), follow=True),
@@ -23,7 +21,6 @@ class TopCVCrawler(CrawlSpider):
     # )
     
     def __init__(self, **kwargs):
-        # ScrapyFileLogObserver(open("debug.log", 'w'), level=logging.DEBUG).start()
         CrawlSpider.__init__(self, **kwargs)
 
     def start_requests(self):
@@ -60,21 +57,22 @@ class TopCVCrawler(CrawlSpider):
             yield item
     
     def after_login(self, response):
-        # with open(START_LINKS_PATH, "r") as f:
-        #     for line in f.readlines():
-        #         self.start_urls.append(line.strip())
-        # f.close()
+        with open(START_LINKS_PATH, "r") as f:
+            for line in f.readlines():
+                self.start_urls.append(line.strip())
+        f.close()
 
-        # for start_link in self.start_urls:
-        #     yield Request(url=start_link, callback=self.posts_parse)
-        yield Request(url="https://www.topcv.vn/tim-viec-lam-an-toan-lao-dong-c10101", callback=self.posts_parse)
+        for start_link in self.start_urls:
+            yield Request(url=start_link, callback=self.posts_parse)
+        # yield Request(url="https://www.topcv.vn/tim-viec-lam-an-toan-lao-dong-c10101", callback=self.posts_parse)
     
     def posts_parse(self, response):
         post_urls = response.xpath('//h4[@class="job-title"]/a/@href').extract()
         for post_url in post_urls:
             yield Request(url=post_url, callback=self.get_item)
         next_page_url = response.xpath('//a[@rel="next"]/@href').extract_first()
-        yield Request(url=next_page_url, callback=self.posts_parse)
+        if next_page_url:
+            yield Request(url=next_page_url, callback=self.posts_parse)
     
     def get_item(self, response):
         item = TopCVItem()
@@ -129,14 +127,15 @@ class TopCVCrawler(CrawlSpider):
             item["requirements"] = ' '.join([x for x in content[1].xpath('.//p//text()').extract() if x != "\n" and x != ""])
             item["extra"] = ' '.join([x for x in content[2].xpath('./p/text()').extract() if x != "\n" and x != ""])
             item["majors"] = response.xpath('//div[@id="col-job-left"]/div[6]/span/a/@href').extract()
-            company_url = response.xpath('//div[@id="nav"]/div/ul/li[2]/a/@href').extract_first()
             company_url = response.xpath('//div[@class="company-title"]/span/a/@href').extract_first()
             item["company_url"] = company_url
             item["post_url"] = response.url
 
             yield item
-        
-        yield Request(url=company_url, callback=self.get_company)
+
+        if company_url not in self.company_url_list:
+            self.company_url_list.append(company_url)
+            yield Request(url=company_url, callback=self.get_company)
     
     def get_company(self, response):
         item = CompanyItem()
