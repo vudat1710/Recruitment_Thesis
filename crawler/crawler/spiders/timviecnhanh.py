@@ -19,14 +19,14 @@ class TVNCrawler(CrawlSpider):
     def start_requests(self):
         # yield Request(url=BASE_URL, callback=self.get_start_links)
         
-        # with open(START_LINKS_PATH, "r") as f:
-        #     for line in f.readlines():
-        #         self.start_urls.append(line.strip())
-        # f.close()
+        with open(START_LINKS_PATH, "r") as f:
+            for line in f.readlines():
+                self.start_urls.append(line.strip())
+        f.close()
 
-        # for start_link in self.start_urls:
-        #     yield Request(url=start_link, callback=self.posts_parse)
-        yield Request(url="https://www.timviecnhanh.com/vieclam/timkiem?tu_khoa=&nganh_nghe%5B%5D=36&tinh_thanh%5B%5D=", callback=self.posts_parse, dont_filter=True)
+        for start_link in self.start_urls:
+            yield Request(url=start_link, callback=self.posts_parse)
+        # yield Request(url="https://www.timviecnhanh.com/vieclam/timkiem?tu_khoa=&nganh_nghe%5B%5D=36&tinh_thanh%5B%5D=", callback=self.posts_parse, dont_filter=True)
     
     def get_start_links(self, response):
         urls = response.xpath('//div[@id="field-hot-content"]/ul/li/a/@href').extract()
@@ -67,7 +67,8 @@ class TVNCrawler(CrawlSpider):
         item["description"] = ''.join(response.xpath('//article[@class="block-content"]/table/tbody/tr[1]/td[2]/p//text()').extract())
         item["extra"] = ''.join(response.xpath('//article[@class="block-content"]/table/tbody/tr[3]/td[2]/p//text()').extract())
         item["requirements"] = ''.join(response.xpath('//article[@class="block-content"]/table/tbody/tr[2]/td[2]/p//text()').extract())
-        item["majors"] = response.xpath('//article[@class="block-content"]/div[5]/div[1]/ul/li[5]/a/@href').extract()
+        majors = response.xpath('//article[@class="block-content"]/div[5]/div[1]/ul/li[5]/a/@href').extract()
+        item["majors"] = [MAJOR_LINK.format(m[-7:-5]) for m in majors]
         item["level"] = ''.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[1]/ul/li[3]/text()').extract() if x.strip() != ""]).strip()
         company_url = response.xpath('//article[@class="block-content"]/div[2]/h3/a/@href').extract_first()
         item["company_url"] = company_url

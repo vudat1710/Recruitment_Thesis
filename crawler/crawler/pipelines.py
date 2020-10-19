@@ -23,6 +23,11 @@ class CrawlerPipeline(object):
         self.companies_tvn = []
         self.majors_tvn = []
 
+        #viectotnhat
+        self.posts_vtn = []
+        self.companies_vtn = []
+        self.majors_vtn = []
+
     def close_spider(self, spider):
         if len(self.posts) != 0:
             json.dump(self.posts, open('crawler/data/topcv/post.json', 'w'))
@@ -48,6 +53,12 @@ class CrawlerPipeline(object):
             json.dump(self.companies_tvn, open('crawler/data/timviecnhanh/company.json', 'w'))
         if len(self.majors_tvn) != 0:
             json.dump(self.majors_tvn, open('crawler/data/timviecnhanh/major.json', 'w'))
+        if len(self.posts_vtn) != 0:
+            json.dump(self.posts_vtn, open('crawler/data/viectotnhat/post.json', 'w'))
+        if len(self.companies_vtn) != 0:
+            json.dump(self.companies_vtn, open('crawler/data/viectotnhat/company.json', 'w'))
+        if len(self.majors_vtn) != 0:
+            json.dump(self.majors_vtn, open('crawler/data/viectotnhat/major.json', 'w'))
 
     def process_item(self, item, spider): 
         if isinstance(item, TopCVItem):       
@@ -74,5 +85,11 @@ class CrawlerPipeline(object):
             self.companies_tvn.append(dict(item))
         elif isinstance(item, TVNMajorItem):
             self.majors_tvn.append(dict(item))
+        elif isinstance(item, VTNItem):       
+            self.posts_vtn.append(dict(item))
+        elif isinstance(item, VTNCompanyItem):
+            self.companies_vtn.append(dict(item))
+        elif isinstance(item, VTNMajorItem):
+            self.majors_vtn.append(dict(item))
         
         return item

@@ -137,3 +137,37 @@ class TVNCompanyItem(Item):
 class TVNMajorItem(Item):
     name = Field()
     major_url = Field()
+
+#Viectotnhat
+class VTNItem(Item):
+    title = Field()
+    company_title = Field()
+    address = Field()
+    job_deadline = Field()
+    salary = Field()
+    job_type = Field()
+    num_hiring = Field()
+    position = Field()
+    experience = Field()
+    gender = Field()
+    img = Field()
+    workplace = Field()
+    description = Field()
+    requirements = Field()
+    extra = Field()
+    majors = Field()
+    level = Field()
+    contact_name = Field()
+    contact_address = Field()
+    company_url = Field()
+    post_url = Field()
+
+class VTNCompanyItem(Item):
+    name = Field()
+    description = Field()
+    company_url = Field()
+    address = Field()
+
+class VTNMajorItem(Item):
+    name = Field()
+    major_url = Field()
