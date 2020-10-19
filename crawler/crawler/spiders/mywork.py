@@ -1,7 +1,7 @@
 from scrapy import Request, FormRequest
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
-from ..items import ViecLam24hItem, VL24hCompanyItem, VL24hMajorItem
+from ..items import MyWorkItem, MyWorkCompanyItem, MyWorkMajorItem
 
 BASE_URL = "https://vieclam24h.vn"
 START_LINKS_PATH = "./crawler/data/vieclam24h/vieclam24h_start_links.txt"
@@ -16,16 +16,16 @@ class ViecLam24hCrawler(CrawlSpider):
         CrawlSpider.__init__(self, **kwargs)
 
     def start_requests(self):
-        # yield Request(url="https://vieclam24h.vn/tim-kiem-viec-lam-nang-cao?gate=&from=homepage", callback=self.get_start_links)
+        yield Request(url="https://vieclam24h.vn/tim-kiem-viec-lam-nang-cao?gate=&from=homepage", callback=self.get_start_links)
         
-        # with open(START_LINKS_PATH, "r") as f:
-        #     for line in f.readlines():
-        #         self.start_urls.append(line.strip())
-        # f.close()
+        with open(START_LINKS_PATH, "r") as f:
+            for line in f.readlines():
+                self.start_urls.append(line.strip())
+        f.close()
 
-        # for start_link in self.start_urls:
-        #     yield Request(url=start_link, callback=self.posts_parse)
-        yield Request(url="https://vieclam24h.vn/mien-bac/viec-lam-chuyen-mon/thiet-ke-my-thuat-c32.html", callback=self.posts_parse)
+        for start_link in self.start_urls:
+            yield Request(url=start_link, callback=self.posts_parse)
+        # yield Request(url="https://vieclam24h.vn/mien-bac/viec-lam-chuyen-mon/thiet-ke-my-thuat-c32.html", callback=self.posts_parse)
     
     def get_start_links(self, response):
         urls = response.xpath('//div[@id="gate_nganhnghe_hot"]/div/a/@href').extract()
@@ -35,7 +35,7 @@ class ViecLam24hCrawler(CrawlSpider):
         f.close()
         elements = response.xpath('//div[@id="gate_nganhnghe_hot"]/div')
         for element in elements:
-            item = VL24hMajorItem()
+            item = MyWorkMajorItem()
             item["major_url"] = element.xpath('./a/@href').extract_first()
             item["name"] = element.xpath('./a/text()').extract_first().strip()
 
@@ -51,7 +51,7 @@ class ViecLam24hCrawler(CrawlSpider):
             yield Request(url=next_page_url, callback=self.posts_parse)
     
     def get_item(self, response):
-        item = ViecLam24hItem()
+        item = MyWorkItem()
         item["title"] = response.xpath('//div[contains(@class, "box_chi_tiet_cong_viec")]/div[1]/div[1]/h1/text()').extract_first().strip()
         item["company_title"] = response.xpath('//div[contains(@class, "box_chi_tiet_cong_viec")]/div[1]/div[1]/p/a/text()').extract_first()
         item["address"] = response.xpath('//address/text()').extract_first()
@@ -72,8 +72,6 @@ class ViecLam24hCrawler(CrawlSpider):
         company_url = response.xpath('//div[contains(@class, "box_chi_tiet_cong_viec")]/div[1]/div[1]/p/a/@href').extract_first()
         item["company_url"] = company_url
         item["post_url"] = response.url
-        item["contact_name"] = response.xpath('//*[@id="ttd_detail"]/div[2]/div[2]/p/text()').extract_first().strip()
-        item["contact_address"] = response.xpath('//*[@id="ttd_detail"]/div[2]/div[3]/p/text()').extract_first().strip()
 
         yield item
         if company_url not in self.company_url_list:
@@ -82,7 +80,7 @@ class ViecLam24hCrawler(CrawlSpider):
     
     def get_company(self, response):
         print(response.url)
-        item = VL24hCompanyItem()
+        item = MyWorkCompanyItem()
         item["name"] = response.xpath('//div[@id="box_chi_tiet_nha_tuyen_dung"]/div/div/h1/text()').extract_first()
         item["company_url"] = response.url
         item["description"] = ''.join(response.xpath('//div[contains(@class, "company-description")]//text()').extract())
