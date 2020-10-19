@@ -13,8 +13,9 @@ bin-release/
 *.ipa
 *.apk
 *__pycache__
-*.json
-*.txt
+company.json
+post.json
+# *.txt
 
 
 # Project files, i.e. `.project`, `.actionScriptProperties` and `.flexProperties`

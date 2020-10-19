@@ -18,14 +18,14 @@ class ViecLam24hCrawler(CrawlSpider):
     def start_requests(self):
         # yield Request(url="https://vieclam24h.vn/tim-kiem-viec-lam-nang-cao?gate=&from=homepage", callback=self.get_start_links)
         
-        # with open(START_LINKS_PATH, "r") as f:
-        #     for line in f.readlines():
-        #         self.start_urls.append(line.strip())
-        # f.close()
+        with open(START_LINKS_PATH, "r") as f:
+            for line in f.readlines():
+                self.start_urls.append(line.strip())
+        f.close()
 
-        # for start_link in self.start_urls:
-        #     yield Request(url=start_link, callback=self.posts_parse)
-        yield Request(url="https://vieclam24h.vn/mien-bac/viec-lam-chuyen-mon/thiet-ke-my-thuat-c32.html", callback=self.posts_parse)
+        for start_link in self.start_urls:
+            yield Request(url=start_link, callback=self.posts_parse)
+        # yield Request(url="https://vieclam24h.vn/mien-bac/viec-lam-chuyen-mon/thiet-ke-my-thuat-c32.html", callback=self.posts_parse)
     
     def get_start_links(self, response):
         urls = response.xpath('//div[@id="gate_nganhnghe_hot"]/div/a/@href').extract()
@@ -55,7 +55,7 @@ class ViecLam24hCrawler(CrawlSpider):
         item["title"] = response.xpath('//div[contains(@class, "box_chi_tiet_cong_viec")]/div[1]/div[1]/h1/text()').extract_first().strip()
         item["company_title"] = response.xpath('//div[contains(@class, "box_chi_tiet_cong_viec")]/div[1]/div[1]/p/a/text()').extract_first()
         item["address"] = response.xpath('//address/text()').extract_first()
-        item["job_deadline"] = ' '.join([x.strip() for x in response.xpath('//div[contains(@class, "box_chi_tiet_cong_viec")]/div[2]/div[1]/span/span/span//text()').extract()])
+        item["job_deadline"] = ' '.join([x.strip() for x in response.xpath('//div[contains(@class, "box_chi_tiet_cong_viec")]/div[2]/div[1]/span/span/span//text()').extract()])[15:]
         item["salary"] = response.xpath('//div[contains(@class, "job_detail")]/div/p[descendant::i[contains(@class, "icon-money")]]/span/span/text()').extract_first().strip()
         item["job_type"] = response.xpath('//div[contains(@class, "job_detail")]/div/p[descendant::i[contains(@class, "icon-job-type")]]/span/span/text()').extract_first().strip()
         item["num_hiring"] = response.xpath('//div[contains(@class, "job_detail")]/div/p[descendant::i[contains(@class, "icon-quantity")]]/span/span/text()').extract_first().strip()
@@ -81,7 +81,6 @@ class ViecLam24hCrawler(CrawlSpider):
             yield Request(url=company_url, callback=self.get_company, dont_filter=True)
     
     def get_company(self, response):
-        print(response.url)
         item = VL24hCompanyItem()
         item["name"] = response.xpath('//div[@id="box_chi_tiet_nha_tuyen_dung"]/div/div/h1/text()').extract_first()
         item["company_url"] = response.url

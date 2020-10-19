@@ -89,6 +89,8 @@ class MyWorkItem(Item):
     extra = Field()
     majors = Field()
     level = Field()
+    contact_name = Field()
+    contact_address = Field()
     company_url = Field()
     post_url = Field()
 
