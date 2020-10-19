@@ -70,7 +70,7 @@ class MyWorkCrawler(CrawlSpider):
         item["experience"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-briefcase")]]/span/text()').extract_first().strip()
         item["gender"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-man-woman")]]/span/text()').extract_first().strip()     
         item["workplace"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-map-marker")]]/span/div/text()').extract_first().strip()
-        item["img"] = response.xpath('//div[@class="box-logo"]/div/img/@src').extract_first()
+        item["img"] = ""
         content = response.xpath('//div[@class="mw-box-item"]')
         item["description"] = '\n'.join(content[0].xpath('.//text()').extract())
         item["extra"] = '\n'.join(content[1].xpath('.//text()').extract())
