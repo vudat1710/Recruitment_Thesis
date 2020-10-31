@@ -2,7 +2,11 @@ import React, { Component } from "react";
 import { Link, withRouter, Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 import Banner from "../../assets/img/banner.jpg";
-import { getNumAllPosts, getDataAutoComplete, searchPosts } from "../../actions/post.action";
+import {
+  getNumAllPosts,
+  getDataAutoComplete,
+  searchPosts,
+} from "../../actions/post.action";
 import PropTypes from "prop-types";
 import AutoCompleteText from "../HOC/AutoCompleteText";
 import classnames from "classnames";
@@ -31,7 +35,7 @@ class Search extends Component {
       numAllPosts: this.props.posts.numAllPosts,
       dataAuto: this.props.posts.autoComplete,
       loading: true,
-      redirect: false
+      redirect: false,
     });
   }
 
@@ -56,23 +60,23 @@ class Search extends Component {
 
   async onSearchClick() {
     const { positionTypes, workplaces, majors } = this.state;
-    const searchData={
+    const searchData = {
       positions: positionTypes,
       workplaces: workplaces,
-      majors: majors
-    }
+      majors: majors,
+    };
     await this.props.searchPosts(searchData);
     this.setState({
       ...this.state,
       redirect: true,
-    })
+    });
   }
 
   renderRedirect = () => {
     if (this.state.redirect) {
-      return <Redirect to='/advancedSearch' />
+      return <Redirect to="/advancedSearch" />;
     }
-  }
+  };
 
   render() {
     const { numAllPosts, dataAuto, loading } = this.state;
@@ -83,7 +87,7 @@ class Search extends Component {
         <header
           className="site-header size-lg text-center"
           style={{
-            backgroundImage: `url(${ Banner })`,
+            backgroundImage: `url(${Banner})`,
           }}
         >
           {this.renderRedirect()}
@@ -133,7 +137,13 @@ class Search extends Component {
                 </div>
 
                 <div className="btn-search">
-                  <button className="btn btn-primary" type="submit" onClick={() => {this.onSearchClick()}}>
+                  <button
+                    className="btn btn-primary"
+                    type="submit"
+                    onClick={() => {
+                      this.onSearchClick();
+                    }}
+                  >
                     Tìm kiếm
                   </button>
                   <Link to="/advancedSearch">Tìm kiếm nâng cao</Link>

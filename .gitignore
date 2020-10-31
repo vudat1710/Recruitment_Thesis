@@ -3,7 +3,9 @@ bin-debug/
 bin-release/
 [Oo]bj/
 [Bb]in/
-
+/crawler/get_data/get_data/data/*.txt
+/crawler/get_data/get_data/model/*
+/crawler/get_data/get_data/sample/*
 # Other files and folders
 .settings/
 

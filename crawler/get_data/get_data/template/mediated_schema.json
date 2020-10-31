@@ -1,0 +1,32 @@
+{
+    "title": [],
+    "description": [],
+    "jobBenefits": [],
+    "skills": [],
+    "qualifications": [],
+    "experienceRequirements": [],
+    "datePosted": [],
+    "validThrough": [],
+    "employmentType": [],
+    "educationRequirements": [],
+    "hiringOrganization": {
+      "name": []
+    },
+    "jobLocation": {
+      "addressRegion": [],
+      "addressCountry": [],
+      "addressLocality": [],
+      "streetAddress": []
+    },
+    "baseSalary": {
+      "currency": [],
+      "minValue": [],
+      "maxValue": [],
+      "unitText": [],
+      "value": []
+    },
+    "occupationalCategory": [
+  
+    ],
+    "logo": ""
+  }
