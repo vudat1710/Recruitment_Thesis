@@ -6,6 +6,7 @@ bin-release/
 /crawler/get_data/get_data/data/*.txt
 /crawler/get_data/get_data/model/*
 /crawler/get_data/get_data/sample/*
+*.ipynb
 # Other files and folders
 .settings/
 

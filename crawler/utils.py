@@ -2,7 +2,7 @@ from extruct.jsonld import JsonLdExtractor
 from extruct.w3cmicrodata import MicrodataExtractor
 from underthesea import word_tokenize
 from .constants import STOPWORDS_PATH
-import re
+import re, math
 import lxml.html as lh
 from lxml.html.clean import clean_html
 
@@ -141,6 +141,10 @@ def build_inverted_index(docs):
             doc_list.append(i)
     return inverted_index
 
+def get_field_data(post, field_name):
+    if field_name in post:
+        return "'{}'".format(post[field_name])
+    else: return "NULL"
 
 def get_sample_data_from_json_type(response):
     try:

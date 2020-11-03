@@ -1,4 +1,5 @@
 from scrapy import Request, FormRequest
+from scrapy.exceptions import CloseSpider
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 from ..items import TopCVItem, CompanyItem, MajorItem
@@ -7,6 +8,7 @@ BASE_URL = "https://www.topcv.vn/"
 USERNAME = "vudat1710@gmail.com"
 PASSWORD = "17101998"
 START_LINKS_PATH = "./crawler/data/topcv/topcv_start_links.txt"
+NUM_STOP = 20
 
 class TopCVCrawler(CrawlSpider):
     name = "topcv"
@@ -21,6 +23,7 @@ class TopCVCrawler(CrawlSpider):
     # )
     
     def __init__(self, **kwargs):
+        self.count = 0
         CrawlSpider.__init__(self, **kwargs)
 
     def start_requests(self):
@@ -70,9 +73,14 @@ class TopCVCrawler(CrawlSpider):
         post_urls = response.xpath('//h4[@class="job-title"]/a/@href').extract()
         for post_url in post_urls:
             yield Request(url=post_url, callback=self.get_item)
-        next_page_url = response.xpath('//a[@rel="next"]/@href').extract_first()
-        if next_page_url:
-            yield Request(url=next_page_url, callback=self.posts_parse)
+        self.count += len(post_urls)
+        if self.count > NUM_STOP:
+            # raise CloseSpider("Num posts exceeded")
+            return
+        else:
+            next_page_url = response.xpath('//a[@rel="next"]/@href').extract_first()
+            if next_page_url:
+                yield Request(url=next_page_url, callback=self.posts_parse)
     
     def get_item(self, response):
         item = TopCVItem()
@@ -85,7 +93,7 @@ class TopCVCrawler(CrawlSpider):
             else: item["title"] = ' '.join(title_list)
             item["company_title"] = response.xpath('//div[@id="company-name"]/h1/text()').extract_first().strip()
             item["address"] = response.xpath('//span[@title="Địa chỉ làm việc"]/text()').extract_first().strip()
-            item["job_deadline"] = response.xpath('//span[@title="Hạn ứng tuyển"]/text()').extract_first().strip()
+            item["valid_through"] = response.xpath('//span[@title="Hạn ứng tuyển"]/text()').extract_first().strip()
             item["salary"] = response.xpath('//span[@title="Mức lương"]/text()').extract_first().strip()
             item["job_type"] = response.xpath('//span[@title="Hình thức làm việc"]/text()').extract_first().strip()
             item["num_hiring"] = response.xpath('//span[@title="Số lượng cần tuyển"]/text()').extract_first().strip()
@@ -96,9 +104,9 @@ class TopCVCrawler(CrawlSpider):
             item["img"] = response.xpath('//div[@id="company-logo"]/img/@src').extract_first()
             content = response.xpath('//div[@class="job-data"]/div')
             item["description"] = ' '.join([x for x in content[0].xpath('.//p//text()').extract() if x != "\n" and x != ""])
-            item["requirements"] = ' '.join([x for x in content[1].xpath('.//p//text()').extract() if x != "\n" and x != ""])
-            item["extra"] = ' '.join([x for x in content[2].xpath('.//p//text()').extract() if x != "\n" and x != ""])
-            item["majors"] = response.xpath('//div[@class="col-md-8 col-sm-12"]/div[4]/span/a/@href').extract()
+            item["extra_requirements"] = ' '.join([x for x in content[1].xpath('.//p//text()').extract() if x != "\n" and x != ""])
+            item["job_benefits"] = ' '.join([x for x in content[2].xpath('.//p//text()').extract() if x != "\n" and x != ""])
+            item["majors"] = response.xpath('//div[@class="col-md-8 col-sm-12"]/div[4]/span/a/text()').extract()
             company_url = response.xpath('//div[@id="nav"]/div/ul/li[2]/a/@href').extract_first()
             item["company_url"] = company_url
             item["post_url"] = response.url
@@ -112,7 +120,7 @@ class TopCVCrawler(CrawlSpider):
             else: item["title"] = ' '.join(title_list)
             item["company_title"] = response.xpath('//div[@class="company-title"]/span/a/text()').extract_first()
             item["address"] = [x.strip() for x in response.xpath('//div[@class="text-dark-gray"]/text()').extract() if x != '\n'][0]
-            item["job_deadline"] = [x.strip() for x in response.xpath('//div[@class=" text-dark-gray  job-deadline"]/text()').extract() if x != '\n'][0]
+            item["valid_through"] = [x.strip() for x in response.xpath('//div[@class=" text-dark-gray  job-deadline"]/text()').extract() if x != '\n'][0]
             recuit_info = [x.strip() for x in response.xpath('//div[@class="job-info-item"]/span/text()').extract() if x.strip() != '']
             item["salary"] = recuit_info[0]
             item["job_type"] = recuit_info[1]
@@ -124,12 +132,12 @@ class TopCVCrawler(CrawlSpider):
             item["img"] = response.xpath('//img[@class="company-logo"]/@src').extract_first()
             content = response.xpath('//div[@class="content-tab"]')
             item["description"] = ' '.join([x for x in content[0].xpath('.//p//text()').extract() if x != "\n" and x != ""])
-            item["requirements"] = ' '.join([x for x in content[1].xpath('.//p//text()').extract() if x != "\n" and x != ""])
-            item["extra"] = ' '.join([x for x in content[2].xpath('./p/text()').extract() if x != "\n" and x != ""])
-            item["majors"] = response.xpath('//div[@id="col-job-left"]/div[6]/span/a/@href').extract()
+            item["extra_requirements"] = ' '.join([x for x in content[1].xpath('.//p//text()').extract() if x != "\n" and x != ""])
+            item["job_benefits"] = ' '.join([x for x in content[2].xpath('./p/text()').extract() if x != "\n" and x != ""])
+            item["majors"] = response.xpath('//div[@id="col-job-left"]/div[6]/span/a/text()').extract()
             company_url = response.xpath('//div[@class="company-title"]/span/a/@href').extract_first()
-            item["company_url"] = company_url
-            item["post_url"] = response.url
+            item["company_url"] = company_url.replace("www.", "")
+            item["post_url"] = response.url.replace("www.", "")
 
             yield item
 
@@ -140,7 +148,7 @@ class TopCVCrawler(CrawlSpider):
     def get_company(self, response):
         item = CompanyItem()
         item["name"] = response.xpath('//h1[@class="company-detail-name text-highlight"]/text()').extract_first()
-        item["company_url"] = response.url
+        item["company_url"] = response.url.replace("www.", "")
         item["description"] = ' '.join(response.xpath('//div[@class="row box-company-info"]/div[1]/div[2]/p/text()').extract())
 
         yield item

@@ -1,10 +1,12 @@
 from scrapy import Request, FormRequest
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
+from scrapy.exceptions import CloseSpider
 from ..items import ViecLam24hItem, VL24hCompanyItem, VL24hMajorItem
 
 BASE_URL = "https://vieclam24h.vn"
 START_LINKS_PATH = "./crawler/data/vieclam24h/vieclam24h_start_links.txt"
+NUM_STOP = 20
 
 class ViecLam24hCrawler(CrawlSpider):
     name = "vieclam24h"
@@ -13,6 +15,7 @@ class ViecLam24hCrawler(CrawlSpider):
     company_url_list = []
     
     def __init__(self, **kwargs):
+        self.count = 0
         CrawlSpider.__init__(self, **kwargs)
 
     def start_requests(self):
@@ -44,18 +47,23 @@ class ViecLam24hCrawler(CrawlSpider):
     def posts_parse(self, response):
         post_urls = response.xpath('//div[@class="list-item-vlmn load_viec_lam_moi"]/div/div/div/div/a/@href').extract()
         for post_url in post_urls:
-            # url_to_crawl = (BASE_URL+post_url).split(".html")[0] + ".html"
-            yield Request(url=BASE_URL+post_url, callback=self.get_item, dont_filter=True)
-        next_page_url = response.xpath('//li[@rel="next"]/a/@href').extract_first()
-        if next_page_url:
-            yield Request(url=next_page_url, callback=self.posts_parse)
+            url_to_crawl = (BASE_URL+post_url).split(".html")[0] + ".html"
+            yield Request(url=url_to_crawl, callback=self.get_item, dont_filter=True)
+        self.count += len(post_urls)
+        if self.count > NUM_STOP:
+            return
+            # raise CloseSpider("Num posts exceeded")
+        else:
+            next_page_url = response.xpath('//li[@rel="next"]/a/@href').extract_first()
+            if next_page_url:
+                yield Request(url=next_page_url, callback=self.posts_parse)
     
     def get_item(self, response):
         item = ViecLam24hItem()
         item["title"] = response.xpath('//div[contains(@class, "box_chi_tiet_cong_viec")]/div[1]/div[1]/h1/text()').extract_first().strip()
         item["company_title"] = response.xpath('//div[contains(@class, "box_chi_tiet_cong_viec")]/div[1]/div[1]/p/a/text()').extract_first()
         item["address"] = response.xpath('//address/text()').extract_first()
-        item["job_deadline"] = ' '.join([x.strip() for x in response.xpath('//div[contains(@class, "box_chi_tiet_cong_viec")]/div[2]/div[1]/span/span/span//text()').extract()])[15:]
+        item["valid_through"] = ' '.join([x.strip() for x in response.xpath('//div[contains(@class, "box_chi_tiet_cong_viec")]/div[2]/div[1]/span/span/span//text()').extract()])[15:]
         item["salary"] = response.xpath('//div[contains(@class, "job_detail")]/div/p[descendant::i[contains(@class, "icon-money")]]/span/span/text()').extract_first().strip()
         item["job_type"] = response.xpath('//div[contains(@class, "job_detail")]/div/p[descendant::i[contains(@class, "icon-job-type")]]/span/span/text()').extract_first().strip()
         item["num_hiring"] = response.xpath('//div[contains(@class, "job_detail")]/div/p[descendant::i[contains(@class, "icon-quantity")]]/span/span/text()').extract_first().strip()
@@ -65,15 +73,14 @@ class ViecLam24hCrawler(CrawlSpider):
         item["workplace"] = ', '.join(response.xpath('//div[contains(@class, "job_detail")]/div/p[descendant::i[contains(@class, "icon-address")]]/span/a/text()').extract())
         item["img"] = response.xpath('//div[@class="logo-company"]/img/@src').extract_first()
         item["description"] = ''.join(response.xpath('//div[@id="ttd_detail"]/div/div[2]/div[1]/descendant::p[contains(@class, "word_break")]/text()').extract())
-        item["extra"] = ''.join(response.xpath('//div[@id="ttd_detail"]/div/div[2]/div[2]/descendant::p[contains(@class, "word_break")]/text()').extract())
-        item["requirements"] = ''.join(response.xpath('//div[@id="ttd_detail"]/div/div[2]/div[3]/descendant::p[contains(@class, "word_break")]/text()').extract())
-        item["majors"] = response.xpath('//div[contains(@class, "job_detail")]/div/div[descendant::i[contains(@class, "icon-career")]]/h2/a/@href').extract()
-        item["level"] = response.xpath('//div[contains(@class, "job_detail")]/div/p[descendant::i[contains(@class, "icon-edu")]]/span/span/text()').extract_first()
+        item["job_benefits"] = ''.join(response.xpath('//div[@id="ttd_detail"]/div/div[2]/div[2]/descendant::p[contains(@class, "word_break")]/text()').extract())
+        item["extra_requirements"] = ''.join(response.xpath('//div[@id="ttd_detail"]/div/div[2]/div[3]/descendant::p[contains(@class, "word_break")]/text()').extract())
+        item["majors"] = response.xpath('//div[contains(@class, "job_detail")]/div/div[descendant::i[contains(@class, "icon-career")]]/h2/a/text()').extract()
+        item["qualification"] = response.xpath('//div[contains(@class, "job_detail")]/div/p[descendant::i[contains(@class, "icon-edu")]]/span/span/text()').extract_first()
         company_url = response.xpath('//div[contains(@class, "box_chi_tiet_cong_viec")]/div[1]/div[1]/p/a/@href').extract_first()
-        item["company_url"] = company_url
-        item["post_url"] = response.url
+        item["company_url"] = company_url.replace("www.", "")
+        item["post_url"] = response.url.replace("www.", "")
         item["contact_name"] = response.xpath('//*[@id="ttd_detail"]/div[2]/div[2]/p/text()').extract_first().strip()
-        item["contact_address"] = response.xpath('//*[@id="ttd_detail"]/div[2]/div[3]/p/text()').extract_first().strip()
 
         yield item
         if company_url not in self.company_url_list:
@@ -83,7 +90,7 @@ class ViecLam24hCrawler(CrawlSpider):
     def get_company(self, response):
         item = VL24hCompanyItem()
         item["name"] = response.xpath('//div[@id="box_chi_tiet_nha_tuyen_dung"]/div/div/h1/text()').extract_first()
-        item["company_url"] = response.url
+        item["company_url"] = response.url.replace("www.", "")
         item["description"] = ''.join(response.xpath('//div[contains(@class, "company-description")]//text()').extract())
         item["address"] = ''.join([x.strip() for x in response.xpath('//div[@id="box_chi_tiet_nha_tuyen_dung"]/div/div/div/p[descendant::i[contains(@class, "icon-address-blue")]]//text()').extract() if x.strip() != ""])
 

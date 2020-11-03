@@ -1,4 +1,5 @@
 from scrapy import Request, FormRequest
+from scrapy.exceptions import CloseSpider
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 from ..items import MyWorkItem, MyWorkCompanyItem, MyWorkMajorItem
@@ -7,15 +8,17 @@ import json
 BASE_URL = "https://www.mywork.com.vn"
 START_LINKS_PATH = "./crawler/data/mywork/mywork_start_links.txt"
 START_LINK_PREFIX = "https://mywork.com.vn/tuyen-dung?categories="
+NUM_STOP = 20
 
 class MyWorkCrawler(CrawlSpider):
     name = "mywork"
     allowed_domains = ["www.mywork.com.vn"]
     start_urls = []
-    company_url_list = []
     major_list = {}
     
     def __init__(self, **kwargs):
+        self.count = 0
+        self.company_url_list = []
         CrawlSpider.__init__(self, **kwargs)
 
     def start_requests(self):
@@ -51,18 +54,23 @@ class MyWorkCrawler(CrawlSpider):
     def posts_parse(self, response):
         post_urls = response.xpath('//p[contains(@class, "j_title")]/a/@href').extract()
         for post_url in post_urls:
-            # url_to_crawl = (BASE_URL+post_url).split(".html")[0] + ".html"
-            yield Request(url=BASE_URL+post_url, callback=self.get_item, dont_filter=True)
-        next_page_url = response.xpath('//ul[@class="pagination"]/li[last()]/a/@href').extract_first()
-        if next_page_url:
-            yield Request(url=BASE_URL+next_page_url, callback=self.posts_parse)
+            url_to_crawl = (BASE_URL+post_url).split(".html")[0] + ".html"
+            yield Request(url=url_to_crawl, callback=self.get_item, dont_filter=True)
+        self.count += len(post_urls)
+        if self.count > NUM_STOP:
+            # raise CloseSpider("Num posts exceeded")
+            return
+        else:
+            next_page_url = response.xpath('//ul[@class="pagination"]/li[last()]/a/@href').extract_first()
+            if next_page_url:
+                yield Request(url=BASE_URL+next_page_url, callback=self.posts_parse)
     
     def get_item(self, response):
         item = MyWorkItem()
         item["title"] = response.xpath('//h1[@class="main-title"]/span/text()').extract_first().strip()
         item["company_title"] = response.xpath('//h4[contains(@class, "desc-for-title")]/span/text()').extract_first().strip()
         item["address"] = response.xpath('//*[@id="footer"]/div/div/div[3]/div[2]/span/text()').extract_first().strip()
-        item["job_deadline"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-clock")]]/span/span[2]/text()').extract_first().strip()
+        item["valid_through"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-clock")]]/span/span[2]/text()').extract_first().strip()
         item["salary"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-cash-dollar")]]/span/text()').extract_first().strip()
         item["job_type"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-store")]]/span/text()').extract_first().strip()
         item["num_hiring"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-users")]]/span/text()').extract_first().strip()
@@ -73,27 +81,26 @@ class MyWorkCrawler(CrawlSpider):
         item["img"] = ""
         content = response.xpath('//div[@class="mw-box-item"]')
         item["description"] = '\n'.join(content[0].xpath('.//text()').extract())
-        item["extra"] = '\n'.join(content[1].xpath('.//text()').extract())
-        item["requirements"] = '\n'.join(content[2].xpath('.//text()').extract())
+        item["job_benefits"] = '\n'.join(content[1].xpath('.//text()').extract())
+        item["extra_requirements"] = '\n'.join(content[2].xpath('.//text()').extract())
         majors = [x.strip() for x in response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-hammer-wrench")]]/span//div/text()').extract_first().strip().split(',')]
-        item["majors"] = [self.major_list[x] for x in majors]
-        item["level"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-library2")]]/span/text()').extract_first().strip()
+        # item["majors"] = [self.major_list[x] for x in majors]
+        item["majors"] = majors
+        item["qualification"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-library2")]]/span/text()').extract_first().strip()
         company_url = BASE_URL + response.xpath('//*[@id="box_info_job_detail"]/div/div[1]/a/@href').extract_first()
-        item["company_url"] = company_url
-        item["post_url"] = response.url
-        item["contact_name"] = response.xpath('//*[@id="footer"]/div/div/div[2]/div[2]/span').extract_first().strip()
-        item["contact_address"] = response.xpath('//*[@id="footer"]/div/div/div[3]/div[2]/span/text()').extract_first().strip()
+        item["company_url"] = company_url.replace("www.", "")
+        item["post_url"] = response.url.replace("www.", "")
+        item["contact_name"] = response.xpath('//*[@id="footer"]/div/div/div[2]/div[2]/span/text()').extract_first().strip()
 
         yield item
         if company_url not in self.company_url_list:
-            print(company_url)
             self.company_url_list.append(company_url)
             yield Request(url=company_url, callback=self.get_company, dont_filter=True)
     
     def get_company(self, response):
         item = MyWorkCompanyItem()
         item["name"] = response.xpath('//div[contains(@class, j_company)]/div/h1/text()').extract_first()
-        item["company_url"] = response.url
+        item["company_url"] = response.url.replace("www.", "")
         item["description"] = response.xpath('//read-more/@text').extract_first().strip()
         item["address"] = response.xpath('//div[contains(@class, j_company)]/div/div/span/text()').extract_first().strip()
 

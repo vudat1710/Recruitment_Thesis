@@ -1,11 +1,13 @@
 from scrapy import Request, FormRequest
 from scrapy.spiders import CrawlSpider, Rule
+from scrapy.exceptions import CloseSpider
 from scrapy.linkextractors import LinkExtractor
 from ..items import VTNItem, VTNCompanyItem, VTNMajorItem
 
 BASE_URL = "https://www.viectotnhat.com"
 START_LINKS_PATH = "./crawler/data/viectotnhat/viectotnhat_start_links.txt"
 MAJOR_LINK = "https://viectotnhat.com/viec-lam/tim-kiem?tu_khoa=&nganh_nghe={}&tinh_thanh=0"
+NUM_STOP = 20
 
 class VTNCrawler(CrawlSpider):
     name = "viectotnhat"
@@ -14,19 +16,20 @@ class VTNCrawler(CrawlSpider):
     company_url_list = []
     
     def __init__(self, **kwargs):
+        self.count = 0
         CrawlSpider.__init__(self, **kwargs)
 
     def start_requests(self):
         # yield Request(url="https://viectotnhat.com/viec-lam/tim-kiem-nang-cao", callback=self.get_start_links)
         
-        # with open(START_LINKS_PATH, "r") as f:
-        #     for line in f.readlines():
-        #         self.start_urls.append(line.strip())
-        # f.close()
+        with open(START_LINKS_PATH, "r") as f:
+            for line in f.readlines():
+                self.start_urls.append(line.strip())
+        f.close()
 
-        # for start_link in self.start_urls:
-        #     yield Request(url=start_link, callback=self.posts_parse)
-        yield Request(url="https://viectotnhat.com/viec-lam/tim-kiem?tu_khoa=&nganh_nghe=27&tinh_thanh=0", callback=self.posts_parse, dont_filter=True)
+        for start_link in self.start_urls:
+            yield Request(url=start_link, callback=self.posts_parse)
+        # yield Request(url="https://viectotnhat.com/viec-lam/tim-kiem?tu_khoa=&nganh_nghe=27&tinh_thanh=0", callback=self.posts_parse, dont_filter=True)
     
     def get_start_links(self, response):
         urls = response.xpath('//div[@id="vl-nganh-nghe"]/div/ul/li/a/@href').extract()
@@ -46,16 +49,21 @@ class VTNCrawler(CrawlSpider):
         post_urls = response.xpath('//h3[contains(@class, "job-name")]/a/@href').extract()
         for post_url in post_urls:
             yield Request(url=post_url, callback=self.get_item, dont_filter=True)
-        next_page_url = response.xpath('//ul[@class="pagination"]/li[last()]/a/@href').extract_first()
-        if next_page_url:
-            yield Request(url=BASE_URL+next_page_url, callback=self.posts_parse, dont_filter=True)
+        self.count += len(post_urls)
+        if self.count > NUM_STOP:
+            return
+            # raise CloseSpider("Num posts exceeded")
+        else:
+            next_page_url = response.xpath('//ul[@class="pagination"]/li[last()]/a/@href').extract_first()
+            if next_page_url:
+                yield Request(url=BASE_URL+next_page_url, callback=self.posts_parse, dont_filter=True)
     
     def get_item(self, response):
         item = VTNItem()
         item["title"] = response.xpath('//h1[contains(@class, "title-job")]/text()').extract_first().strip()
         item["company_title"] = response.xpath('//div[contains(@class, "chi-tiet-vl")]/div[4]/div[1]/a/h2/text()').extract_first().strip()
         item["address"] = ''.join([x for x in response.xpath('//div[contains(@class, "job-ads")]/div[2]/text()').extract_first().strip() if x.strip() != ""]).strip()
-        item["job_deadline"] = response.xpath('//span[contains(@class,"color-orange2")]/text()').extract_first().strip()
+        item["valid_through"] = response.xpath('//span[contains(@class,"color-orange2")]/text()').extract_first().strip()
         item["salary"] = ''.join([x for x in response.xpath('//div[contains(@class, "list-thong-tin")]/div[1]/div/ul/li[descendant::span[contains(@class, "icon-muc-luong2")]]/text()').extract() if x.strip() != ""]).strip()
         item["job_type"] = ''.join([x for x in response.xpath('//div[contains(@class, "list-thong-tin")]/div[1]/div/ul/li[descendant::span[contains(@class, "icon-hinh-thuc2")]]/text()').extract() if x.strip() != ""]).strip()
         item["num_hiring"] = ''.join([x for x in response.xpath('//div[contains(@class, "list-thong-tin")]/div[1]/div/ul/li[descendant::span[contains(@class, "icon-cap-bac2")]]/text()').extract() if x.strip() != ""]).strip()
@@ -65,16 +73,16 @@ class VTNCrawler(CrawlSpider):
         item["workplace"] = ''.join([x for x in response.xpath('//div[contains(@class, "list-thong-tin")]/div[1]/div/ul/li[descendant::span[contains(@class, "icon-dia-diem")]]//text()').extract() if x.strip() != ""]).strip()[19:]
         item["img"] = response.xpath('//div[contains(@class, "img-ads")]/img/@src').extract_first().strip()
         item["description"] = ''.join(response.xpath('//div[contains(@class, "mo-ta-cv")]//text()').extract()).strip()
-        item["extra"] = ''.join(response.xpath('//div[contains(@class, "quyen-loi")]//text()').extract()).strip()
-        item["requirements"] = ''.join(response.xpath('//div[contains(@class, "yeu-cau")]//text()').extract()).strip()
-        majors = response.xpath('//div[contains(@class, "list-thong-tin")]/div[1]/div/ul/li[descendant::span[contains(@class, "icon-nganh-nghe")]]/a/@href').extract()
-        item["majors"] = [MAJOR_LINK.format(m[-7:-5]) for m in majors]
-        item["level"] = ''.join([x for x in response.xpath('//div[contains(@class, "list-thong-tin")]/div[1]/div/ul/li[descendant::span[contains(@class, "icon-trinh-do2")]]/text()').extract() if x.strip() != ""]).strip()
+        item["job_benefits"] = ''.join(response.xpath('//div[contains(@class, "quyen-loi")]//text()').extract()).strip()
+        item["extra_requirements"] = ''.join(response.xpath('//div[contains(@class, "yeu-cau")]//text()').extract()).strip()
+        majors = response.xpath('//div[contains(@class, "list-thong-tin")]/div[1]/div/ul/li[descendant::span[contains(@class, "icon-nganh-nghe")]]/a/text()').extract()
+        # item["majors"] = [MAJOR_LINK.format(m[-7:-5]) for m in majors]
+        item["majors"] = majors
+        item["qualification"] = ''.join([x for x in response.xpath('//div[contains(@class, "list-thong-tin")]/div[1]/div/ul/li[descendant::span[contains(@class, "icon-trinh-do2")]]/text()').extract() if x.strip() != ""]).strip()
         company_url = response.xpath('//div[contains(@class, "chi-tiet-vl")]/div[4]/div[1]/a/@href').extract_first().strip()
-        item["company_url"] = company_url
-        item["post_url"] = response.url
+        item["company_url"] = company_url.replace("www.", "")
+        item["post_url"] = response.url.replace("www.", "")
         item["contact_name"] = response.xpath('//div[contains(@class, "ho-so")]/ul/li[1]/text()').extract_first().strip()
-        item["contact_address"] = response.xpath('//div[contains(@class, "ho-so")]/ul/li[2]/text()').extract_first().strip()
 
         yield item
         if company_url not in self.company_url_list:
@@ -84,7 +92,7 @@ class VTNCrawler(CrawlSpider):
     def get_company(self, response):
         item = VTNCompanyItem()
         item["name"] = response.xpath('//h2[@class="company-name"]/text()').extract_first().strip()
-        item["company_url"] = response.url
+        item["company_url"] = response.url.replace("www.", "")
         item["description"] = ''.join(response.xpath('//span[@id="company_info"]//text()').extract())
         item["address"] = response.xpath('//td[@class="detail-info-company"]/span/text()').extract_first().strip()
 
