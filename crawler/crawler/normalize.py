@@ -36,13 +36,13 @@ class PostNormalization:
     def normalize_workplace(self, workplace_post):       
         if isinstance(workplace_post, list):
             workplace_post = [self.address_dict[w.strip()] for w in workplace_post]
-            return workplace_post
+            return ','.join(workplace_post)
         else:
             norm_workplace = []
             workplaces = [x.strip() for x in workplace_post.split(",")]
             for workplace in workplaces:
                 norm_workplace.append(self.address_dict[workplace])
-            return list(set(norm_workplace))
+            return ','.join(list(set(norm_workplace)))
 
     def normalize_salary(self, salary):
         if re.match(r"^(((\d{1,3}([\.,]\d{3})*)|(\d+))|(\w*\d+))", str(salary)) is not None:

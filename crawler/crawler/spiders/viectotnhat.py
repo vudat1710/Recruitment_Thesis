@@ -13,10 +13,11 @@ class VTNCrawler(CrawlSpider):
     name = "viectotnhat"
     allowed_domains = ["www.viectotnhat.com"]
     start_urls = []
-    company_url_list = []
     
     def __init__(self, **kwargs):
         self.count = 0
+        self.company_url_list = []
+        self.post_urls = []
         CrawlSpider.__init__(self, **kwargs)
 
     def start_requests(self):
@@ -27,8 +28,7 @@ class VTNCrawler(CrawlSpider):
                 self.start_urls.append(line.strip())
         f.close()
 
-        for start_link in self.start_urls:
-            yield Request(url=start_link, callback=self.posts_parse)
+        yield Request(url=self.start_urls[self.count], callback=self.posts_parse)
         # yield Request(url="https://viectotnhat.com/viec-lam/tim-kiem?tu_khoa=&nganh_nghe=27&tinh_thanh=0", callback=self.posts_parse, dont_filter=True)
     
     def get_start_links(self, response):
@@ -46,17 +46,20 @@ class VTNCrawler(CrawlSpider):
             yield item
     
     def posts_parse(self, response):
-        post_urls = response.xpath('//h3[contains(@class, "job-name")]/a/@href').extract()
-        for post_url in post_urls:
-            yield Request(url=post_url, callback=self.get_item, dont_filter=True)
-        self.count += len(post_urls)
-        if self.count > NUM_STOP:
-            return
-            # raise CloseSpider("Num posts exceeded")
-        else:
-            next_page_url = response.xpath('//ul[@class="pagination"]/li[last()]/a/@href').extract_first()
-            if next_page_url:
+        self.count += 1
+        self.post_urls.extend(response.xpath('//h3[contains(@class, "job-name")]/a/@href').extract())
+        next_page_url = response.xpath('//ul[@class="pagination"]/li[last()]/a/@href').extract_first()
+        if next_page_url:
+            if len(self.post_urls) <= NUM_STOP:
                 yield Request(url=BASE_URL+next_page_url, callback=self.posts_parse, dont_filter=True)
+            else:
+                self.post_urls = list(set(self.post_urls))
+                for post_url in self.post_urls:
+                    yield Request(url=post_url, callback=self.get_item, dont_filter=True)
+                return
+        else:
+            if self.count < len(self.start_urls):
+                yield Request(url=self.start_urls[self.count], callback=self.posts_parse)
     
     def get_item(self, response):
         item = VTNItem()

@@ -7,16 +7,17 @@ from ..items import TVNItem, TVNCompanyItem, TVNMajorItem
 BASE_URL = "https://www.timviecnhanh.com/"
 START_LINKS_PATH = "./crawler/data/timviecnhanh/timviecnhanh_start_links.txt"
 MAJOR_LINK = "https://www.timviecnhanh.com/vieclam/timkiem?tu_khoa=&nganh_nghe%5B%5D={}&tinh_thanh%5B%5D="
-NUM_STOP = 20
+NUM_STOP = 100
 
 class TVNCrawler(CrawlSpider):
     name = "timviecnhanh"
     allowed_domains = ["www.timviecnhanh.com"]
     start_urls = []
-    company_url_list = []
     
     def __init__(self, **kwargs):
         self.count = 0
+        self.company_url_list = []
+        self.post_urls = []
         CrawlSpider.__init__(self, **kwargs)
 
     def start_requests(self):
@@ -27,8 +28,7 @@ class TVNCrawler(CrawlSpider):
                 self.start_urls.append(line.strip())
         f.close()
 
-        for start_link in self.start_urls:
-            yield Request(url=start_link, callback=self.posts_parse)
+        yield Request(url=self.start_urls[self.count], callback=self.posts_parse)
         # yield Request(url="https://www.timviecnhanh.com/vieclam/timkiem?tu_khoa=&nganh_nghe%5B%5D=36&tinh_thanh%5B%5D=", callback=self.posts_parse, dont_filter=True)
     
     def get_start_links(self, response):
@@ -46,18 +46,20 @@ class TVNCrawler(CrawlSpider):
             yield item
     
     def posts_parse(self, response):
-        post_urls = response.xpath('//table[@class="table-content"]/tbody/tr/td/a[contains(@data-box, "search_page")]/@href').extract()
-        # self.count += len(post_urls)
-        for post_url in post_urls:
-            yield Request(url=post_url, callback=self.get_item, dont_filter=True)
-        self.count += len(post_urls)
-        if self.count > NUM_STOP:
-            # raise CloseSpider("Num posts exceeded")
-            return
-        else:
-            next_page_url = response.xpath('//div[contains(@class, "page-navi")]/a[contains(@class, "next")]/@href').extract_first()
-            if next_page_url:
+        self.count += 1
+        self.post_urls.extend(response.xpath('//table[@class="table-content"]/tbody/tr/td/a[contains(@data-box, "search_page")]/@href').extract())
+        next_page_url = response.xpath('//div[contains(@class, "page-navi")]/a[contains(@class, "next")]/@href').extract_first()
+        if next_page_url:
+            if len(self.post_urls) <= NUM_STOP:
                 yield Request(url=next_page_url, callback=self.posts_parse, dont_filter=True)
+            else:
+                self.post_urls = list(set(self.post_urls))
+                for post_url in self.post_urls:
+                    yield Request(url=post_url, callback=self.get_item, dont_filter=True)
+                return
+        else:
+            if self.count < len(self.start_urls):
+                yield Request(url=self.start_urls[self.count], callback=self.posts_parse)
     
     def get_item(self, response):
         item = TVNItem()
@@ -76,9 +78,7 @@ class TVNCrawler(CrawlSpider):
         item["description"] = ''.join(response.xpath('//article[@class="block-content"]/table/tbody/tr[1]/td[2]/p//text()').extract())
         item["job_benefits"] = ''.join(response.xpath('//article[@class="block-content"]/table/tbody/tr[3]/td[2]/p//text()').extract())
         item["extra_requirements"] = ''.join(response.xpath('//article[@class="block-content"]/table/tbody/tr[2]/td[2]/p//text()').extract())
-        majors = response.xpath('//article[@class="block-content"]/div[5]/div[1]/ul/li[5]/a/text()').extract()
-        # item["majors"] = [MAJOR_LINK.format(m[-7:-5]) for m in majors]
-        item["majors"] = majors
+        item["majors"] = response.xpath('//article[@class="block-content"]/div[5]/div[1]/ul/li[5]/a/text()').extract()
         item["qualification"] = ''.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[1]/ul/li[3]/text()').extract() if x.strip() != ""]).strip()
         company_url = response.xpath('//article[@class="block-content"]/div[2]/h3/a/@href').extract_first()
         item["company_url"] = company_url.replace("www.", "")

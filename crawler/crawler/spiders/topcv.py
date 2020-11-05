@@ -8,13 +8,12 @@ BASE_URL = "https://www.topcv.vn/"
 USERNAME = "vudat1710@gmail.com"
 PASSWORD = "17101998"
 START_LINKS_PATH = "./crawler/data/topcv/topcv_start_links.txt"
-NUM_STOP = 20
+NUM_STOP = 100
 
 class TopCVCrawler(CrawlSpider):
     name = "topcv"
     allowed_domains = ["www.topcv.vn"]
     start_urls = []
-    company_url_list = []
     # rules = (
     #     Rule(
     #         LinkExtractor(restrict_xpaths=('//a[@rel="next"]/@href',), deny=(r"/login",)), follow=True),
@@ -24,6 +23,8 @@ class TopCVCrawler(CrawlSpider):
     
     def __init__(self, **kwargs):
         self.count = 0
+        self.company_url_list = []
+        self.post_urls = []
         CrawlSpider.__init__(self, **kwargs)
 
     def start_requests(self):
@@ -65,22 +66,24 @@ class TopCVCrawler(CrawlSpider):
                 self.start_urls.append(line.strip())
         f.close()
 
-        for start_link in self.start_urls:
-            yield Request(url=start_link, callback=self.posts_parse)
+        yield Request(url=self.start_urls[self.count], callback=self.posts_parse)
         # yield Request(url="https://www.topcv.vn/tim-viec-lam-an-toan-lao-dong-c10101", callback=self.posts_parse)
     
     def posts_parse(self, response):
-        post_urls = response.xpath('//h4[@class="job-title"]/a/@href').extract()
-        for post_url in post_urls:
-            yield Request(url=post_url, callback=self.get_item)
-        self.count += len(post_urls)
-        if self.count > NUM_STOP:
-            # raise CloseSpider("Num posts exceeded")
-            return
-        else:
-            next_page_url = response.xpath('//a[@rel="next"]/@href').extract_first()
-            if next_page_url:
+        self.count += 1
+        self.post_urls.extend(response.xpath('//h4[@class="job-title"]/a/@href').extract())
+        next_page_url = response.xpath('//a[@rel="next"]/@href').extract_first()
+        if next_page_url:
+            if len(self.post_urls) <= NUM_STOP:
                 yield Request(url=next_page_url, callback=self.posts_parse)
+            else:
+                self.post_urls = list(set(self.post_urls))
+                for post_url in self.post_urls:
+                    yield Request(url=post_url, callback=self.get_item)
+                return
+        else:
+            if self.count < len(self.start_urls):
+                yield Request(url=self.start_urls[self.count], callback=self.posts_parse)
     
     def get_item(self, response):
         item = TopCVItem()

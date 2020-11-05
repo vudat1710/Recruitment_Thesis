@@ -5,15 +5,24 @@ from .constants import STOPWORDS_PATH
 import re, math
 import lxml.html as lh
 from lxml.html.clean import clean_html
+import pandas as pd
 
 jslde = JsonLdExtractor()
 mde = MicrodataExtractor()
 
+def merge_data(posts, companies):
+    post_df = pd.DataFrame(posts)
+    company_df = pd.DataFrame(companies)
+    company_df = company_df.rename(columns={"description": "company_description", "address": "company_address"})
+    merged_data = pd.merge(post_df, company_df, on="company_url")
+    return list(merged_data.T.to_dict().values())
 
 def sort_by_frequency(inverted_index, arr):
     return sorted(arr,
-                  key=lambda arr_i: len(inverted_index[arr_i] if inverted_index[arr_i] is not None else []), reverse=True)
+                  key=lambda arr_i: len(inverted_index[arr_i] if arr_i in inverted_index else []), reverse=True)
 
+def get_post_to_check(post):
+    return [post["title"], post["name"], post["workplace"]]
 
 def get_prefix_threshold(x, y, sim_threshold):
     k = math.ceil(
@@ -23,7 +32,7 @@ def get_prefix_threshold(x, y, sim_threshold):
     return None
 
 def preprocess(text):
-    tokens = word_tokenize(text, format("text")).split(" ")
+    tokens = word_tokenize(text, format="text").split(" ")
     return [x.lower() for x in tokens if x not in load_stop_list(STOPWORDS_PATH)]
 
 

@@ -6,16 +6,17 @@ from ..items import ViecLam24hItem, VL24hCompanyItem, VL24hMajorItem
 
 BASE_URL = "https://vieclam24h.vn"
 START_LINKS_PATH = "./crawler/data/vieclam24h/vieclam24h_start_links.txt"
-NUM_STOP = 20
+NUM_STOP = 100
 
 class ViecLam24hCrawler(CrawlSpider):
     name = "vieclam24h"
     allowed_domains = ["www.vieclam24h.vn"]
     start_urls = []
-    company_url_list = []
     
     def __init__(self, **kwargs):
         self.count = 0
+        self.company_url_list = []
+        self.post_urls = []
         CrawlSpider.__init__(self, **kwargs)
 
     def start_requests(self):
@@ -26,8 +27,7 @@ class ViecLam24hCrawler(CrawlSpider):
                 self.start_urls.append(line.strip())
         f.close()
 
-        for start_link in self.start_urls:
-            yield Request(url=start_link, callback=self.posts_parse)
+        yield Request(url=self.start_urls[self.count], callback=self.posts_parse)
         # yield Request(url="https://vieclam24h.vn/mien-bac/viec-lam-chuyen-mon/thiet-ke-my-thuat-c32.html", callback=self.posts_parse)
     
     def get_start_links(self, response):
@@ -45,18 +45,22 @@ class ViecLam24hCrawler(CrawlSpider):
             yield item
     
     def posts_parse(self, response):
-        post_urls = response.xpath('//div[@class="list-item-vlmn load_viec_lam_moi"]/div/div/div/div/a/@href').extract()
-        for post_url in post_urls:
-            url_to_crawl = (BASE_URL+post_url).split(".html")[0] + ".html"
-            yield Request(url=url_to_crawl, callback=self.get_item, dont_filter=True)
-        self.count += len(post_urls)
-        if self.count > NUM_STOP:
-            return
+        self.count += 1
+        self.post_urls.extend(response.xpath('//div[@class="list-item-vlmn load_viec_lam_moi"]/div/div/div/div/a/@href').extract())
+        next_page_url = response.xpath('//li[@rel="next"]/a/@href').extract_first()
+        if next_page_url:
+            if len(self.post_urls) <= NUM_STOP:
+                yield Request(url=next_page_url, callback=self.posts_parse)
+            else:
+                self.post_urls = list(set(self.post_urls))
+                for post_url in self.post_urls:
+                    url_to_crawl = (BASE_URL+post_url).split(".html")[0] + ".html"
+                    yield Request(url=url_to_crawl, callback=self.get_item, dont_filter=True)
+                return
             # raise CloseSpider("Num posts exceeded")
         else:
-            next_page_url = response.xpath('//li[@rel="next"]/a/@href').extract_first()
-            if next_page_url:
-                yield Request(url=next_page_url, callback=self.posts_parse)
+            if self.count < len(self.start_urls):
+                yield Request(url=self.start_urls[self.count], callback=self.posts_parse)
     
     def get_item(self, response):
         item = ViecLam24hItem()
