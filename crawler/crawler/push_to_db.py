@@ -45,19 +45,13 @@ class DBPushing:
             data = self.merged_data.copy()
             for post in self.merged_data.copy():
                 data.remove(post)
-                self.duplicate_filtering = self.get_first_filter(data)
+                self.duplicate_filtering = DuplicateFiltering(3, [get_post_to_check(post) for post in data])
                 if self.duplicate_filtering.is_match(get_post_to_check(post)):
                     print(post)
                     self.merged_data.remove(post)
             return self.merged_data
 
-    def get_first_filter(self, posts):
-        filtered_data = [get_post_to_check(post) for post in posts]
-        return DuplicateFiltering(3, filtered_data)
-
     def insert_to_db(self, posts_with_company):
-        # if len(posts_with_company) == 0 and not self.duplicate_filtering:
-        #     posts_with_company = self.merged_data
         for post in posts_with_company:
             title = "'{}'".format(post["title"])
             extra_requirements = "'{}'".format(post["extra_requirements"])
@@ -103,6 +97,7 @@ class DBPushing:
                 company_id = self.cursor.fetchone()["companyId"]
             self.cursor.execute("INSERT INTO `PostCompany` (`postId`, `companyId`) VALUES ({}, {})".format(last_inserted, company_id))
             self.connection.commit()
+            print("Insert successfully {} posts!\n".format(len(posts_with_company)))
 
 
     def get_table_ids(self, item_list, table_name, id_field):

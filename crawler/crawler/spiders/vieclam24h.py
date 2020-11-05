@@ -6,7 +6,7 @@ from ..items import ViecLam24hItem, VL24hCompanyItem, VL24hMajorItem
 
 BASE_URL = "https://vieclam24h.vn"
 START_LINKS_PATH = "./crawler/data/vieclam24h/vieclam24h_start_links.txt"
-NUM_STOP = 100
+NUM_STOP = 5000
 
 class ViecLam24hCrawler(CrawlSpider):
     name = "vieclam24h"

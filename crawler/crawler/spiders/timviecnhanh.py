@@ -7,7 +7,7 @@ from ..items import TVNItem, TVNCompanyItem, TVNMajorItem
 BASE_URL = "https://www.timviecnhanh.com/"
 START_LINKS_PATH = "./crawler/data/timviecnhanh/timviecnhanh_start_links.txt"
 MAJOR_LINK = "https://www.timviecnhanh.com/vieclam/timkiem?tu_khoa=&nganh_nghe%5B%5D={}&tinh_thanh%5B%5D="
-NUM_STOP = 100
+NUM_STOP = 5000
 
 class TVNCrawler(CrawlSpider):
     name = "timviecnhanh"

@@ -7,7 +7,7 @@ from ..items import VTNItem, VTNCompanyItem, VTNMajorItem
 BASE_URL = "https://www.viectotnhat.com"
 START_LINKS_PATH = "./crawler/data/viectotnhat/viectotnhat_start_links.txt"
 MAJOR_LINK = "https://viectotnhat.com/viec-lam/tim-kiem?tu_khoa=&nganh_nghe={}&tinh_thanh=0"
-NUM_STOP = 20
+NUM_STOP = 5000
 
 class VTNCrawler(CrawlSpider):
     name = "viectotnhat"

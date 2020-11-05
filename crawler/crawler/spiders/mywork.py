@@ -8,7 +8,7 @@ import json
 BASE_URL = "https://www.mywork.com.vn"
 START_LINKS_PATH = "./crawler/data/mywork/mywork_start_links.txt"
 START_LINK_PREFIX = "https://mywork.com.vn/tuyen-dung?categories="
-NUM_STOP = 100
+NUM_STOP = 5000
 
 class MyWorkCrawler(CrawlSpider):
     name = "mywork"

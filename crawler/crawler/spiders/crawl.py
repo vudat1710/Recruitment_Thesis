@@ -7,29 +7,37 @@ from .vieclam24h import ViecLam24hCrawler
 from .viectotnhat import VTNCrawler
 from twisted.internet import reactor
 from scrapy.utils.log import configure_logging
-import time, os, sys
+from ..push_to_db import DBPushing
+import time, os, sys, json
+from ..constants import CRAWLED_DATA
 
 
-# configure_logging()
-# settings = get_project_settings()
-# # process = CrawlerProcess(settings)
-# # process.crawl(MyWorkCrawler)
-# # process.crawl(TVNCrawler)
-# # process.crawl(TopCVCrawler)
-# # process.crawl(ViecLam24hCrawler)
-# # process.crawl(VTNCrawler)
-# # process.start()
-# # process.join()
-# runner = CrawlerRunner(settings)
-# runner.crawl(MyWorkCrawler)
-# runner.crawl(TVNCrawler)
-# runner.crawl(TopCVCrawler)
-# runner.crawl(ViecLam24hCrawler)
-# runner.crawl(VTNCrawler)
-# d = runner.join()
-# d.addBoth(lambda _: reactor.stop())
+def crawl():
+    configure_logging()
+    settings = get_project_settings()
+    runner = CrawlerRunner(settings)
+    runner.crawl(MyWorkCrawler)
+    runner.crawl(TVNCrawler)
+    runner.crawl(TopCVCrawler)
+    runner.crawl(ViecLam24hCrawler)
+    runner.crawl(VTNCrawler)
+    d = runner.join()
+    d.addBoth(lambda _: reactor.stop())
 
-# reactor.run()
-# time.sleep(0.5)
+    reactor.run()
+    time.sleep(0.5)
 
-# os.execl(sys.executable, sys.executable, *sys.argv)
+def push_to_db():
+    for folder_name in os.listdir(CRAWLED_DATA):
+        posts = json.load(open(CRAWLED_DATA + folder_name + "/post.json", "r"))
+        companies = json.load(open(CRAWLED_DATA + folder_name + "/company.json", "r"))
+        dbp = DBPushing(posts, companies)
+        posts_with_company = dbp.check_posts()
+        print(len(posts_with_company))
+        dbp.insert_to_db(posts_with_company)
+        dbp.connection.close()
+
+
+crawl()
+push_to_db()
+os.execl(sys.executable, sys.executable, *sys.argv)

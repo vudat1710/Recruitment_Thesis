@@ -42,6 +42,7 @@ MEDIATED_SCHEMA_PATH = "./get_data/get_data/template/mediated_schema.json"
 STOPWORDS_PATH = "./get_data/get_data/template/vietnamese-stopwords-dash.txt"
 SAMPLE_PATH = "./get_data/get_data/sample/"
 DATA_PATH = "./get_data/get_data/data/"
+CRAWLED_DATA = './crawler/data/'
 
 #DATABASE
 USER = "root"

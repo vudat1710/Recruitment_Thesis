@@ -8,7 +8,7 @@ BASE_URL = "https://www.topcv.vn/"
 USERNAME = "vudat1710@gmail.com"
 PASSWORD = "17101998"
 START_LINKS_PATH = "./crawler/data/topcv/topcv_start_links.txt"
-NUM_STOP = 100
+NUM_STOP = 5000
 
 class TopCVCrawler(CrawlSpider):
     name = "topcv"
