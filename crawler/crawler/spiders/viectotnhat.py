@@ -7,7 +7,7 @@ from ..items import VTNItem, VTNCompanyItem, VTNMajorItem
 BASE_URL = "https://www.viectotnhat.com"
 START_LINKS_PATH = "./crawler/data/viectotnhat/viectotnhat_start_links.txt"
 MAJOR_LINK = "https://viectotnhat.com/viec-lam/tim-kiem?tu_khoa=&nganh_nghe={}&tinh_thanh=0"
-NUM_STOP = 5000
+NUM_STOP = 10000
 
 class VTNCrawler(CrawlSpider):
     name = "viectotnhat"
@@ -51,7 +51,8 @@ class VTNCrawler(CrawlSpider):
         next_page_url = response.xpath('//ul[@class="pagination"]/li[last()]/a/@href').extract_first()
         if next_page_url:
             if len(self.post_urls) <= NUM_STOP:
-                yield Request(url=BASE_URL+next_page_url, callback=self.posts_parse, dont_filter=True)
+                if next_page_url.split("&page=")[-1] < 51:
+                    yield Request(url=BASE_URL+next_page_url, callback=self.posts_parse, dont_filter=True)
             else:
                 self.post_urls = list(set(self.post_urls))
                 for post_url in self.post_urls:

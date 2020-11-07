@@ -16,9 +16,15 @@ class PostNormalization:
             '', post['title']).strip()
         post['salary'] = self.normalize_salary(post['salary'])
         post['description'] = re.sub(r"(<br>)", "", post['description']) 
-        post['valid_through'] = datetime.strptime(post['valid_through'], "%d/%m/%Y").strftime('%Y-%m-%d')
+        post['valid_through'] = self.normalize_date(post['valid_through'])
 
         return post
+
+    def normalize_date(self, date):
+        try:
+            return datetime.strptime(date, "%d/%m/%Y").strftime('%Y-%m-%d')
+        except:
+            return datetime.strptime(date, "%d-%m-%Y").strftime('%Y-%m-%d')
 
     def normalize_majors(self, category):
         norm_category = []

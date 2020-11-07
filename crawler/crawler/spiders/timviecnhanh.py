@@ -7,7 +7,7 @@ from ..items import TVNItem, TVNCompanyItem, TVNMajorItem
 BASE_URL = "https://www.timviecnhanh.com/"
 START_LINKS_PATH = "./crawler/data/timviecnhanh/timviecnhanh_start_links.txt"
 MAJOR_LINK = "https://www.timviecnhanh.com/vieclam/timkiem?tu_khoa=&nganh_nghe%5B%5D={}&tinh_thanh%5B%5D="
-NUM_STOP = 5000
+NUM_STOP = 10000
 
 class TVNCrawler(CrawlSpider):
     name = "timviecnhanh"
@@ -46,21 +46,27 @@ class TVNCrawler(CrawlSpider):
             yield item
     
     def posts_parse(self, response):
-        self.count += 1
         self.post_urls.extend(response.xpath('//table[@class="table-content"]/tbody/tr/td/a[contains(@data-box, "search_page")]/@href').extract())
         next_page_url = response.xpath('//div[contains(@class, "page-navi")]/a[contains(@class, "next")]/@href').extract_first()
-        if next_page_url:
-            if len(self.post_urls) <= NUM_STOP:
+        if next_page_url:   
+            if next_page_url.split("&page=")[-1] < 51:
                 yield Request(url=next_page_url, callback=self.posts_parse, dont_filter=True)
-            else:
+            if len(self.post_urls) > NUM_STOP:
                 self.post_urls = list(set(self.post_urls))
                 for post_url in self.post_urls:
                     yield Request(url=post_url, callback=self.get_item, dont_filter=True)
                 return
         else:
+            self.count += 1
             if self.count < len(self.start_urls):
                 yield Request(url=self.start_urls[self.count], callback=self.posts_parse)
-    
+            else:
+                self.post_urls = list(set(self.post_urls))
+                for post_url in self.post_urls:
+                    url_to_crawl = (BASE_URL+post_url).split(".html")[0] + ".html"
+                    yield Request(url=url_to_crawl, callback=self.get_item, dont_filter=True)
+                return
+
     def get_item(self, response):
         item = TVNItem()
         item["title"] = response.xpath('//header[@class="block-title"]/h1/span/text()').extract_first().strip()
@@ -73,7 +79,7 @@ class TVNCrawler(CrawlSpider):
         item["position"] = response.xpath('//header[@class="block-title"]/h1/span/text()').extract_first().strip()
         item["experience"] = ''.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[1]/ul/li[2]/text()').extract() if x.strip() != ""]).strip()
         item["gender"] = ''.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[2]/ul/li[2]/text()').extract() if x.strip() != ""]).strip()          
-        item["workplace"] = ', '.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[1]/ul/li[4]/text()').extract() if x.strip() != ""]).strip()
+        item["workplace"] = ', '.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[1]/ul/li[4]/a/text()').extract() if x.strip() != ""]).strip()
         item["img"] = response.xpath('//div[@class="block-sidebar"]/div/div/div/img/@src').extract_first()
         item["description"] = ''.join(response.xpath('//article[@class="block-content"]/table/tbody/tr[1]/td[2]/p//text()').extract())
         item["job_benefits"] = ''.join(response.xpath('//article[@class="block-content"]/table/tbody/tr[3]/td[2]/p//text()').extract())

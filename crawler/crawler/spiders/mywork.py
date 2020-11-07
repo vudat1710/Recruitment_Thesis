@@ -8,7 +8,7 @@ import json
 BASE_URL = "https://www.mywork.com.vn"
 START_LINKS_PATH = "./crawler/data/mywork/mywork_start_links.txt"
 START_LINK_PREFIX = "https://mywork.com.vn/tuyen-dung?categories="
-NUM_STOP = 5000
+NUM_STOP = 10000
 
 class MyWorkCrawler(CrawlSpider):
     name = "mywork"
@@ -53,22 +53,27 @@ class MyWorkCrawler(CrawlSpider):
             yield item
     
     def posts_parse(self, response):
-        self.count += 1
         self.post_urls.extend(response.xpath('//p[contains(@class, "j_title")]/a/@href').extract())
         next_page_url = response.xpath('//ul[@class="pagination"]/li[last()]/a/@href').extract_first()
         if next_page_url:
-            if len(self.post_urls) <= NUM_STOP:
-                yield Request(url=BASE_URL+next_page_url, callback=self.posts_parse)
-            else:
+            yield Request(url=BASE_URL+next_page_url, callback=self.posts_parse)
+            if len(self.post_urls) > NUM_STOP:
                 self.post_urls = list(set(self.post_urls))
                 for post_url in self.post_urls:
                     url_to_crawl = (BASE_URL+post_url).split(".html")[0] + ".html"
                     yield Request(url=url_to_crawl, callback=self.get_item, dont_filter=True)
                 return
         else:
+            self.count += 1
             if self.count < len(self.start_urls):
                 yield Request(url=self.start_urls[self.count], callback=self.posts_parse)
-    
+            else:
+                self.post_urls = list(set(self.post_urls))
+                for post_url in self.post_urls:
+                    url_to_crawl = (BASE_URL+post_url).split(".html")[0] + ".html"
+                    yield Request(url=url_to_crawl, callback=self.get_item, dont_filter=True)
+                return
+
     def get_item(self, response):
         item = MyWorkItem()
         item["title"] = ' '.join([x for x in response.xpath('//h1[@class="main-title"]/span/text()').extract() if x not in ['hot', '\xa0']])

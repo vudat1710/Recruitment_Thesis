@@ -152,7 +152,13 @@ def build_inverted_index(docs):
 
 def get_field_data(post, field_name):
     if field_name in post:
-        return "'{}'".format(post[field_name])
+        if field_name == "num_hiring":
+            try:
+                return int(post[field_name])
+            except:
+                return "NULL"
+        else:
+            return "'{}'".format(post[field_name])
     else: return "NULL"
 
 def get_sample_data_from_json_type(response):

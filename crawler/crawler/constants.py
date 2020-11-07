@@ -47,5 +47,5 @@ CRAWLED_DATA = './crawler/data/'
 #DATABASE
 USER = "root"
 PASSWORD = "17101998"
-DATABASE = "recruitment"
+DATABASE = "recruitment_test"
 PORT = 3306
