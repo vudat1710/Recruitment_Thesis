@@ -4,7 +4,7 @@ from .utils import get_prefix_threshold, build_inverted_index, preprocess, sort_
 from py_stringmatching.similarity_measure.soft_tfidf import SoftTfIdf
 
 class DuplicateFiltering:
-    def __init__(self, num_fields_checked, Y, threshold_tfidf=0.8, sim_threshold=0.8):
+    def __init__(self, num_fields_checked, Y, threshold_tfidf=0.75, sim_threshold=0.8):
         self.threshold_tfidf = threshold_tfidf
         self.sim_threshold = sim_threshold
         self.num_fields_checked = num_fields_checked

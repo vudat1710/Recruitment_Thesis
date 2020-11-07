@@ -1,3 +1,5 @@
+USE `recruitment_test`;
+
 CREATE TABLE `ActionType` (
   `actionTypeId` int NOT NULL AUTO_INCREMENT,
   `name` varchar(20) NOT NULL,
@@ -42,13 +44,13 @@ CREATE TABLE `CommentPost` (
 
 CREATE TABLE `Company` (
   `companyId` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(70) NOT NULL,
+  `name` varchar(200) NOT NULL,
   `address` varchar(300) NOT NULL,
   `description` text,
-  `img_url` varchar(100) DEFAULT NULL,
+  `img_url` varchar(400) DEFAULT NULL,
   PRIMARY KEY (`companyId`),
   UNIQUE KEY `companyId_UNIQUE` (`companyId`)
-) ENGINE=InnoDB AUTO_INCREMENT=518 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1030 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `Major` (
   `majorId` int NOT NULL AUTO_INCREMENT,
@@ -56,7 +58,7 @@ CREATE TABLE `Major` (
   PRIMARY KEY (`majorId`),
   UNIQUE KEY `majorId_UNIQUE` (`majorId`),
   UNIQUE KEY `name_UNIQUE` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=68 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=136 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `MajorItem` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -79,7 +81,7 @@ CREATE TABLE `MajorPost` (
   KEY `postIdMajor_idx` (`postId`),
   CONSTRAINT `majorIdPost` FOREIGN KEY (`majorId`) REFERENCES `Major` (`majorId`),
   CONSTRAINT `postIdMajor` FOREIGN KEY (`postId`) REFERENCES `Post` (`postId`)
-) ENGINE=InnoDB AUTO_INCREMENT=1754 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9897 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `Post` (
   `postId` int NOT NULL AUTO_INCREMENT,
@@ -100,7 +102,7 @@ CREATE TABLE `Post` (
   `contact_name` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`postId`),
   UNIQUE KEY `postId_UNIQUE` (`postId`)
-) ENGINE=InnoDB AUTO_INCREMENT=1059 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4930 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `PostCompany` (
   `postId` int NOT NULL,
@@ -111,7 +113,7 @@ CREATE TABLE `PostCompany` (
   KEY `postId_idx` (`postId`),
   CONSTRAINT `companyIdPost` FOREIGN KEY (`companyId`) REFERENCES `Company` (`companyId`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `postIdComp` FOREIGN KEY (`postId`) REFERENCES `Post` (`postId`)
-) ENGINE=InnoDB AUTO_INCREMENT=1046 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4910 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `Rate` (
   `rateId` int NOT NULL AUTO_INCREMENT,
@@ -166,7 +168,7 @@ CREATE TABLE `WorkPlace` (
   `name` varchar(30) NOT NULL,
   PRIMARY KEY (`workPlaceId`),
   UNIQUE KEY `name_UNIQUE` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=125 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=197 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `WorkPlacePost` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -177,7 +179,7 @@ CREATE TABLE `WorkPlacePost` (
   KEY `workPlaceId_idx` (`workPlaceId`),
   CONSTRAINT `postIdWP` FOREIGN KEY (`postId`) REFERENCES `Post` (`postId`),
   CONSTRAINT `workPlaceIdPost` FOREIGN KEY (`workPlaceId`) REFERENCES `WorkPlace` (`workPlaceId`)
-) ENGINE=InnoDB AUTO_INCREMENT=1271 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5623 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `WorkPlaceUser` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -189,4 +191,3 @@ CREATE TABLE `WorkPlaceUser` (
   CONSTRAINT `userIdWP` FOREIGN KEY (`userId`) REFERENCES `User` (`userId`),
   CONSTRAINT `workPlaceIdUser` FOREIGN KEY (`workPlaceId`) REFERENCES `WorkPlace` (`workPlaceId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-SELECT * FROM recruitment.Post;

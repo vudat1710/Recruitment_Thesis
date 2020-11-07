@@ -7,8 +7,10 @@ import pandas as pd
 from collections import OrderedDict
 from .filtering import DuplicateFiltering
 
+CHUNK_SIZE = 100
+
 class DBPushing:
-    def __init__(self, posts, companies):
+    def __init__(self, merged_data):
         self.connection = pymysql.connect(
             host='localhost',
             user=USER,
@@ -22,34 +24,36 @@ class DBPushing:
         self.majors = list(set(json.load(open(MAJOR_DICT_PATH, "r")).values()))
         self.workplaces = list(set(json.load(open(ADDRESS_DICT_PATH, 'r')).values()))
         self.post_normalization = PostNormalization()
-        self.duplicate_filtering = self.get_filtered_data()
         self.num_duplicated = 0
-        self.merged_data = [self.post_normalization.normalize_post(post) for post in merge_data(posts, companies)]
+        self.merged_data = merged_data
 
     def insert_table(self, table_name, items):
         for item in items:
             self.cursor.execute("INSERT INTO `{}` (`name`) VALUES ('{}')".format(table_name, item))
         self.connection.commit()
 
-    def check_posts(self):
-        if self.duplicate_filtering:
+    def check_posts(self, merged_data):
+        duplicate_filtering = self.get_filtered_data()
+        if duplicate_filtering:
             result = []
-            for post in self.merged_data:
+            for post in merged_data:
                 post_to_check = get_post_to_check(post)
-                if self.duplicate_filtering.is_match(post_to_check):
+                if duplicate_filtering.is_match(post_to_check):
                     self.num_duplicated += 1
                 else:
                     result.append(post)
             return result
         else:
-            data = self.merged_data.copy()
-            for post in self.merged_data.copy():
-                data.remove(post)
-                self.duplicate_filtering = DuplicateFiltering(3, [get_post_to_check(post) for post in data])
-                if self.duplicate_filtering.is_match(get_post_to_check(post)):
-                    print(post)
-                    self.merged_data.remove(post)
-            return self.merged_data
+            return merged_data
+        # else:
+        #     data = self.merged_data.copy()
+        #     for post in self.merged_data.copy():
+        #         data.remove(post)
+        #         self.duplicate_filtering = DuplicateFiltering(3, [get_post_to_check(post) for post in data])
+        #         if self.duplicate_filtering.is_match(get_post_to_check(post)):
+        #             print(post)
+        #             self.merged_data.remove(post)
+        #     return self.merged_data
 
     def insert_to_db(self, posts_with_company):
         for post in posts_with_company:
@@ -85,20 +89,29 @@ class DBPushing:
             major_ids = self.get_table_ids(majors, "Major", "majorId")
             for major_id in major_ids:
                 self.cursor.execute("INSERT INTO `MajorPost` (`postId`, `majorId`) VALUES ({},{})".format(last_inserted, major_id))
-            company_name = post["name"]
+            company_name = post["name"].replace("'", "''")
             company_id = self.check_company(company_name)
             if not company_id:
                 img = post["img"]
-                company_address = post["company_address"]
-                company_desc = re.sub(r"(<br>)", "", post["company_description"])
-                self.cursor.execute("INSERT INTO `Company` (`name`, `address`, `description`, `img_url`) VALUES ('{}', '{}', '{}', '{}')".format(company_name, company_address, company_desc, img))
+                if "company_address" in post.keys():
+                    company_address = post["company_address"]
+                else:
+                    company_address = address[1:-1]
+                company_desc = post["company_description"]
+                company_query = "INSERT INTO `Company` (`name`, `address`, `description`, `img_url`) VALUES ('{}', '{}', '{}', '{}')".format(company_name, company_address, company_desc, img)
+                self.cursor.execute(company_query)
                 self.connection.commit()
                 self.cursor.execute("SELECT * FROM Company ORDER BY companyId DESC LIMIT 1")
                 company_id = self.cursor.fetchone()["companyId"]
             self.cursor.execute("INSERT INTO `PostCompany` (`postId`, `companyId`) VALUES ({}, {})".format(last_inserted, company_id))
             self.connection.commit()
-            print("Insert successfully {} posts!\n".format(len(posts_with_company)))
+        print("Insert successfully {} posts!\n".format(len(posts_with_company)))
 
+    def push_chunks(self):
+        for i in range(len(self.merged_data) // CHUNK_SIZE + 1):
+            posts_with_company = self.check_posts(self.merged_data[(CHUNK_SIZE*i):(CHUNK_SIZE*(i+1))])
+            print(len(posts_with_company))
+            self.insert_to_db(posts_with_company)
 
     def get_table_ids(self, item_list, table_name, id_field):
         query = "SELECT * FROM {} WHERE `name` IN (".format(table_name)
@@ -145,13 +158,18 @@ class DBPushing:
         
 
 if __name__ == "__main__":
+     
+    # dbp.get_table_ids(["An ninh – Bảo vệ"], "Major", "majorId")
+    posts = json.load(open('./crawler/data/topcv/post.json', 'r'))
+    companies = json.load(open('./crawler/data/topcv/company.json', 'r'))
+    merged_data = []
+    post_normalization = PostNormalization()
+    for post in merge_data(posts, companies):
+        norm_post = post_normalization.normalize_post(post)
+        if norm_post:
+            merged_data.append(norm_post)
+    dbp = DBPushing(merged_data)
     # dbp.insert_table("Major", dbp.majors)
     # dbp.insert_table("WorkPlace", dbp.workplaces)
-    # dbp.get_table_ids(["An ninh – Bảo vệ"], "Major", "majorId")
-    posts = json.load(open('./crawler/data/mywork/post.json', 'r'))
-    companies = json.load(open('./crawler/data/mywork/company.json', 'r'))
-    dbp = DBPushing(posts, companies)
-    posts_with_company = dbp.check_posts()
-    print(len(posts_with_company))
-    dbp.insert_to_db(posts_with_company)
+    dbp.push_chunks()
     dbp.connection.close()

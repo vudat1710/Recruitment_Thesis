@@ -9,6 +9,8 @@ class PostNormalization:
         self.address_dict = json.load(open(ADDRESS_DICT_PATH, "r"))
 
     def normalize_post(self, post):
+        if post["valid_through"] == "":
+            return None
         post['workplace'] = self.normalize_workplace(post["workplace"])
         post['majors'] = self.normalize_majors(post['majors'])
         post['title'] = re.sub(
@@ -17,10 +19,22 @@ class PostNormalization:
         post['salary'] = self.normalize_salary(post['salary'])
         post['description'] = re.sub(r"(<br>)", "", post['description']) 
         post['valid_through'] = self.normalize_date(post['valid_through'])
+        post['description'] = self.normalize_long_text(post['description'])
+        post['job_benefits'] = self.normalize_long_text(post['job_benefits'])
+        post['extra_requirements'] = self.normalize_long_text(post['extra_requirements'])
+        post['company_description'] = re.sub(r"(<br>)", "", post['company_description'])
+        post['company_description'] = self.normalize_long_text(post['company_description'])
+        if "company_address" in post:
+            post["company_address"] = self.normalize_long_text(post["company_address"])
+        post["address"] = self.normalize_long_text(post["address"])
 
         return post
 
     def normalize_date(self, date):
+        try:
+            date = re.search(r"\d{2}[-/]\d{2}[-/]\d{4}", date).group(0)
+        except:
+            date = ""
         try:
             return datetime.strptime(date, "%d/%m/%Y").strftime('%Y-%m-%d')
         except:
@@ -58,3 +72,6 @@ class PostNormalization:
             if len(value_list) > 0:
                 return "-".join([str(int(x) * 1000000) for x in value_list])
         return 0
+    
+    def normalize_long_text(self, long_text):
+        return long_text.replace("'", "''")
