@@ -20,7 +20,8 @@ company.json
 post.json
 # *.txt
 # dependencies
-/node_modules
+*/node_modules
+app/client/node_modules
 /.pnp
 .pnp.js
 
