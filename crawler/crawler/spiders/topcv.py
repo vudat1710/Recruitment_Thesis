@@ -149,8 +149,15 @@ class TopCVCrawler(CrawlSpider):
     
     def get_company(self, response):
         item = CompanyItem()
-        item["name"] = response.xpath('//h1[@class="company-detail-name text-highlight"]/text()').extract_first()
-        item["company_url"] = response.url.replace("www.", "")
-        item["description"] = ' '.join(response.xpath('//div[@class="row box-company-info"]/div[1]/div[2]/p/text()').extract())
-
-        yield item
+        if "/brand/" in response.url:
+            item["name"] = response.xpath('//div[@id="company-name"]/h1/text()').extract_first()
+            item["company_url"] = response.url
+            item["description"] = ''.join(response.xpath('//div[@class="intro-content"]//text()').extract()).strip()
+            item["address"] = response.xpath('//div[@class="content-contact"]/div[descendant::i[contains(@class, "fa-map-marker")]]/span/text()').extract_first()
+            yield item
+        else:          
+            item["name"] = response.xpath('//h1[@class="company-detail-name text-highlight"]/text()').extract_first()
+            item["company_url"] = response.url.replace("www.", "")
+            item["description"] = ' '.join(response.xpath('//div[@class="row box-company-info"]/div[1]/div[2]/p/text()').extract())
+            item["address"] = ''.join(response.xpath('//div[@id="box-detail-info-company"]/p[descendant::i[contains(@class, "map")]]/text()').extract()).strip()
+            yield item

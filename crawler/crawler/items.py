@@ -30,6 +30,7 @@ class CompanyItem(Item):
     name = Field()
     description = Field()
     company_url = Field()
+    address = Field()
 
 class MajorItem(Item):
     name = Field()

@@ -99,6 +99,7 @@ class DBPushing:
                     company_address = address[1:-1]
                 company_desc = post["company_description"]
                 company_query = "INSERT INTO `Company` (`name`, `address`, `description`, `img_url`) VALUES ('{}', '{}', '{}', '{}')".format(company_name, company_address, company_desc, img)
+                print(company_query)
                 self.cursor.execute(company_query)
                 self.connection.commit()
                 self.cursor.execute("SELECT * FROM Company ORDER BY companyId DESC LIMIT 1")

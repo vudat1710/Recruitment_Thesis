@@ -74,4 +74,5 @@ class PostNormalization:
         return 0
     
     def normalize_long_text(self, long_text):
+        long_text = long_text.replace("\\\\\\'", "''")
         return long_text.replace("'", "''")
