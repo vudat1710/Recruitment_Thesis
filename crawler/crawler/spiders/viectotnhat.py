@@ -46,31 +46,42 @@ class VTNCrawler(CrawlSpider):
             yield item
     
     def posts_parse(self, response):
-        self.count += 1
+        self.post_urls = list(set(self.post_urls))
+        next_start_url = False
         self.post_urls.extend(response.xpath('//h3[contains(@class, "job-name")]/a/@href').extract())
         next_page_url = response.xpath('//ul[@class="pagination"]/li[last()]/a/@href').extract_first()
         if next_page_url:
-            if len(self.post_urls) <= NUM_STOP:
-                if next_page_url.split("&page=")[-1] < 51:
+            try: 
+                if int(next_page_url.split("&page=")[-1]) < 51:
                     yield Request(url=BASE_URL+next_page_url, callback=self.posts_parse, dont_filter=True)
+                else:
+                    next_start_url = True
+            except:
+                next_start_url = True
+            if len(self.post_urls) > NUM_STOP:
+                self.post_urls = list(set(self.post_urls))
+                for post_url in self.post_urls:
+                    yield Request(url=post_url, callback=self.get_item, dont_filter=True)
+                return
+        if not next_page_url or next_start_url:
+            self.count += 1
+            if self.count < len(self.start_urls):
+                yield Request(url=self.start_urls[self.count], callback=self.posts_parse, dont_filter=True)
             else:
                 self.post_urls = list(set(self.post_urls))
                 for post_url in self.post_urls:
                     yield Request(url=post_url, callback=self.get_item, dont_filter=True)
                 return
-        else:
-            if self.count < len(self.start_urls):
-                yield Request(url=self.start_urls[self.count], callback=self.posts_parse)
     
     def get_item(self, response):
         item = VTNItem()
         item["title"] = response.xpath('//h1[contains(@class, "title-job")]/text()').extract_first().strip()
         item["company_title"] = response.xpath('//div[contains(@class, "chi-tiet-vl")]/div[4]/div[1]/a/h2/text()').extract_first().strip()
-        item["address"] = ''.join([x for x in response.xpath('//div[contains(@class, "job-ads")]/div[2]/text()').extract_first().strip() if x.strip() != ""]).strip()
+        item["address"] = ''.join([x for x in response.xpath('//div[contains(@class, "job-ads")]/div[2]/text()').extract() if x.strip() != ""]).strip()
         item["valid_through"] = response.xpath('//span[contains(@class,"color-orange2")]/text()').extract_first().strip()
         item["salary"] = ''.join([x for x in response.xpath('//div[contains(@class, "list-thong-tin")]/div[1]/div/ul/li[descendant::span[contains(@class, "icon-muc-luong2")]]/text()').extract() if x.strip() != ""]).strip()
         item["job_type"] = ''.join([x for x in response.xpath('//div[contains(@class, "list-thong-tin")]/div[1]/div/ul/li[descendant::span[contains(@class, "icon-hinh-thuc2")]]/text()').extract() if x.strip() != ""]).strip()
-        item["num_hiring"] = ''.join([x for x in response.xpath('//div[contains(@class, "list-thong-tin")]/div[1]/div/ul/li[descendant::span[contains(@class, "icon-cap-bac2")]]/text()').extract() if x.strip() != ""]).strip()
+        item["num_hiring"] = ''.join([x for x in response.xpath('//div[contains(@class, "list-thong-tin")]/div[1]/div/ul/li[descendant::span[contains(@class, "icon-cap-bac2")]]/span/text()').extract() if x.strip() != ""]).strip()
         item["position"] = ''.join([x for x in response.xpath('//div[contains(@class, "list-thong-tin")]/div[1]/div/ul/li[descendant::span[contains(@class, "icon-cap-bac3")]]/text()').extract() if x.strip() != ""]).strip()
         item["experience"] = ''.join([x for x in response.xpath('//div[contains(@class, "list-thong-tin")]/div[1]/div/ul/li[descendant::span[contains(@class, "icon-kinh-nghiem2")]]/text()').extract() if x.strip() != ""]).strip()
         item["gender"] = ''.join([x for x in response.xpath('//div[contains(@class, "list-thong-tin")]/div[1]/div/ul/li[descendant::span[contains(@class, "icon-gioi-tinh2")]]/text()').extract() if x.strip() != ""]).strip()

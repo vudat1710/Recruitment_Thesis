@@ -33,6 +33,7 @@ class MyWorkCrawler(CrawlSpider):
             for line in f.readlines():
                 self.start_urls.append(line.strip())
         f.close()
+        self.start_urls = list(set(self.start_urls))
 
         yield Request(url=self.start_urls[self.count], callback=self.posts_parse)
 
@@ -53,20 +54,25 @@ class MyWorkCrawler(CrawlSpider):
             yield item
     
     def posts_parse(self, response):
+        self.post_urls = list(set(self.post_urls))
+        next_start_url = False
         self.post_urls.extend(response.xpath('//p[contains(@class, "j_title")]/a/@href').extract())
         next_page_url = response.xpath('//ul[@class="pagination"]/li[last()]/a/@href').extract_first()
         if next_page_url:
-            yield Request(url=BASE_URL+next_page_url, callback=self.posts_parse)
+            if int(next_page_url.split("?cat")[0].split('/trang/')[1]) < 51:
+                yield Request(url=BASE_URL+next_page_url, callback=self.posts_parse, dont_filter=True)
+            else:
+                next_start_url = True
             if len(self.post_urls) > NUM_STOP:
                 self.post_urls = list(set(self.post_urls))
                 for post_url in self.post_urls:
                     url_to_crawl = (BASE_URL+post_url).split(".html")[0] + ".html"
                     yield Request(url=url_to_crawl, callback=self.get_item, dont_filter=True)
                 return
-        else:
+        if not next_page_url or next_start_url:
             self.count += 1
             if self.count < len(self.start_urls):
-                yield Request(url=self.start_urls[self.count], callback=self.posts_parse)
+                yield Request(url=self.start_urls[self.count], callback=self.posts_parse, dont_filter=True)
             else:
                 self.post_urls = list(set(self.post_urls))
                 for post_url in self.post_urls:

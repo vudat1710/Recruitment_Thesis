@@ -75,7 +75,6 @@ class TopCVCrawler(CrawlSpider):
                 return
         else:
             self.count += 1
-            print(len(self.post_urls))
             if self.count < len(self.start_urls):
                 yield Request(url=self.start_urls[self.count], callback=self.posts_parse)
             else:
