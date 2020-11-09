@@ -14,14 +14,29 @@ class DuplicateFiltering:
             for i in range(num_fields_checked):
                 temp.append([word.lower() for word in re.compile("[\\w_]+").findall(word_tokenize(y[i], format="text"))])
             self.Y_norm.append(temp)
-        fields = [[] for _ in range(num_fields_checked)]
+        self.fields = [[] for _ in range(num_fields_checked)]
         for y in self.Y_norm:
             for i in range(num_fields_checked):
-                fields[i].append(y[i])
+                self.fields[i].append(y[i])
         
-        self.inverted_indices = [build_inverted_index(fields[i]) for i in range(num_fields_checked)]
-        self.scoring_models = [SoftTfIdf(fields[i]) for i in range(num_fields_checked)]
+        self.inverted_indices = [build_inverted_index(self.fields[i]) for i in range(num_fields_checked)]
+        self.scoring_models = [SoftTfIdf(self.fields[i]) for i in range(num_fields_checked)]
         # [print(self.inverted_indices[i]["ngân_hàng"]) for i in range(num_fields_checked)]
+    
+    def update(self, update_data):
+        temp_norm = []
+        for y in update_data:
+            temp = []
+            for i in range(self.num_fields_checked):
+                temp.append([word.lower() for word in re.compile("[\\w_]+").findall(word_tokenize(y[i], format="text"))])
+            temp_norm.append(temp)    
+        self.Y_norm.extend(temp_norm)
+        for y in temp_norm:
+            for i in range(self.num_fields_checked):
+                self.fields[i].append(y[i])
+        
+        self.inverted_indices = [build_inverted_index(self.fields[i]) for i in range(self.num_fields_checked)]
+        self.scoring_models = [SoftTfIdf(self.fields[i]) for i in range(self.num_fields_checked)]
 
     def is_match(self, X):
         X_norm = [[word.lower() for word in re.compile("[\\w_]+").findall(word_tokenize(X[i], format="text"))] for i in range(self.num_fields_checked)]

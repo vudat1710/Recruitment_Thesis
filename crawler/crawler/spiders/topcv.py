@@ -93,7 +93,10 @@ class TopCVCrawler(CrawlSpider):
                 item["title"] = title_list[0] + title_extra + ' '.join(title_list[1:])
             else: item["title"] = ' '.join(title_list)
             item["company_title"] = response.xpath('//div[@id="company-name"]/h1/text()').extract_first().strip()
-            item["address"] = response.xpath('//span[@title="Địa chỉ làm việc"]/text()').extract_first().strip()
+            try:
+                item["address"] = response.xpath('//span[@title="Địa chỉ làm việc"]/text()').extract_first().strip()
+            except:
+                pass
             item["valid_through"] = response.xpath('//span[@title="Hạn ứng tuyển"]/text()').extract_first().strip()
             item["salary"] = response.xpath('//span[@title="Mức lương"]/text()').extract_first().strip()
             item["job_type"] = response.xpath('//span[@title="Hình thức làm việc"]/text()').extract_first().strip()

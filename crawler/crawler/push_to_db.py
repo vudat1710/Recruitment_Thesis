@@ -23,7 +23,8 @@ class DBPushing:
         print("Connect to DB successfully!\n")
         self.majors = list(set(json.load(open(MAJOR_DICT_PATH, "r")).values()))
         self.workplaces = list(set(json.load(open(ADDRESS_DICT_PATH, 'r')).values()))
-        self.post_normalization = PostNormalization()
+        self.wp_dict = self.get_all_data_from_table("WorkPlace", "name", "workPlaceId")
+        self.major_dict = self.get_all_data_from_table("Major", "name", "majorId")
         self.num_duplicated = 0
         self.merged_data = merged_data
 
@@ -31,9 +32,14 @@ class DBPushing:
         for item in items:
             self.cursor.execute("INSERT INTO `{}` (`name`) VALUES ('{}')".format(table_name, item))
         self.connection.commit()
+    
+    def get_all_data_from_table(self, table_name, key_name, value_name):
+        query = "SELECT * FROM {}".format(table_name)
+        self.cursor.execute(query)
+        result_query = self.cursor.fetchall()
+        return {x[key_name]: x[value_name] for x in result_query}
 
-    def check_posts(self, merged_data):
-        duplicate_filtering = self.get_filtered_data()
+    def check_posts(self, merged_data, duplicate_filtering):
         if duplicate_filtering:
             result = []
             for post in merged_data:
@@ -83,10 +89,10 @@ class DBPushing:
             self.connection.commit()
             self.cursor.execute("SELECT * FROM Post ORDER BY postId DESC LIMIT 1")
             last_inserted = self.cursor.fetchone()["postId"]
-            workplace_ids = self.get_table_ids(workplaces, "WorkPlace", "workPlaceId")
+            workplace_ids = [self.wp_dict[wp] for wp in workplaces]
             for workplace_id in workplace_ids:
                 self.cursor.execute("INSERT INTO `WorkPlacePost` (`postId`, `workPlaceId`) VALUES ({}, {})".format(last_inserted, workplace_id))
-            major_ids = self.get_table_ids(majors, "Major", "majorId")
+            major_ids = [self.major_dict[major] for major in majors]
             for major_id in major_ids:
                 self.cursor.execute("INSERT INTO `MajorPost` (`postId`, `majorId`) VALUES ({},{})".format(last_inserted, major_id))
             company_name = post["name"].replace("'", "''")
@@ -99,7 +105,6 @@ class DBPushing:
                     company_address = address[1:-1]
                 company_desc = post["company_description"]
                 company_query = "INSERT INTO `Company` (`name`, `address`, `description`, `img_url`) VALUES ('{}', '{}', '{}', '{}')".format(company_name, company_address, company_desc, img)
-                print(company_query)
                 self.cursor.execute(company_query)
                 self.connection.commit()
                 self.cursor.execute("SELECT * FROM Company ORDER BY companyId DESC LIMIT 1")
@@ -109,10 +114,16 @@ class DBPushing:
         print("Insert successfully {} posts!\n".format(len(posts_with_company)))
 
     def push_chunks(self):
+        if len(self.wp_dict) == 0:
+            dbp.insert_table("WorkPlace", dbp.workplaces)
+        if len(self.major_dict) == 0:
+            dbp.insert_table("Major", dbp.majors)
+        duplicate_filtering = self.get_filtered_data()
         for i in range(len(self.merged_data) // CHUNK_SIZE + 1):
-            posts_with_company = self.check_posts(self.merged_data[(CHUNK_SIZE*i):(CHUNK_SIZE*(i+1))])
+            posts_with_company = self.check_posts(self.merged_data[(CHUNK_SIZE*i):(CHUNK_SIZE*(i+1))], duplicate_filtering)
             print(len(posts_with_company))
             self.insert_to_db(posts_with_company)
+            duplicate_filtering.update(self.merged_data[(CHUNK_SIZE*i):(CHUNK_SIZE*(i+1))])
 
     def get_table_ids(self, item_list, table_name, id_field):
         query = "SELECT * FROM {} WHERE `name` IN (".format(table_name)
@@ -159,8 +170,6 @@ class DBPushing:
         
 
 if __name__ == "__main__":
-     
-    # dbp.get_table_ids(["An ninh – Bảo vệ"], "Major", "majorId")
     posts = json.load(open('./crawler/data/topcv/post.json', 'r'))
     companies = json.load(open('./crawler/data/topcv/company.json', 'r'))
     merged_data = []
@@ -170,7 +179,5 @@ if __name__ == "__main__":
         if norm_post:
             merged_data.append(norm_post)
     dbp = DBPushing(merged_data)
-    # dbp.insert_table("Major", dbp.majors)
-    # dbp.insert_table("WorkPlace", dbp.workplaces)
     dbp.push_chunks()
     dbp.connection.close()
