@@ -7,7 +7,7 @@ import {
 import axios from "axios";
 
 export const getPosts = (params) => async (dispatch) => {
-  // let res = await axios.post(`/api/here`, params);
+  // let res = await axios.post(`/api/here`, {params: params});
 
   dispatch({
     type: GET_POSTS,
