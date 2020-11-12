@@ -1,10 +1,6 @@
-module.exports = app => {
-    const posts = require("../controllers/post.controller.js");
-  
-    var router = require("express").Router();
+var router = require("express").Router();
+const posts = require("../controllers/post.controller.js");
+router.post("/findPosts", posts.findPosts); 
+router.get("/getNumPosts", posts.getNumPosts);
 
-    // Retrieve all posts
-    router.get("/post/findPosts", posts.findPosts);
-  
-
-  };
+module.exports = router;

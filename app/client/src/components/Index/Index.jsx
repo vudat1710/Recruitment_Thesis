@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import { getPosts } from "../../actions/post.action";
 import Search from "../Search/Search";
 import HowItWork from "../../assets/img/job-vacancy.jpg"
+import BGFact from "../../assets/img/bg-facts.jpg";
 
 class Index extends Component {
   constructor(props) {
@@ -14,7 +15,7 @@ class Index extends Component {
   }
 
   async componentDidMount() {
-    await this.props.getPosts({ getType: "latest", numPosts: 5 });
+    await this.props.getPosts({ type: "home", limit: 5, attributes: ['postId', 'title', 'salary', 'valid_through'] });
     this.setState({
       ...this.state,
       postsDisplay: this.props.posts.postData,
@@ -28,17 +29,18 @@ class Index extends Component {
         <></>
       ) : (
         postsDisplay.map((post) => {
+          let workplace = post.WorkPlaces.map(function(ele){ return ele.name;}).join(", ");
           return (
             <div className="col-xs-12">
               <a className="item-block" href="job-detail.html">
                 <header>
-                  <img src={post.img} alt="" />
+                  <img src={post.Companies[0].img_url} alt="" />
                   <div className="hgroup">
                     <h4>{post.title}</h4>
-                    <h5>{post.companyTitle}</h5>
+                    <h5>{post.Companies[0].name}</h5>
                   </div>
                   <div className="header-meta">
-                    <span className="location">{post.workplace}</span>
+                    <span className="location">{workplace}</span>
                     <span className="label label-success">{post.salary}</span>
                   </div>
                 </header>
@@ -55,9 +57,9 @@ class Index extends Component {
           <section className="bg-alt">
             <div className="container">
               <header className="section-header">
-                <span>Latest</span>
-                <h2>Recent jobs</h2>
-                <p>Here's the last five job posted on the website</p>
+                <span>Gần nhất</span>
+                <h2>Các công việc mới được cập nhật</h2>
+                <p>Dưới đây là 5 công việc được cập nhật gần nhất trên hệ thống</p>
               </header>
 
               <div className="row item-blocks-condensed">{recentJobs}</div>
@@ -254,7 +256,7 @@ class Index extends Component {
           <section
             className="bg-img text-center"
             style={{
-              backgroundImage: "url(" + "../../assets/img/bg-facts.jpg" + ")",
+              backgroundImage: `url(${BGFact})`,
             }}
           >
             {/* <section className="bg-img text-center"> */}

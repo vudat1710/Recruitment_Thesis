@@ -3,7 +3,6 @@ import { Link, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import Banner from "../../assets/img/banner_details.jpg";
 import {
-  getNumAllPosts,
   getDataAutoComplete,
   searchPosts,
 } from "../../actions/post.action";
@@ -18,7 +17,6 @@ class AdvancedSearch extends Component {
 
     this.state = {
       isShow: false,
-      numAllPosts: 0,
       dataAuto: null,
       positionTypes: "",
       workplaces: "",
@@ -29,11 +27,9 @@ class AdvancedSearch extends Component {
   }
 
   async componentDidMount() {
-    await this.props.getNumAllPosts({ type: "all", numPosts: 0 });
     await this.props.getDataAutoComplete();
     this.setState({
       ...this.state,
-      numAllPosts: this.props.posts.numAllPosts,
       dataAuto: this.props.posts.autoComplete,
       resultPosts: this.props.posts.postData,
       loading: true,
@@ -243,13 +239,12 @@ class AdvancedSearch extends Component {
 
 AdvancedSearch.propTypes = {
   posts: PropTypes.object.isRequired,
-  getNumAllPosts: PropTypes.func.isRequired,
   getDataAutoComplete: PropTypes.func.isRequired,
   searchPosts: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({ posts: state.posts });
 
-const mapDispatchToProps = { getNumAllPosts, getDataAutoComplete, searchPosts };
+const mapDispatchToProps = { getDataAutoComplete, searchPosts };
 
 export default connect(mapStateToProps, mapDispatchToProps)(AdvancedSearch);

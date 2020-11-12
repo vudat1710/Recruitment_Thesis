@@ -65,13 +65,13 @@ class PostNormalization:
             return ','.join(list(set(norm_workplace)))
 
     def normalize_salary(self, salary):
-        if re.match(r"^(((\d{1,3}([\.,]\d{3})*)|(\d+))|(\w*\d+))", str(salary)) is not None:
+        if re.match(r"^((\d{1,3}([\.,]\d{3})+))", str(salary)) is not None:
             return re.sub(r'[.,]', '', str(salary))
         else:
             value_list = re.findall(r'\d+', salary)
             if len(value_list) > 0:
                 return "-".join([str(int(x) * 1000000) for x in value_list])
-        return 0
+        return salary
     
     def normalize_long_text(self, long_text):
         long_text = long_text.replace("\\\\\\'", "''")

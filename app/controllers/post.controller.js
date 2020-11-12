@@ -1,5 +1,10 @@
+const { WorkPlacePost } = require("../models");
 const db = require("../models");
-const Post = db.post;
+const MajorPost = require("../models/MajorPost");
+const Post = db.Post;
+const WorkPlace = db.WorkPlace;
+const Company = db.Company;
+const Major = db.Major;
 const Op = db.Sequelize.Op;
 
 exports.createPost = (req, res) => {
@@ -11,21 +16,21 @@ exports.createPost = (req, res) => {
   }
 
   const post = {
-    title: req.params.title,
-    description: req.params.description,
-    gender: req.params.gender,
-    extra_requirements: req.params.extra_requirements,
-    job_benefits: req.params.job_benefits,
-    salary: req.params.salary,
-    experience: req.params.experience,
-    job_type: req.params.job_type,
-    num_hiring: req.params.num_hiring,
-    valid_through: req.params.valid_through,
-    address: req.params.address,
-    post_url: req.params.post_url,
-    qualification: req.params.qualification,
-    position: req.params.position,
-    contact_name: req.params.contact_name,
+    title: req.body.title,
+    description: req.body.description,
+    gender: req.body.gender,
+    extra_requirements: req.body.extra_requirements,
+    job_benefits: req.body.job_benefits,
+    salary: req.body.salary,
+    experience: req.body.experience,
+    job_type: req.body.job_type,
+    num_hiring: req.body.num_hiring,
+    valid_through: req.body.valid_through,
+    address: req.body.address,
+    post_url: req.body.post_url,
+    qualification: req.body.qualification,
+    position: req.body.position,
+    contact_name: req.body.contact_name,
   };
 
   Post.create(post)
@@ -39,18 +44,21 @@ exports.createPost = (req, res) => {
     });
 };
 
-exports.findPosts = (req, res) => {
-  const type = req.params.type;
-  const attributesParams = req.params.attributes;
+exports.findPosts = (req, res) => { 
+  const type = req.body.type;
+  const attributesParams = req.body.attributes;
   let conditions;
   if (type == "home") {
-    conditions = { limit: req.params.limit, order: ["valid_through", "ASC"], attributes: attributesParams };
+    conditions = { limit: parseInt(req.body.limit), attributes: attributesParams, order: [["valid_through", "ASC"]] };
   } else if (type == "all") {
     conditions = {};
   } else {
-    conditions = { limit: req.params.limit };
+    conditions = { limit: parseInt(req.body.limit) };
   }
-  Post.findAll(conditions)
+
+  conditions["include"] = [{model: db.WorkPlace, attributes: ["name"]}, {model: db.Major, attributes: ["name"]}, {model: db.Company, attributes: ["name", "description", "img_url"]}];
+
+  Post.findAll(conditions,{subQuery: false})
     .then((data) => {
       res.send(data);
     })
@@ -62,10 +70,22 @@ exports.findPosts = (req, res) => {
     });
 };
 
-exports.getPostById = (req, res) => {
-  const id = req.params.id;
+exports.getNumPosts = (req, res) => {
+  Post.count()
+    .then((data) => {
+      res.send(data.toString());
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: "Some errors happened",
+      });
+    });
+};
 
-  Tutorial.findByPk(id)
+exports.getPostById = (req, res) => {
+  const id = req.body.id;
+
+  Post.findByPk(id)
     .then((data) => {
       res.send(data);
     })

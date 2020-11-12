@@ -4,13 +4,19 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js",
+    "swagger-autogen": "node swagger.js",
+    "client": "npm start --prefix client",
+    "server": "nodemon server.js",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
   },
   "author": "vudat1710",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
+    "concurrently": "^5.3.0",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
     "debug": "^4.2.0",
@@ -21,6 +27,7 @@
     "mysql2": "^2.2.5",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
+    "save": "^2.4.0",
     "sequelize": "^6.3.5",
     "sequelize-auto": "^0.7.1",
     "validator": "^13.1.17"

@@ -3,7 +3,6 @@ import { Link, withRouter, Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 import Banner from "../../assets/img/banner.jpg";
 import {
-  getNumAllPosts,
   getDataAutoComplete,
   searchPosts,
 } from "../../actions/post.action";
@@ -17,7 +16,6 @@ class Search extends Component {
 
     this.state = {
       isShow: false,
-      numAllPosts: 0,
       dataAuto: null,
       positionTypes: "",
       workplaces: "",
@@ -28,11 +26,9 @@ class Search extends Component {
   }
 
   async componentDidMount() {
-    await this.props.getNumAllPosts({ type: "all", numPosts: 0 });
     await this.props.getDataAutoComplete();
     this.setState({
       ...this.state,
-      numAllPosts: this.props.posts.numAllPosts,
       dataAuto: this.props.posts.autoComplete,
       loading: true,
       redirect: false,
@@ -79,7 +75,7 @@ class Search extends Component {
   };
 
   render() {
-    const { numAllPosts, dataAuto, loading } = this.state;
+    const { dataAuto, loading } = this.state;
     if (!loading) {
       return <></>;
     } else {
@@ -96,7 +92,7 @@ class Search extends Component {
               <br />
               <br />
               <h2>
-                Hiện tại đang có <mark>{numAllPosts}</mark> công việc trên hệ
+                Hiện tại đang có <mark>{dataAuto.numPosts}</mark> công việc trên hệ
                 thống
               </h2>
               <h5 className="font-alt">
@@ -159,13 +155,12 @@ class Search extends Component {
 
 Search.propTypes = {
   posts: PropTypes.object.isRequired,
-  getNumAllPosts: PropTypes.func.isRequired,
   getDataAutoComplete: PropTypes.func.isRequired,
   searchPosts: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({ posts: state.posts });
 
-const mapDispatchToProps = { getNumAllPosts, getDataAutoComplete, searchPosts };
+const mapDispatchToProps = { getDataAutoComplete, searchPosts };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Search);

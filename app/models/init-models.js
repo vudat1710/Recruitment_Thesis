@@ -70,6 +70,19 @@ function initModels(sequelize, Sequelize) {
   User.hasMany(WorkPlaceUser, { foreignKey: "userId"});
   WorkPlaceUser.belongsTo(WorkPlace, { foreignKey: "workPlaceId"});
   WorkPlace.hasMany(WorkPlaceUser, { foreignKey: "workPlaceId"});
+  
+  Post.belongsToMany(WorkPlace, { through: WorkPlacePost, foreignKey: 'postId' });
+  WorkPlace.belongsToMany(Post, { through: WorkPlacePost, foreignKey: 'workPlaceId' });
+  User.belongsToMany(WorkPlace, { through: WorkPlaceUser, foreignKey: 'userId' });
+  WorkPlace.belongsToMany(User, { through: WorkPlaceUser, foreignKey: 'workPlaceId' });
+  Post.belongsToMany(Major, { through: MajorPost, foreignKey: 'postId' });
+  Major.belongsToMany(Post, { through: MajorPost, foreignKey: 'majorId' });
+  User.belongsToMany(Major, { through: MajorItem, foreignKey: 'userId' });
+  Major.belongsToMany(User, { through: MajorItem, foreignKey: 'majorId' });
+  User.belongsToMany(ActionType, { through: ActionTypeItem, foreignKey: 'userId' });
+  ActionType.belongsToMany(User, { through: ActionTypeItem, foreignKey: 'actionTypeId' });
+  Post.belongsToMany(Company, { through: PostCompany, foreignKey: 'postId' });
+  Company.belongsToMany(Post, { through: PostCompany, foreignKey: 'companyId' });
 
   return {
     ActionType,
