@@ -38,6 +38,8 @@ CRAWL_SITES = {
 
 ADDRESS_DICT_PATH = "./get_data/get_data/template/address.json"
 MAJOR_DICT_PATH = "./get_data/get_data/template/major.json"
+EXP_DICT_PATH = "./get_data/get_data/template/exp.json"
+JOB_TYPE_DICT_PATH = "./get_data/get_data/template/job_type.json"
 MEDIATED_SCHEMA_PATH = "./get_data/get_data/template/mediated_schema.json"
 STOPWORDS_PATH = "./get_data/get_data/template/vietnamese-stopwords-dash.txt"
 SAMPLE_PATH = "./get_data/get_data/sample/"

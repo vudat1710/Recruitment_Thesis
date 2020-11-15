@@ -1,5 +1,5 @@
 import re, json
-from .constants import MAJOR_DICT_PATH, ADDRESS_DICT_PATH
+from .constants import MAJOR_DICT_PATH, ADDRESS_DICT_PATH, EXP_DICT_PATH, JOB_TYPE_DICT_PATH
 from .utils import get_norm_job_name
 from datetime import datetime
 
@@ -7,9 +7,11 @@ class PostNormalization:
     def __init__(self):
         self.major_dict = json.load(open(MAJOR_DICT_PATH, "r"))
         self.address_dict = json.load(open(ADDRESS_DICT_PATH, "r"))
+        self.exp_dict = json.load(open(EXP_DICT_PATH, "r"))
+        self.job_type_dict = json.load(open(JOB_TYPE_DICT_PATH, "r"))
 
     def normalize_post(self, post):
-        if post["valid_through"] == "":
+        if post["valid_through"] == "" or post["job_type"] == "":
             return None
         post['workplace'] = self.normalize_workplace(post["workplace"])
         post['majors'] = self.normalize_majors(post['majors'])
@@ -27,8 +29,22 @@ class PostNormalization:
         if "company_address" in post:
             post["company_address"] = self.normalize_long_text(post["company_address"])
         post["address"] = self.normalize_long_text(post["address"])
+        post["gender"] = self.normalize_gender(post["gender"])
+        post["job_type"] = self.normalize_job_type(post["job_type"])
 
         return post
+
+    def normalize_gender(self, gender):
+        if "Không" in gender or gender == "":
+            return "Không yêu cầu"
+        else:
+            return gender
+
+    def normalize_job_type(self, job_type):
+        return self.job_type_dict[job_type]
+
+    def normalize_experience(self, experience):
+        return self.exp_dict[experience]
 
     def normalize_date(self, date):
         try:

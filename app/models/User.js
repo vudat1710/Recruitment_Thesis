@@ -14,7 +14,7 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false
     },
     password: {
-      type: DataTypes.STRING(45),
+      type: DataTypes.TEXT,
       allowNull: false
     },
     experience: {

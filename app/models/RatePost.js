@@ -9,7 +9,7 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false,
       primaryKey: true
     },
-    rateId: {
+    rate: {
       type: DataTypes.INTEGER,
       allowNull: false
     },
