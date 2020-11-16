@@ -9,6 +9,9 @@ const formData = require("express-form-data");
 const postRouter = require("./routes/post.routes");
 const otherRouter = require("./routes/other.routes");
 const userRouter = require("./routes/user.routes");
+const majorRouter = require("./routes/major.routes");
+const workplaceRouter = require("./routes/workplace.routes");
+const companyRouter = require("./routes/company.routes");
 require('./configs/passport')(passport);
 
 const app = express();
@@ -38,6 +41,9 @@ db.sequelize.sync()
 app.use('/api/post', postRouter);
 app.use('/api/other', otherRouter);
 app.use('/api/user', userRouter);
+app.use('/api/major', majorRouter);
+app.use('/api/workplace', workplaceRouter);
+app.use('/api/company', companyRouter);
 
 app.use((req, res, next) => {
   next(createError(404));
