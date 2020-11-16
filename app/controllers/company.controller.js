@@ -6,7 +6,7 @@ const PostCompany = db.PostCompany;
 exports.addCompany = (req, res) => {
   const { name } = req.body;
 
-  Major.findOne({ where: { name: name } })
+  Company.findOne({ where: { name: name } })
     .then((m) => {
       if (m) {
         res.json({
