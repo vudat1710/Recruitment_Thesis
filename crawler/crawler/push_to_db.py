@@ -67,7 +67,9 @@ class DBPushing:
             extra_requirements = "'{}'".format(post["extra_requirements"])
             description = "'{}'".format(post["description"])
             job_benefits = "'{}'".format(post["job_benefits"])
-            salary = "'{}'".format(post["salary"])
+            salary_type = "'{}'".format(post["salary_type"])
+            min_value = "'{}'".format(int(post["min_value"] / 1000000))
+            max_value = "'{}'".format(int(post["max_value"] / 1000000))
             job_type = "'{}'".format(post["job_type"])
             valid_through = "'{}'".format(post["valid_through"])
             address = "'{}'".format(post["address"])
@@ -80,12 +82,17 @@ class DBPushing:
             contact_name = get_field_data(post, "contact_name")
             majors = post["majors"]
             workplaces = post["workplace"].split(",")
+
             query = "INSERT INTO `{}` \
-                (`title`, `extra_requirements`, `description`, `job_benefits`, `salary`, `job_type`, \
-                `valid_through`, `address`, `gender`, `experience`, `num_hiring`, `post_url`, `qualification`, `position`, `contact_name`) \
-                VALUES ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{})".format("Post", title, extra_requirements, description, job_benefits,
-                salary, job_type, valid_through, address, gender, experience, num_hiring, post_url, qualification, position, contact_name)
-            self.cursor.execute(query)
+                (`title`, `extra_requirements`, `description`, `job_benefits`, `salary_type`, `job_type`, \
+                `valid_through`, `address`, `gender`, `experience`, `num_hiring`, `post_url`, `qualification`, `position`, `contact_name`, `min_value`, `max_value` ) \
+                VALUES ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{}, {}, {})".format("Post", title, extra_requirements, description, job_benefits,
+                salary_type, job_type, valid_through, address, gender, experience, num_hiring, post_url, qualification, position, contact_name, min_value, max_value)
+            try:
+                self.cursor.execute(query)
+            except:
+                print(query)
+                pass
             self.connection.commit()
             self.cursor.execute("SELECT * FROM Post ORDER BY postId DESC LIMIT 1")
             last_inserted = self.cursor.fetchone()["postId"]
@@ -116,14 +123,19 @@ class DBPushing:
     def push_chunks(self):
         if len(self.wp_dict) == 0:
             dbp.insert_table("WorkPlace", dbp.workplaces)
+            self.wp_dict = self.get_all_data_from_table("WorkPlace", "name", "workPlaceId")
         if len(self.major_dict) == 0:
             dbp.insert_table("Major", dbp.majors)
+            self.major_dict = self.get_all_data_from_table("Major", "name", "majorId")
         duplicate_filtering = self.get_filtered_data()
         for i in range(len(self.merged_data) // CHUNK_SIZE + 1):
             posts_with_company = self.check_posts(self.merged_data[(CHUNK_SIZE*i):(CHUNK_SIZE*(i+1))], duplicate_filtering)
             print(len(posts_with_company))
             self.insert_to_db(posts_with_company)
-            duplicate_filtering.update(self.merged_data[(CHUNK_SIZE*i):(CHUNK_SIZE*(i+1))])
+            if not duplicate_filtering:
+                duplicate_filtering.update(self.merged_data[(CHUNK_SIZE*i):(CHUNK_SIZE*(i+1))])
+            else:
+                duplicate_filtering = self.get_filtered_data()
 
     def get_table_ids(self, item_list, table_name, id_field):
         query = "SELECT * FROM {} WHERE `name` IN (".format(table_name)
@@ -170,14 +182,14 @@ class DBPushing:
         
 
 if __name__ == "__main__":
-    posts = json.load(open('./crawler/data/topcv/post.json', 'r'))
-    companies = json.load(open('./crawler/data/topcv/company.json', 'r'))
+    # posts = json.load(open('./crawler/data/topcv/post.json', 'r'))
+    # companies = json.load(open('./crawler/data/topcv/company.json', 'r'))
     merged_data = []
-    post_normalization = PostNormalization()
-    for post in merge_data(posts, companies):
-        norm_post = post_normalization.normalize_post(post)
-        if norm_post:
-            merged_data.append(norm_post)
+    # post_normalization = PostNormalization()
+    merged = json.load(open('./crawler/data/topcv/norm_post.json', 'r'))
+    for post in merged:
+        if post:
+            merged_data.append(post)
     dbp = DBPushing(merged_data)
     dbp.push_chunks()
     dbp.connection.close()

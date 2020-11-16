@@ -1,6 +1,4 @@
-const { WorkPlacePost } = require("../models");
 const db = require("../models");
-const MajorPost = require("../models/MajorPost");
 const Post = db.Post;
 const WorkPlace = db.WorkPlace;
 const Company = db.Company;
@@ -8,43 +6,23 @@ const Major = db.Major;
 const Op = db.Sequelize.Op;
 const CommentPost = db.CommentPost;
 const RatePost = db.RatePost;
+const WorkPlacePost = db.WorkPlacePost;
+const WishList = db.WishList;
+const MajorPost = db.MajorPost;
+const PostCompany = db.PostCompany;
 
-exports.createPost = (req, res) => {
-  if (!req.body.title) {
-    res.status(400).send({
-      message: "Content can't be empty!",
-    });
-    return;
+function convertToObject(array, externalKey, externalValue, key) {
+  let res = [];
+  // console.log(array.length)
+  for (const item in array) {
+    let newItem = {};
+    newItem[key] = parseInt(array[item]);
+    newItem[externalKey] = externalValue;
+    res.push(newItem);
   }
 
-  const post = {
-    title: req.body.title,
-    description: req.body.description,
-    gender: req.body.gender,
-    extra_requirements: req.body.extra_requirements,
-    job_benefits: req.body.job_benefits,
-    salary: req.body.salary,
-    experience: req.body.experience,
-    job_type: req.body.job_type,
-    num_hiring: req.body.num_hiring,
-    valid_through: req.body.valid_through,
-    address: req.body.address,
-    post_url: req.body.post_url,
-    qualification: req.body.qualification,
-    position: req.body.position,
-    contact_name: req.body.contact_name,
-  };
-
-  Post.create(post)
-    .then((data) => {
-      res.send(data);
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: err.message || "Some errs occurred while creating a post.",
-      });
-    });
-};
+  return res;
+}
 
 exports.findPosts = (req, res) => {
   const type = req.body.type;
@@ -252,52 +230,360 @@ exports.rate = (req, res) => {
 exports.compare = (req, res) => {
   const { compareList, userId } = req.body;
 
-  const p = Post.findAll({
-    where: {
-      postId: compareList,
-    },
-    include: [
-      { model: Company, attributes: ["name"] },
-      { model: WorkPlace, attributes: ["name"] },
-      { model: Major, attributes: ["name"] },
-      { model: CommentPost },
-      { model: RatePost },
-    ],
-  });
+  if (compareList.length < 2) {
+    res.json({
+      success: false,
+      message: "Not enough post to compare",
+    });
+  } else {
+    const p = Post.findAll({
+      where: {
+        postId: compareList,
+      },
+      include: [
+        { model: Company, attributes: ["name"] },
+        { model: WorkPlace, attributes: ["name"] },
+        { model: Major, attributes: ["name"] },
+        { model: CommentPost },
+        { model: RatePost },
+      ],
+    });
 
-  const u = User.findOne({ where: { userId: userId } });
+    const u = User.findOne({ where: { userId: userId } });
 
-  Promise.all([p, u])
+    Promise.all([p, u])
+      .then((response) => {
+        let data = {};
+        const postId1 = response[0][0].postId;
+        const postId2 = response[0][1].postId;
+        const userWorkPlace = response[1].WorkPlaces.map((a) => a.name);
+        const wpPost1 = response[0][0].WorkPlaces.map(
+          (a) => a.name
+        ).filter((e) => userWorkPlace.includes(e));
+        const wpPost2 = response[0][1].WorkPlaces.map(
+          (a) => a.name
+        ).filter((e) => userWorkPlace.includes(e));
+        const userMajor = response[1].Majors.map((a) => a.name);
+        const majorPost1 = response[0][0].Majors.map(
+          (a) => a.name
+        ).filter((e) => userMajor.includes(e));
+        const majorPost2 = response[0][1].Majors.map(
+          (a) => a.name
+        ).filter((e) => userMajor.includes(e));
+        const genderPost1 =
+          response[0][0].gender === response[1].gender ||
+          response[0][0].gender === "Không yêu cầu";
+        const genderPost2 =
+          response[0][1].gender === response[1].gender ||
+          response[0][1].gender === "Không yêu cầu";
+        const expPost1 =
+          response[0][0].experience <= response[1].experience ||
+          response[0][0].experience === 99;
+        const expPost2 =
+          response[0][1].experience <= response[1].experience ||
+          response[0][1].experience === 99;
+        const qualPost1 = response[0][0].qualification
+          .split(",")
+          .map((a) => a.trim())
+          .includes(response[1].qualification);
+        const qualPost2 = response[0][1].qualification
+          .split(",")
+          .map((a) => a.trim())
+          .includes(response[1].qualification);
+        let salaryPost1, salaryPost2, minSalPost1, maxSalPost1;
+        const sal1 = response[0][0].salary_type;
+        const sal2 = response[0][1].salary_type;
+        if (sal1 === "Thoả thuận" || sal2 === "Thoả thuận") {
+          salaryPost1 = !(sal1 === "Thoả thuận");
+          salaryPost2 = !(sal2 === "Thoả thuận");
+        } else {
+          const minSal1 = response[0][0].min_value;
+          const maxSal1 = response[0][0].max_value;
+          const minSal2 = response[0][1].min_value;
+          const maxSal2 = response[0][1].max_value;
+          minSalPost1 = minSal1 > minSal2;
+          maxSalPost1 = maxSal1 > maxSal2;
+        }
+
+        data[postId1] = {
+          workplace: wpPost1,
+          major: majorPost1,
+          gender: genderPost1,
+          experience: expPost1,
+          qualification: qualPost1,
+          salary: {
+            deal: salaryPost1,
+            min: minSalPost1,
+            max: maxSalPost1,
+          },
+        };
+
+        data[postId2] = {
+          workplace: wpPost2,
+          major: majorPost2,
+          gender: genderPost2,
+          experience: expPost2,
+          qualification: qualPost2,
+          salary: {
+            deal: salaryPost2,
+            min: !minSalPost1,
+            max: !maxSalPost1,
+          },
+        };
+
+        res.json({
+          success: true,
+          data,
+        });
+      })
+
+      .catch((err) => {
+        res.status(500).send({
+          message: err.message || "Some errors occurred.",
+        });
+      });
+  }
+};
+
+exports.addPost = (req, res) => {
+  let conditions = { Companies: [{ PostCompany: { selfGranted: true } }] };
+
+  for (key in req.body) {
+    if (
+      key !== "name" &&
+      key !== "company_description" &&
+      key !== "company_address" &&
+      key !== "img_url" &&
+      key !== "majors" &&
+      key !== "workplaces"
+    ) {
+      conditions[key] = req.body[key];
+    } else {
+      if (key === "company_description") key = "description";
+      if (key === "company_address") key = "address";
+      conditions.Companies[0][key] = req.body[key];
+    }
+  }
+
+  Company.findOne({where: { name: req.body.name }}).then((company) => {
+    if (!company) {
+      Post.create(conditions, { include: [Company, WorkPlacePost, MajorPost] })
+      .then(function (x) {
+        const postId = x.postId;
+        const a = Major.findAll({
+          where: {
+            name: req.body.majors
+          },
+          attributes: ['majorId']
+        });
+        const b= WorkPlace.findAll({
+          where: {
+            name: req.body.workplaces
+          },
+          attributes: ['workPlaceId']
+        });
+
+        Promise.all([a, b]).then((response) => {
+          const c = WorkPlacePost.bulkCreate(
+            convertToObject(response[1].map(a => a.workPlaceId), "postId", postId, "workPlaceId")
+          );
+          const d = MajorPost.bulkCreate(
+            convertToObject(response[0].map(a => a.majorId), "postId", postId, "majorId")
+          );
+
+          Promise.all([c,d]).then((response) => {
+            res.json({
+              success: true,
+              message: "Add post successful"
+            });
+          }).catch((err) => {
+            res.status(500).send({
+              message: err.message || "Some errors occurred while creating post.",
+            });
+          });
+        }).catch((err) => {
+          res.status(500).send({
+            message: err.message || "Some errors occurred while creating post.",
+          });
+        });
+      }) 
+      .catch((err) => {
+        res.status(500).send({
+          message: err.message || "Some errors occurred while creating post.",
+        });
+      });
+    } else {
+      let otherConditions = {};
+      for (key in req.body) {
+        if (key !== "name" && key !== "company_description" && key !== "company_address" && key !== "img_url" && key !== "majors" && key !== "workplaces") {
+          otherConditions[key] = req.body[key];
+        }
+        Post.create(otherConditions).then(function(x) {
+          PostCompany.create({ postId: x.postId, companyId: company.companyId })
+        }).then((response) => {
+          res.json({
+            success: true,
+            message: "Add post successful"
+          });
+        })
+      }
+    }
+  })
+};
+
+exports.deletePost = (req, res) => {
+  const { postId } = req.body;
+  const a = MajorPost.destroy({ where: { postId: postId } });
+  const b = CommentPost.destroy({ where: { postId: postId } });
+  const c = RatePost.destroy({ where: { postId: postId } });
+  const d = WishList.destroy({ where: { postId: postId } });
+  const e = WorkPlacePost.destroy({ where: { postId: postId } });
+  const f = PostCompany.destroy({ where: { postId: postId } });
+  Promise.all([a, b, c, d, e, f])
     .then((response) => {
-      const userWorkPlace = response[1].WorkPlaces.map(a => a.name);
-      const wpPost1 = response[0][0].WorkPlaces.map(a => a.name).filter(
-        (e) => userWorkPlace.includes(e)
-      );
-      const wpPost2 = response[0][1].WorkPlaces.map(a => a.name).filter(
-        (e) => userWorkPlace.includes(e)
-      );
-      const userMajor = response[1].Majors.map(a => a.name);
-      const majorPost1 = response[0][0].Majors.map(a => a.name).filter(
-        (e) => userMajor.includes(e)
-      );
-      const majorPost2 = response[0][1].Majors.map(a => a.name).filter(
-        (e) => userMajor.includes(e)
-      );
-      const genderPost1 = (response[0][0].gender === response[1].gender || response[0][0].gender === "Không yêu cầu");
-      const genderPost2 = (response[0][1].gender === response[1].gender || response[0][1].gender === "Không yêu cầu");
-      const expPost1 = (response[0][0].experience <= response[1].experience || response[0][0].experience === 99);
-      const expPost2 = (response[0][1].experience <= response[1].experience || response[0][1].experience === 99);
+      Post.destroy({ where: { postId: postId } })
+        .then((data) => {
+          res.json({ success: true, message: "Post has been deleted" });
+        })
+        .catch((err) => {
+          res.status(500).send({
+            message: err.message || "Some errors occurred while deleting post.",
+          });
+        });
     })
     .catch((err) => {
       res.status(500).send({
-        message:
-          err.message || "Some errors occurred.",
+        message: err.message || "Some errors occurred while deleting post.",
       });
     });
 };
 
-exports.addPost = (req, res) => {};
+exports.updatePost = (req, res) => {
+  const { postId, majors, workplaces } = req.body;
 
-exports.deletePost = (req, res) => {};
+  Post.findOne({
+    where: { postId: postId },
+    include: [
+      { model: WorkPlace, attributes: ["workPlaceId"] },
+      { model: Major, attributes: ["majorId"] }
+    ],
+  }).then((post) => {
+    if (post) {
+      const majorIdsExist = post.Majors.map((a) => a.majorId);
+      const workPlaceIdsExist = post.WorkPlaces.map((a) => a.workPlaceId);
 
-exports.updatePost = (req, res) => {};
+      const updatePost = post.update({
+        experience: req.body.experience? req.body.experience : post.experience,
+        qualification: req.body.qualification ? req.body.qualification : post.qualification,
+        salary_type: req.body.salary_type? req.body.salary_type : post.salary_type,
+        job_type: req.body.job_type ? req.body.job_type : post.job_type,
+        gender: req.body.gender ? req.body.gender : post.gender,
+        title: req.body.title ? req.body.title : post.title,
+        min_value: req.body.min_value ? req.body.min_value : post.min_value,
+        max_value: req.body.max_value? req.body.max_value : post.max_value,
+        num_hiring: req.body.num_hiring? req.body.num_hiring : post.num_hiring,
+        valid_through: req.body.valid_through? req.body.valid_through : post.valid_through,
+        address: req.body.address? req.body.address : post.address,
+        extra_requirements: req.body.extra_requirements? req.body.extra_requirements : post.extra_requirements,
+        description: req.body.description? req.body.description : post.description,
+        job_benefits: req.body.job_benefits? req.body.job_benefits : post.job_benefits,
+        post_url: req.body.post_url? req.body.post_url : post.post_url,
+        position: req.body.position? req.body.position : post.position,
+        contact_name: req.body.contact_name? req.body.contact_name : post.contact_name
+      });
+
+      const majorIds = Major.findAll({
+        where: {
+          name: majors,
+        },
+        attributes: ["majorId"],
+      });
+
+      const workPlaceIds = WorkPlace.findAll({
+        where: {
+          name: workplaces,
+        },
+        attributes: ["workPlaceId"],
+      });
+
+      Promise.all([updatePost, majorIds, workPlaceIds]).then((response) => {
+        const newMajorIds = response[1].map((a) => a.majorId);
+        const newWorkPlaceIds = response[2].map((a) => a.workPlaceId);
+        const deleteMajorIds = majorIdsExist.filter(
+          (e) => !newMajorIds.includes(e)
+        );
+        const addMajorIds = newMajorIds.filter(
+          (e) => !majorIdsExist.includes(e)
+        );
+        const a = MajorPost.bulkCreate(
+          convertToObject(addMajorIds, "userId", post.postId, "majorId")
+        );
+
+        const b = MajorPost.destroy({
+          where: {
+            postId: post.postId,
+            majorId: deleteMajorIds,
+          },
+        });
+
+        const deleteWorkPlaceIds = workPlaceIdsExist.filter(
+          (e) => !newWorkPlaceIds.includes(e)
+        );
+        const addWorkPlaceIds = newWorkPlaceIds.filter(
+          (e) => !workPlaceIdsExist.includes(e)
+        );
+        const c = WorkPlacePost.bulkCreate(
+          convertToObject(addWorkPlaceIds, "userId", post.postId, "workPlaceId")
+        );
+
+        const d = WorkPlacePost.destroy({
+          where: {
+            postId: post.postId,
+            workPlaceId: deleteWorkPlaceIds,
+          },
+        });
+
+        Promise.all([a, b, c, d])
+          .then((response) => {
+            res.json({
+              success: true,
+            });
+          })
+          .catch((err) => {
+            res.status(500).send({
+              message:
+                err.message ||
+                "Some errors occurred while retrieving all posts.",
+            });
+          })
+          .catch((err) => {
+            res.status(500).send({
+              message:
+                err.message ||
+                "Some errors occurred while retrieving all posts.",
+            });
+          });
+      });
+    }
+  });
+};
+
+exports.deleteComment = (req, res) => {
+  const { postId, userId, content } = req.body;
+
+  CommentPost.destroy({
+    where: {
+      content: content,
+      postId: postId,
+      userId: userId,
+    },
+  })
+    .then((data) => {
+      res.json({ success: true, message: "Comment has been deleted" });
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: err.message || "Some errors occurred while deleting comment.",
+      });
+    });
+};

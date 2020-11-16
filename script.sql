@@ -1,3 +1,5 @@
+USE recruitment_test;
+
 CREATE TABLE `ActionType` (
   `actionTypeId` int NOT NULL AUTO_INCREMENT,
   `name` varchar(20) NOT NULL,
@@ -58,7 +60,7 @@ CREATE TABLE `MajorItem` (
   KEY `userIdMajor_idx` (`userId`),
   CONSTRAINT `majorIdMajor` FOREIGN KEY (`majorId`) REFERENCES `Major` (`majorId`),
   CONSTRAINT `userIdMajor` FOREIGN KEY (`userId`) REFERENCES `User` (`userId`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `MajorPost` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -79,7 +81,9 @@ CREATE TABLE `Post` (
   `extra_requirements` text NOT NULL,
   `description` text NOT NULL,
   `job_benefits` text NOT NULL,
-  `salary` varchar(30) NOT NULL,
+  `salary_type` varchar(30) NOT NULL,
+  `min_value` int DEFAULT NULL,
+  `max_value` int DEFAULT NULL,
   `experience` varchar(50) DEFAULT NULL,
   `job_type` varchar(30) NOT NULL,
   `num_hiring` int DEFAULT NULL,
@@ -106,7 +110,7 @@ CREATE TABLE `PostCompany` (
 
 CREATE TABLE `RatePost` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `rateId` int NOT NULL,
+  `rate` int NOT NULL,
   `postId` int NOT NULL,
   `userId` int NOT NULL,
   PRIMARY KEY (`id`),
@@ -120,7 +124,7 @@ CREATE TABLE `RatePost` (
 CREATE TABLE `User` (
   `userId` int NOT NULL AUTO_INCREMENT,
   `user_name` varchar(100) NOT NULL,
-  `password` varchar(45) NOT NULL,
+  `password` text NOT NULL,
   `experience` varchar(50) DEFAULT NULL,
   `qualification` varchar(70) DEFAULT NULL,
   `year_of_birth` int NOT NULL,
@@ -130,7 +134,7 @@ CREATE TABLE `User` (
   `is_lock` tinyint NOT NULL,
   PRIMARY KEY (`userId`),
   UNIQUE KEY `userId_UNIQUE` (`userId`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `WishList` (
   `WishList` int NOT NULL AUTO_INCREMENT,
@@ -170,4 +174,15 @@ CREATE TABLE `WorkPlaceUser` (
   KEY `userIdWP_idx` (`userId`),
   CONSTRAINT `userIdWP` FOREIGN KEY (`userId`) REFERENCES `User` (`userId`),
   CONSTRAINT `workPlaceIdUser` FOREIGN KEY (`workPlaceId`) REFERENCES `WorkPlace` (`workPlaceId`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+ALTER TABLE recruitment_test.Major AUTO_INCREMENT = 1;
+ALTER TABLE recruitment_test.WorkPlace AUTO_INCREMENT = 1;
+ALTER TABLE recruitment_test.User AUTO_INCREMENT = 1;
+ALTER TABLE recruitment_test.Post AUTO_INCREMENT = 1;
+ALTER TABLE recruitment_test.Company AUTO_INCREMENT = 1;
+ALTER TABLE recruitment_test.MajorItem AUTO_INCREMENT = 1;
+ALTER TABLE recruitment_test.MajorPost AUTO_INCREMENT = 1;
+ALTER TABLE recruitment_test.WorkPlaceUser AUTO_INCREMENT = 1;
+ALTER TABLE recruitment_test.WorkPlacePost AUTO_INCREMENT = 1;
+ALTER TABLE recruitment_test.PostCompany AUTO_INCREMENT = 1;

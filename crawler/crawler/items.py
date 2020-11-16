@@ -25,6 +25,7 @@ class TopCVItem(Item):
     majors = Field()
     company_url = Field()
     post_url = Field()
+    qualification = Field()
 
 class CompanyItem(Item):
     name = Field()

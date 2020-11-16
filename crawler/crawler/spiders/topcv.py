@@ -87,35 +87,37 @@ class TopCVCrawler(CrawlSpider):
         item = TopCVItem()
         company_url = ""
         if "/brand/" in response.url:
-            title_list = response.xpath('//h2[@class="job-name text-premium"]/text()').extract()
-            title_extra = response.xpath('//h2[@class="job-name text-premium"]/a/text()').extract_first()
-            if title_extra:
-                item["title"] = title_list[0] + title_extra + ' '.join(title_list[1:])
-            else: item["title"] = ' '.join(title_list)
-            item["company_title"] = response.xpath('//div[@id="company-name"]/h1/text()').extract_first().strip()
-            try:
-                item["address"] = response.xpath('//span[@title="Địa chỉ làm việc"]/text()').extract_first().strip()
-            except:
-                pass
-            item["valid_through"] = response.xpath('//span[@title="Hạn ứng tuyển"]/text()').extract_first().strip()
-            item["salary"] = response.xpath('//span[@title="Mức lương"]/text()').extract_first().strip()
-            item["job_type"] = response.xpath('//span[@title="Hình thức làm việc"]/text()').extract_first().strip()
-            item["num_hiring"] = response.xpath('//span[@title="Số lượng cần tuyển"]/text()').extract_first().strip()
-            item["position"] = ""
-            item["experience"] = response.xpath('//span[@title="Yêu cầu kinh nghiệm"]/text()').extract_first().strip()
-            item["gender"] = response.xpath('//span[@title="Giới tính"]/text()').extract_first().strip()           
-            item["workplace"] = ""
-            item["img"] = response.xpath('//div[@id="company-logo"]/img/@src').extract_first()
-            content = response.xpath('//div[@class="job-data"]/div')
-            item["description"] = ' '.join([x for x in content[0].xpath('.//text()').extract() if x != "\n" and x != ""])
-            item["extra_requirements"] = ' '.join([x for x in content[1].xpath('.//text()').extract() if x != "\n" and x != ""])
-            item["job_benefits"] = ' '.join([x for x in content[2].xpath('.//text()').extract() if x != "\n" and x != ""])
-            item["majors"] = response.xpath('//div[@class="col-md-8 col-sm-12"]/div[4]/span/a/text()').extract()
-            company_url = response.xpath('//div[@id="nav"]/div/ul/li[2]/a/@href').extract_first()
-            item["company_url"] = company_url
-            item["post_url"] = response.url
+            # title_list = response.xpath('//h2[@class="job-name text-premium"]/text()').extract()
+            # title_extra = response.xpath('//h2[@class="job-name text-premium"]/a/text()').extract_first()
+            # if title_extra:
+            #     item["title"] = title_list[0] + title_extra + ' '.join(title_list[1:])
+            # else: item["title"] = ' '.join(title_list)
+            # item["company_title"] = response.xpath('//div[@id="company-name"]/h1/text()').extract_first().strip()
+            # try:
+            #     item["address"] = response.xpath('//span[@title="Địa chỉ làm việc"]/text()').extract_first().strip()
+            # except:
+            #     pass
+            # item["valid_through"] = response.xpath('//span[@title="Hạn ứng tuyển"]/text()').extract_first().strip()
+            # item["salary"] = response.xpath('//span[@title="Mức lương"]/text()').extract_first().strip()
+            # item["job_type"] = response.xpath('//span[@title="Hình thức làm việc"]/text()').extract_first().strip()
+            # item["num_hiring"] = response.xpath('//span[@title="Số lượng cần tuyển"]/text()').extract_first().strip()
+            # item["position"] = ""
+            # item["experience"] = response.xpath('//span[@title="Yêu cầu kinh nghiệm"]/text()').extract_first().strip()
+            # item["gender"] = response.xpath('//span[@title="Giới tính"]/text()').extract_first().strip()           
+            # item["workplace"] = ""
+            # item["img"] = response.xpath('//div[@id="company-logo"]/img/@src').extract_first()
+            # content = response.xpath('//div[@class="job-data"]/div')
+            # item["description"] = ' '.join([x for x in content[0].xpath('.//text()').extract() if x != "\n" and x != ""])
+            # item["extra_requirements"] = ' '.join([x for x in content[1].xpath('.//text()').extract() if x != "\n" and x != ""])
+            # item["job_benefits"] = ' '.join([x for x in content[2].xpath('.//text()').extract() if x != "\n" and x != ""])
+            # item["majors"] = response.xpath('//div[@class="col-md-8 col-sm-12"]/div[4]/span/a/text()').extract()
+            # company_url = response.xpath('//div[@id="nav"]/div/ul/li[2]/a/@href').extract_first()
+            # item["company_url"] = company_url
+            # item["post_url"] = response.url
+            # item["qualification"] = ""
 
-            yield item
+            # yield item
+            pass
         else:
             title_list = response.xpath('//h1[@class="job-title text-highlight bold text-uppercase"]/text()').extract()
             title_extra = response.xpath('//h1[@class="job-title text-highlight bold text-uppercase"]/a/text()').extract_first()
@@ -142,6 +144,7 @@ class TopCVCrawler(CrawlSpider):
             company_url = response.xpath('//div[@class="company-title"]/span/a/@href').extract_first()
             item["company_url"] = company_url.replace("www.", "")
             item["post_url"] = response.url.replace("www.", "")
+            item["qualification"] = ""
 
             yield item
 

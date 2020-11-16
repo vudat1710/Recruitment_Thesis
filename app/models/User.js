@@ -18,7 +18,7 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false
     },
     experience: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.INTEGER,
       allowNull: true
     },
     qualification: {

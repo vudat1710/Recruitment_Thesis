@@ -2,6 +2,7 @@ import re, json
 from .constants import MAJOR_DICT_PATH, ADDRESS_DICT_PATH, EXP_DICT_PATH, JOB_TYPE_DICT_PATH
 from .utils import get_norm_job_name
 from datetime import datetime
+from underthesea import word_tokenize
 
 class PostNormalization:
     def __init__(self):
@@ -9,16 +10,18 @@ class PostNormalization:
         self.address_dict = json.load(open(ADDRESS_DICT_PATH, "r"))
         self.exp_dict = json.load(open(EXP_DICT_PATH, "r"))
         self.job_type_dict = json.load(open(JOB_TYPE_DICT_PATH, "r"))
+        self.qualification_list = [x.lower() for x in ['Cao đẳng', 'Chứng chỉ', 'Đại học', 'Trung học', 'Trung cấp', 'Lao động phổ thông', 'Cao học']]
+        self.salary_type_list = [(1,3), (3,5), (5,7), (7,10), (10,12), (12,15), (15,20), (20,25), (25,30)]
 
     def normalize_post(self, post):
-        if post["valid_through"] == "" or post["job_type"] == "":
+        if post["valid_through"] == "" or post["job_type"] == "" or post["workplace"] == "":
             return None
         post['workplace'] = self.normalize_workplace(post["workplace"])
         post['majors'] = self.normalize_majors(post['majors'])
         post['title'] = re.sub(
             r"(\\(.+\\)|\\[.+\\]|{.+}|–.+|-.*|,.*|Thu Nhập.*|Khu Vực.*|Làm Việc Tại.*|Lương.*|\d{1,2}[ ]{0,1}-[ ]{0,1}\d{1,2}.*)",
             '', post['title']).strip()
-        post['salary'] = self.normalize_salary(post['salary'])
+        post["min_value"], post["max_value"], post['salary_type'] = self.normalize_salary(post['salary'])
         post['description'] = re.sub(r"(<br>)", "", post['description']) 
         post['valid_through'] = self.normalize_date(post['valid_through'])
         post['description'] = self.normalize_long_text(post['description'])
@@ -31,8 +34,24 @@ class PostNormalization:
         post["address"] = self.normalize_long_text(post["address"])
         post["gender"] = self.normalize_gender(post["gender"])
         post["job_type"] = self.normalize_job_type(post["job_type"])
+        post["experience"] = self.normalize_experience(post["experience"])
+        if post["qualification"] != "":
+            if post["qualification"] == "Trên đại học":
+                post["qualification"] = "Cao học"
+            elif post["qualification"] == "Tất cả trình độ":
+                post["qualification"] = "Không yêu cầu"
+            post["qualification"].lower()
+        else:
+            post["qualification"] = self.get_qualification(post["extra_requirements"])
 
         return post
+
+    def get_qualification(self, extra_requirements):
+        word_list = word_tokenize(extra_requirements.lower())
+        qualification = [x for x in word_list if x in self.qualification_list]
+        if len(qualification) == 0:
+            return "không yêu cầu"
+        else: return ", ".join(qualification)
 
     def normalize_gender(self, gender):
         if "Không" in gender or gender == "":
@@ -41,7 +60,9 @@ class PostNormalization:
             return gender
 
     def normalize_job_type(self, job_type):
-        return self.job_type_dict[job_type]
+        if job_type in self.job_type_dict:
+            return self.job_type_dict[job_type]
+        else: return job_type
 
     def normalize_experience(self, experience):
         return self.exp_dict[experience]
@@ -81,14 +102,29 @@ class PostNormalization:
             return ','.join(list(set(norm_workplace)))
 
     def normalize_salary(self, salary):
+        salary = salary.split("(")[0].strip()
         if re.match(r"^((\d{1,3}([\.,]\d{3})+))", str(salary)) is not None:
-            return re.sub(r'[.,]', '', str(salary))
+            salary = re.sub(r'[.,]', '', str(salary))
+            if "-" in salary:
+                salary = [int(x.strip()) for x in salary.split("-")]
         else:
             value_list = re.findall(r'\d+', salary)
             if len(value_list) > 0:
-                return "-".join([str(int(x) * 1000000) for x in value_list])
-        return salary
+                salary = [int(x) * 1000000 for x in value_list]
+        if salary in ["Thoả thuận", "Thỏa thuận"]:
+            return (0,0,"Thoả thuận")
+        elif len(salary) == 1:
+            return [salary[0], salary[0], self.get_salary_type(salary[0] / 1000000)]
+        else:
+            return [salary[0], salary[1], self.get_salary_type(salary[0] / 1000000)]
     
     def normalize_long_text(self, long_text):
         long_text = long_text.replace("\\\\\\'", "''")
         return long_text.replace("'", "''")
+
+    def get_salary_type(self, min_value):
+        if min_value < 30:
+            for pair in self.salary_type_list:
+                if pair[0] <= min_value <= pair[1]:
+                    return "{}-{} triệu".format(pair[0], pair[1])
+        return "Trên 30 triệu"

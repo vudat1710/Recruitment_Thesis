@@ -29,12 +29,20 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.TEXT,
       allowNull: false
     },
-    salary: {
+    salary_type: {
       type: DataTypes.STRING(30),
       allowNull: false
     },
+    min_value: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    max_value: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
     experience: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.INTEGER,
       allowNull: true
     },
     job_type: {

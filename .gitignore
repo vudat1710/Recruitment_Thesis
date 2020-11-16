@@ -18,6 +18,7 @@ bin-release/
 *__pycache__
 company.json
 post.json
+norm_post.json
 # *.txt
 # dependencies
 */node_modules
