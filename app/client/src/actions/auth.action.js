@@ -91,16 +91,14 @@ export const changePassword = (newData) => async (dispatch) => {
 
 // Log user out
 export const logoutUser = () => (dispatch) => {
-  axios.post("customer/logout").then((res) => {
-    // Remove token from localStorage
-    localStorage.removeItem("jwtToken");
-    localStorage.removeItem("userId");
-    localStorage.removeItem("ttl");
-    // Remove auth header for future requests
-    setAuthToken(false);
-    // Set current user to {} which will set isAuthenticated to false
-    dispatch(setCurrentUser({}));
-    //Remove user profile
-    dispatch(clearCurrentProfile());
-  });
+  // Remove token from localStorage
+  localStorage.removeItem("jwtToken");
+  localStorage.removeItem("userId");
+  localStorage.removeItem("userName");
+  // Remove auth header for future requests
+  setAuthToken(false);
+  // Set current user to {} which will set isAuthenticated to false
+  dispatch(setCurrentUser({}));
+  //Remove user profile
+  dispatch(clearCurrentProfile());
 };
