@@ -1,10 +1,12 @@
-import React, { Component } from "react";
+import React, { Component, useState } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { registerUser } from "../../actions/auth.action";
-import Logo from '../../assets/img/logo.png';
+import Logo from "../../assets/img/logo.png";
 import TextInputAuth from "../HOC/TextInputAuth";
+import { TextField } from "@material-ui/core";
+import "./extra.scss";
 
 class Register extends Component {
   static propTypes = {
@@ -16,11 +18,11 @@ class Register extends Component {
     super(props);
 
     this.state = {
-      fullname: "",
-      email: "",
+      user_name: "",
+      gender: "",
       password: "",
       password2: "",
-      province: "HANOI",
+      year_of_birth: "1998-10-17",
       errors: {},
     };
   }
@@ -42,19 +44,33 @@ class Register extends Component {
 
   onSubmit(e) {
     e.preventDefault();
-    const { fullname, email, password2, password } = this.state;
-    const newUser = {
-      fullname,
-      email,
+    const {
+      user_name,
+      gender,
+      year_of_birth,
       password2,
       password,
+    } = this.state;
+    const newUser = {
+      user_name,
+      gender,
+      password2,
+      password,
+      year_of_birth,
     };
 
     this.props.registerUser(newUser, this.props.history);
   }
 
   render() {
-    const { fullname, email, password2, password, errors } = this.state;
+    const {
+      user_name,
+      gender,
+      password2,
+      password,
+      errors,
+      year_of_birth,
+    } = this.state;
     return (
       <div className="login-page">
         <main>
@@ -69,15 +85,36 @@ class Register extends Component {
                     <i className="ti-user"></i>
                   </span>
                   <TextInputAuth
-                    id="fullname"
-                    name="fullname"
+                    id="user_name"
+                    name="user_name"
                     className="form-control form-control-lg fs-13 px-3 rounded"
-                    placeholder="Họ và tên"
-                    title="Họ và tên"
+                    placeholder="Tên đăng nhập"
+                    title="Tên đăng nhập"
                     type="text"
                     onChange={(e) => this.onChange(e)}
-                    value={fullname}
-                    error={errors.fullname}
+                    value={user_name}
+                    error={errors.user_name}
+                  />
+                </div>
+              </div>
+
+              <hr className="hr-xs" />
+
+              <div className="form-group">
+                <div className="input-group">
+                  <span className="input-group-addon">
+                    <i className="ti-gender"></i>
+                  </span>
+                  <TextInputAuth
+                    id="gender"
+                    name="gender"
+                    className="form-control form-control-lg fs-13 px-3 rounded"
+                    placeholder="Giới tính"
+                    title="Giới tính"
+                    type="text"
+                    onChange={(e) => this.onChange(e)}
+                    value={gender}
+                    error={errors.gender}
                   />
                 </div>
               </div>
@@ -89,16 +126,18 @@ class Register extends Component {
                   <span className="input-group-addon">
                     <i className="ti-email"></i>
                   </span>
-                  <TextInputAuth
-                    id="email"
-                    name="email"
-                    className="form-control form-control-lg fs-13 px-3 rounded"
-                    placeholder="Email"
-                    title="Email"
-                    type="text"
+                  <TextField
+                    id="date"
+                    type="date"
+                    name="year_of_birth"
+                    defaultValue="1998-10-17"
+                    label="Ngày sinh"
+                    className="aa"
+                    style = {{width: 250, fontSize: 200}}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
                     onChange={(e) => this.onChange(e)}
-                    value={email}
-                    error={errors.email}
                   />
                 </div>
               </div>

@@ -22,12 +22,12 @@ class Login extends Component {
     };
   }
 
-  UNSAFE_componentWillReceiveProps(nextPops) {
-    if (nextPops.auth.isAuthenticated) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
+    if (nextProps.auth.isAuthenticated) {
       this.props.history.push("/");
     }
-    if (nextPops.errors) {
-      this.setState({ errors: nextPops.errors });
+    if (nextProps.errors) {
+      this.setState({ errors: nextProps.errors });
     }
   }
 
@@ -41,7 +41,7 @@ class Login extends Component {
     e.preventDefault();
 
     const userData = {
-      email: this.state.email,
+      user_name: this.state.user_name,
       password: this.state.password,
     };
 
@@ -53,14 +53,14 @@ class Login extends Component {
   }
 
   render() {
-    const { email, password, errors } = this.state;
+    const { user_name, password, errors } = this.state;
     return (
       <div className="login-page">
         <main>
           <div className="login-block">
             <img src={Logo} alt="" />
             <h1>Đăng nhập</h1>
-
+            {errors.login && <div className="invalid-feedback" style={{color: "red"}}>{errors.login}</div>}
             <form 
                 id="loginForm"
                 noValidate
@@ -72,15 +72,15 @@ class Login extends Component {
                     <i className="ti-email"></i>
                   </span>
                   <TextInputAuth
-                      id="email"
-                      name="email"
+                      id="user_name"
+                      name="user_name"
                       className="form-control"
-                      placeholder="Nhập email"
-                      title="Nhập email"
+                      placeholder="Nhập tên đăng nhập"
+                      title="Nhập tên đăng nhập"
                       type="input"
                       onChange={e => this.onChange(e)}
-                      value={email}
-                      error={errors.email}
+                      value={user_name}
+                      error={errors.user_name}
                     />
                 </div>
               </div>
@@ -101,7 +101,7 @@ class Login extends Component {
                       type="password"
                       onChange={e => this.onChange(e)}
                       value={password}
-                      error={errors.login}
+                      error={errors.password}
                     />
                 </div>
               </div>

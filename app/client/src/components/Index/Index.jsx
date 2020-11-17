@@ -15,7 +15,8 @@ class Index extends Component {
   }
 
   async componentDidMount() {
-    await this.props.getPosts({ type: "home", limit: 5, attributes: ['postId', 'title', 'salary', 'valid_through'] });
+    await this.props.getPosts({ type: "home", limit: 5, attributes: ['postId', 'title', 'salary_type', 'valid_through'] });
+    console.log(this.props.posts.postData)
     this.setState({
       ...this.state,
       postsDisplay: this.props.posts.postData,
@@ -41,7 +42,7 @@ class Index extends Component {
                   </div>
                   <div className="header-meta">
                     <span className="location">{workplace}</span>
-                    <span className="label label-success">{post.salary}</span>
+                    <span className="label label-success">{post.salary_type}</span>
                   </div>
                 </header>
               </a>

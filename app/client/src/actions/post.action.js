@@ -24,7 +24,7 @@ export const getDataAutoComplete = () => async (dispatch) => {
       positions: res.data.positions,
       workplaces: res.data.workplaces,
       majors: res.data.majors,
-      salary: res.data.salary,
+      salary_types: res.data.salary_types,
       jobTypes: res.data.job_types,
       experience: res.data.experience,
       numPosts: res.data.num_posts,

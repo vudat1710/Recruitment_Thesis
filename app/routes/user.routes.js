@@ -9,5 +9,6 @@ router.post("/updateUser", passport.authenticate('jwt', { session: false }), use
 router.post("/lockAccount", users.lockAccount);
 router.post("/unlockAccount", users.unlockAccount);
 router.post("/changePassword", passport.authenticate('jwt', { session: false }), users.changePassword);
+router.post("/forgotPassword", users.forgotPassword);
 
 module.exports = router;

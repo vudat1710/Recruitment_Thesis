@@ -1,17 +1,21 @@
-import { SET_CURRENT_USER, FORGET_PASSWORD, CHANGE_PASSWORD } from '../actions/actionTypes';
+import {
+  SET_CURRENT_USER,
+  FORGET_PASSWORD,
+  CHANGE_PASSWORD,
+} from "../actions/actionTypes";
 
 const initialState = {
   isAuthenticated: false,
   user: {},
-  forgetSuccess: false,
+  forgotSuccess: false,
   changeSuccess: false,
 };
 
-const isEmpty = value =>
+const isEmpty = (value) =>
   value === undefined ||
   value === null ||
-  (typeof value === 'object' && Object.keys(value).length === 0) ||
-  (typeof value === 'string' && value.trim().length === 0);
+  (typeof value === "object" && Object.keys(value).length === 0) ||
+  (typeof value === "string" && value.trim().length === 0);
 
 export default (state = initialState, { type, payload }) => {
   switch (type) {
@@ -19,24 +23,26 @@ export default (state = initialState, { type, payload }) => {
       return {
         ...state,
         isAuthenticated: !isEmpty(payload),
-        user: payload
+        user: payload,
       };
     case FORGET_PASSWORD:
-      return {
-        ...state,
-        forgetSuccess: true
-      }
-    case CHANGE_PASSWORD:
-      if (payload === "success"){
+      if (payload === "success") {
         return {
           ...state,
-          changeSuccess: true
-        }
+          forgotSuccess: true,
+        };
+      }
+    case CHANGE_PASSWORD:
+      if (payload === "success") {
+        return {
+          ...state,
+          changeSuccess: true,
+        };
       } else if (payload === "failed") {
         return {
           ...state,
-          changeSuccess: false
-        }
+          changeSuccess: false,
+        };
       }
     default:
       return state;

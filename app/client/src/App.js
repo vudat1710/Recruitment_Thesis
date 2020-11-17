@@ -1,7 +1,7 @@
 import Index from "./components/Index/Index";
 import store from "./store";
 import { Provider } from "react-redux";
-import React from "react";
+import React, { Component } from "react";
 import { Route, BrowserRouter } from "react-router-dom";
 import setAuthToken from "./utils/setAuthTokens";
 import { setCurrentUser } from "./actions/auth.action";
@@ -33,6 +33,7 @@ import ForgotPassword from "./components/Auth/ForgotPassword";
 import Header from "./components/Layouts/Header";
 import Footer from "./components/Layouts/Footer";
 import AdvancedSearch from "./components/Search/AdvancedSearch";
+import ChangePassword from "./components/Auth/ChangePassword";
 import PrivateRoute from "./components/HOC/PrivateRoute";
 
 if (localStorage.jwtToken) {
@@ -43,22 +44,25 @@ if (localStorage.jwtToken) {
   const currentTime = Date.now() / 1000;
 }
 
-function App() {
-  return (
-    <div>
-      <Provider store={store}>
-        <BrowserRouter>
-          <Header />
-          <Route exact path="/" component={Index} />
-          <Route exact path="/login" component={Login} />
-          <Route exact path="/register" component={Register} />
-          <Route exact path="/forgotPassword" component={ForgotPassword} />
-          <Route exact path="/advancedSearch" component={AdvancedSearch} />
-        </BrowserRouter>
-        <Footer />
-      </Provider>
-    </div>
-  );
+class App extends Component {
+  render() {
+    return (
+      <div>
+        <Provider store={store}>
+          <BrowserRouter>
+            <Header />
+            <Route exact path="/" component={Index} />
+            <Route exact path="/login" component={Login} />
+            <Route exact path="/register" component={Register} />
+            <Route exact path="/forgotPassword" component={ForgotPassword} />
+            <Route exact path="/advancedSearch" component={AdvancedSearch} />
+            <PrivateRoute exact path="/changePassword" component={ChangePassword}/>
+          </BrowserRouter>
+          <Footer />
+        </Provider>
+      </div>
+    );
+  }
 }
 
 export default App;

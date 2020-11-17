@@ -28,7 +28,7 @@ exports.getDataAutoComplete = (req, res) => {
 
   const salary = Post.findAll({
     attributes: [
-      [db.Sequelize.fn("DISTINCT", db.Sequelize.col("salary")), "salary"],
+      [db.Sequelize.fn("DISTINCT", db.Sequelize.col("salary_type")), "salary_type"],
     ],
   });
 
@@ -41,7 +41,7 @@ exports.getDataAutoComplete = (req, res) => {
       returnData["positions"] = responses[0].map(a => a.position);
       returnData["job_types"] = responses[1].map(a => a.job_type);
       returnData["experience"] = responses[2].map(a => a.experience);
-      returnData["salary"] = responses[3].map(a => a.salary);
+      returnData["salary_types"] = responses[3].map(a => a.salary_type);
       returnData["majors"] = responses[4].map(a => a.name);
       returnData["workplaces"] = responses[5].map(a => a.name);
       returnData["num_posts"] = responses[6];

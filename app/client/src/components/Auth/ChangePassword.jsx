@@ -3,13 +3,13 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import TextInputAuth from "../HOC/TextInputAuth";
-import { forgotPassword } from "../../actions/auth.action";
+import { changePassword } from "../../actions/auth.action";
 import Logo from "../../assets/img/logo.png";
 import SweetAlert from "react-bootstrap-sweetalert";
 
-class ForgotPassword extends Component {
+class ChangePassword extends Component {
   static propTypes = {
-    forgotPassword: PropTypes.func.isRequired,
+    changePassword: PropTypes.func.isRequired,
     auth: PropTypes.object.isRequired,
     errors: PropTypes.object.isRequired,
   };
@@ -17,11 +17,11 @@ class ForgotPassword extends Component {
     super(props);
 
     this.state = {
-      user_name: "",
+      oldPassword: "",
       newPassword: "",
       newPassword2: "",
       errors: {},
-      forgotSuccess: false,
+      changeSuccess: false,
     };
   }
   componentWillReceiveProps(nextPops) {
@@ -33,18 +33,24 @@ class ForgotPassword extends Component {
   onConfirm() {
     this.setState({
       ...this.state,
-      forgotSuccess: false,
+      changeSuccess: false,
     });
   }
 
   async onSubmit(e) {
     e.preventDefault();
-    const { user_name, newPassword, newPassword2 } = this.state;
-    await this.props.forgotPassword({user_name: user_name, newPassword: newPassword, newPassword2: newPassword2});
+    const userId = localStorage.userId;
+    const { oldPassword, newPassword, newPassword2 } = this.state;
+    await this.props.changePassword({
+      oldPassword: oldPassword,
+      newPassword: newPassword,
+      newPassword2: newPassword2,
+      userId: userId,
+    });
 
     this.setState({
       ...this.state,
-      forgotSuccess: this.props.auth.forgotSuccess,
+      changeSuccess: this.props.auth.changeSuccess,
     });
   }
 
@@ -53,8 +59,13 @@ class ForgotPassword extends Component {
   }
 
   render() {
-    const { user_name, newPassword, newPassword2, errors } = this.state;
-    let alertSucc = !this.state.forgotSuccess ? (
+    const {
+      oldPassword,
+      newPassword,
+      newPassword2,
+      errors,
+    } = this.state;
+    let alertSucc = !this.state.changeSuccess ? (
       <></>
     ) : (
       <SweetAlert
@@ -65,12 +76,13 @@ class ForgotPassword extends Component {
         }}
       ></SweetAlert>
     );
+
     return (
       <div className="login-page">
         <main>
           <div className="login-block">
             <img src={Logo} alt="" />
-            <h1>Quên mật khẩu</h1>
+            <h1>Đổi mật khẩu</h1>
 
             <form id="forgotForm" noValidate onSubmit={(e) => this.onSubmit(e)}>
               <div className="form-group">
@@ -79,15 +91,15 @@ class ForgotPassword extends Component {
                     <i className="ti-unlock"></i>
                   </span>
                   <TextInputAuth
-                    id="user_name"
-                    name="user_name"
+                    id="oldPassword"
+                    name="oldPassword"
                     className="form-control form-control-lg fs-13 px-3 rounded"
-                    placeholder="Nhập username"
-                    title="Nhập username"
+                    placeholder="Nhập mật khẩu cũ"
+                    title="Nhập mật khẩu cũ"
                     type="password"
                     onChange={(e) => this.onChange(e)}
-                    value={user_name}
-                    error={errors.user_name}
+                    value={oldPassword}
+                    error={errors.oldPassword}
                   />
                 </div>
               </div>
@@ -135,14 +147,14 @@ class ForgotPassword extends Component {
               </div>
 
               <button className="btn btn-primary btn-block" type="submit">
-              Reset mật khẩu
+                Đổi mật khẩu
               </button>
             </form>
           </div>
 
           <div className="login-links">
             <p className="text-center">
-              <Link to="/login">Quay về trang đăng nhập</Link>
+              <Link to="/">Quay về trang chủ</Link>
             </p>
           </div>
         </main>
@@ -157,6 +169,6 @@ const mapStateToProps = (state) => ({
   errors: state.errors,
 });
 
-const mapDispatchToProps = { forgotPassword };
+const mapDispatchToProps = { changePassword };
 
-export default connect(mapStateToProps, mapDispatchToProps)(ForgotPassword);
+export default connect(mapStateToProps, mapDispatchToProps)(ChangePassword);

@@ -12,7 +12,7 @@ module.exports = passport => {
         secretOrKey: KEY
       },
       (jwtPayload, done) => {
-        User.findById(jwtPayload.userId)
+        User.findOne({where: {userId: jwtPayload.userId}})
           .then((user) => {
             if (user) {
               return done(null, user);

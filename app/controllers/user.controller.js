@@ -5,6 +5,8 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const validateRegisterInput = require("../validation/register");
 const validateLoginInput = require("../validation/login");
+const validateChangePassword = require("../validation/changePassword");
+const validateForgotPassword = require("../validation/forgotPassword");
 const User = db.User;
 const secretOrKey = "vudat1710";
 const WorkPlace = db.WorkPlace;
@@ -29,7 +31,10 @@ function convertToObject(array, externalKey, externalValue, key) {
 exports.register = (req, res, next) => {
   const { errors, isValid } = validateRegisterInput(req.body);
   if (!isValid) {
-    return res.status(400).json(errors);
+    return res.json({
+      status: 400,
+      errors,
+    });
   }
 
   User.findOne({ where: { user_name: req.body.user_name } }).then((user) => {
@@ -38,10 +43,12 @@ exports.register = (req, res, next) => {
       return res.status(400).json(errors);
     }
 
+    const genderDict = { nam: "Nam", nữ: "Nữ" };
+
     const newUser = {
       user_name: req.body.user_name,
       password: req.body.password,
-      gender: req.body.gender,
+      gender: genderDict[req.body.gender.toLowerCase()],
       year_of_birth: req.body.year_of_birth,
       is_lock: false,
     };
@@ -51,9 +58,10 @@ exports.register = (req, res, next) => {
         newUser.password = hash;
         User.create(newUser)
           .then((data) => {
-            res.json({ success: true });
+            res.json({ status: 200, success: true });
           }) // fix trả về user
           .catch((err) => {
+            console.log(err.message);
             res.status(500).send({
               message:
                 err.message ||
@@ -68,17 +76,17 @@ exports.register = (req, res, next) => {
 exports.login = (req, res, next) => {
   const { errors, isValid } = validateLoginInput(req.body);
   if (!isValid) {
-    return res.status(400).json(errors);
+    return res.json({ status: 400, errors: errors });
   }
   const { user_name, password } = req.body;
   User.findOne({ where: { user_name: user_name } }).then((user) => {
     if (!user) {
       errors.login = "Tài khoản hoặc mật khẩu không chính xác";
-      return res.status(404).json(errors);
+      return res.json({ status: 400, errors: errors });
     }
     bcrypt.compare(password, user.password, (err, matched) => {
       errors.login = "Tài khoản hoặc mật khẩu không chính xác";
-      if (!matched) return res.status(400).json(errors);
+      if (!matched) return res.json({ status: 400, errors: errors });
       // User matched
       const payload = {
         userId: user.userId,
@@ -89,6 +97,7 @@ exports.login = (req, res, next) => {
         res.json({
           success: true,
           token: `Bearer ${token}`,
+          payload,
         });
       });
     });
@@ -295,20 +304,85 @@ exports.unlockAccount = (req, res) => {
 };
 
 exports.changePassword = (req, res) => {
-  const { user_name, newPassword } = req.body;
+  const { errors, isValid } = validateChangePassword(req.body);
+  if (!isValid) {
+    console.log(errors);
+    return res.json({
+      status: 400,
+      errors,
+    });
+  }
+
+  const { newPassword, oldPassword, userId } = req.body;
+  let conditions = { where: { userId: userId } };
+  User.findOne(conditions).then((user) => {
+    bcrypt.compare(oldPassword, user.password, (err, matched) => {
+      if (matched) {
+        bcrypt.compare(newPassword, user.password, (err, matched) => {
+          if (matched) {
+            return res.json({
+              status: 400,
+              errors: {
+                newPassword:
+                  "Mật khẩu mới trùng với mật khẩu cũ, vui lòng nhập lại",
+              },
+            });
+          } else {
+            bcrypt.genSalt(10, (err, salt) => {
+              bcrypt.hash(newPassword, salt, (err3, hash) => {
+                if (err3) next(err3);
+                user
+                  .update({ password: hash })
+                  .then((data) => {
+                    res.json({ success: true });
+                  }) // fix trả về user
+                  .catch((err) => {
+                    res.status(500).send({
+                      message: err.message || "Some errors occurred.",
+                    });
+                  });
+              });
+            });
+          }
+        });
+      } else {
+        return res.json({
+          status: 400,
+          errors: {
+            oldPassword: "Mật khẩu cũ không trùng, vui lòng nhập lại",
+          },
+        });
+      }
+    });
+  });
+};
+
+exports.forgotPassword = (req, res) => {
+  const { errors, isValid } = validateForgotPassword(req.body);
+  if (!isValid) {
+    console.log(errors);
+    return res.json({
+      status: 400,
+      errors,
+    });
+  }
+
+  const { newPassword, user_name } = req.body;
   let conditions = { where: { user_name: user_name } };
   User.findOne(conditions).then((user) => {
-    bcrypt
-      .compare(password, user.password, (err, matched) => {
-        if (!matched) {
-          return res
-            .status(400)
-            .json({
-              errors: "Mật khẩu trùng với mật khẩu cũ, vui lòng nhập lại",
-            });
+    if (user) {
+      bcrypt.compare(newPassword, user.password, (err, matched) => {
+        if (matched) {
+          return res.json({
+            status: 400,
+            errors: {
+              newPassword:
+                "Mật khẩu mới trùng với mật khẩu cũ, vui lòng nhập lại",
+            },
+          });
         } else {
           bcrypt.genSalt(10, (err, salt) => {
-            bcrypt.hash(newUser.password, salt, (err3, hash) => {
+            bcrypt.hash(newPassword, salt, (err3, hash) => {
               if (err3) next(err3);
               user
                 .update({ password: hash })
@@ -317,19 +391,20 @@ exports.changePassword = (req, res) => {
                 }) // fix trả về user
                 .catch((err) => {
                   res.status(500).send({
-                    message:
-                      err.message ||
-                      "Some errors occurred while retrieving all posts.",
+                    message: err.message || "Some errors occurred.",
                   });
                 });
             });
           });
         }
-      })
-      .catch((err) => {
-        res.status(500).send({
-          message: err.message || "Tài khoản không tồn tại",
-        });
       });
+    } else {
+      return res.json({
+        status: 400,
+        errors: {
+          user_name: "Tài khoản không tồn tại"
+        }
+      });
+    }
   });
 };

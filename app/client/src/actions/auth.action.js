@@ -1,127 +1,106 @@
-import axios from 'axios';
-import setAuthToken from '../utils/setAuthTokens';
-import { GET_ERRORS, SET_CURRENT_USER, FORGET_PASSWORD, CHANGE_PASSWORD } from './actionTypes';
-import { clearCurrentProfile } from './user.action';
+import axios from "axios";
+import setAuthToken from "../utils/setAuthTokens";
+import {
+  GET_ERRORS,
+  SET_CURRENT_USER,
+  FORGET_PASSWORD,
+  CHANGE_PASSWORD,
+} from "./actionTypes";
+import { clearCurrentProfile } from "./user.action";
 
-export const registerUser = (userData, history) => dispatch => {
-  axios
-    .post('api/here', userData)
-    .then(res => {
-      if (res.data.status === 400){
-        dispatch({
-          type: GET_ERRORS,
-          payload: res.data,
-        });
-      }
-      else history.push('/login')
-    })
-    .catch(err => {
-      dispatch({
-        type: GET_ERRORS,
-        payload: err.data,
-      });
+export const registerUser = (userData, history) => async (dispatch) => {
+  const res = await axios.post(`api/user/register`, userData);
+  console.log(res);
+  if (res.data.status === 400) {
+    dispatch({
+      type: GET_ERRORS,
+      payload: res.data.errors,
     });
+  } else history.push("/login");
 };
 
-export const loginUser = userData => dispatch => {
-  axios
-    .post('api/here', userData)
-    .then(res => {
-      // save to LocalStorage
-      if (res.data.status !== 400) {
-        const token = res.data.id;
-        const user_id = res.data.userId;
+export const loginUser = (userData) => async (dispatch) => {
+  const res = await axios.post(`api/user/login`, userData);
+  if (res.data.status !== 400) {
+    console.log(res.data);
+    const token = res.data.token;
+    const userId = res.data.payload.userId;
+    const user_name = res.data.payload.user_name;
 
-        //set token to ls
-        localStorage.setItem('jwtToken', token);
-        localStorage.setItem('userId', user_id);
-        localStorage.setItem('ttl', res.data.ttl);
-        // set token to Auth header
-        setAuthToken(token);
-        //Set Current user
-        dispatch(setCurrentUser(token));
-      } else {
-        return dispatch({
-          type: GET_ERRORS,
-          payload: res.data,
-        });
-      }
-    })
-    .catch(err => {
-      return dispatch({
-        type: GET_ERRORS,
-        payload: err.data,
-      });
+    //set token to ls
+    localStorage.setItem("jwtToken", token);
+    localStorage.setItem("userId", userId);
+    localStorage.setItem("userName", user_name);
+    // set token to Auth header
+    setAuthToken(token);
+
+    //Set Current user
+    dispatch(setCurrentUser(token));
+  } else {
+    dispatch({
+      type: GET_ERRORS,
+      payload: res.data.errors,
     });
+  }
 };
 
-export const setCurrentUser = token => {
+export const setCurrentUser = (token) => {
   return {
     type: SET_CURRENT_USER,
     payload: token,
   };
 };
 
-export const forgetPassword = (email) => dispatch => {
-  axios.post(`customer/forgotPass`, {email: email})
-  .then(res => {
-    if (res.data.status === 400){
-      dispatch({
-        type: GET_ERRORS,
-        payload: res.data
-      })
-    } else{
-      dispatch({
-        type: GET_ERRORS,
-        payload: {}
-      })
-      dispatch({
-        type: FORGET_PASSWORD,
-        payload: 'success'
-      })
-    }
-  })
-}
-
-export const changePassword = (password1, password2, passwordOld) => async dispatch => {
-  const userId = localStorage.userId
-  const res = await axios.post(`customer/resetPass`, {userId: userId, pass1: password1, pass2: password2, passOld: passwordOld})
-  if (res.status === 204){
-    dispatch({
-      type: CHANGE_PASSWORD,
-      payload: 'success'
-    })
+export const forgotPassword = (newData) => async (dispatch) => {
+  const res = await axios.post(`api/user/forgotPassword`, newData);
+  if (res.data.status === 400) {
     dispatch({
       type: GET_ERRORS,
-      payload: {}
-    })
-  } else{
-    dispatch({
-      type: CHANGE_PASSWORD,
-      payload: 'failed'
-    })
+      payload: res.data.errors,
+    });
+  } else {
     dispatch({
       type: GET_ERRORS,
-      payload: res.data
-    }) 
+      payload: {},
+    });
+    dispatch({
+      type: FORGET_PASSWORD,
+      payload: "success",
+    });
   }
-  // })
-}
+};
+
+export const changePassword = (newData) => async (dispatch) => {
+  const res = await axios.post(`api/user/changePassword`, newData);
+  if (res.data.status === 400) {
+    dispatch({
+      type: GET_ERRORS,
+      payload: res.data.errors,
+    });
+  } else {
+    dispatch({
+      type: GET_ERRORS,
+      payload: {},
+    });
+    dispatch({
+      type: CHANGE_PASSWORD,
+      payload: "success",
+    });
+  }
+};
 
 // Log user out
-export const logoutUser = () => dispatch => {
-  axios
-  .post('customer/logout')
-  .then( res => {
-  // Remove token from localStorage
-  localStorage.removeItem('jwtToken');
-  localStorage.removeItem('userId')
-  localStorage.removeItem('ttl')
-  // Remove auth header for future requests
-  setAuthToken(false);
-  // Set current user to {} which will set isAuthenticated to false
-  dispatch(setCurrentUser({}));
-  //Remove user profile
-  dispatch(clearCurrentProfile());
-  })
+export const logoutUser = () => (dispatch) => {
+  axios.post("customer/logout").then((res) => {
+    // Remove token from localStorage
+    localStorage.removeItem("jwtToken");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("ttl");
+    // Remove auth header for future requests
+    setAuthToken(false);
+    // Set current user to {} which will set isAuthenticated to false
+    dispatch(setCurrentUser({}));
+    //Remove user profile
+    dispatch(clearCurrentProfile());
+  });
 };

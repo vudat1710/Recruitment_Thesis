@@ -8,7 +8,6 @@ import {
 } from "../../actions/post.action";
 import PropTypes from "prop-types";
 import AutoCompleteText from "../HOC/AutoCompleteText";
-// import "./AdvancedSearch.scss";
 import classnames from "classnames";
 
 class AdvancedSearch extends Component {
@@ -142,7 +141,7 @@ class AdvancedSearch extends Component {
                   <div className="form-group col-xs-12 col-sm-4">
                     <select class="form-control">
                       <option selected>Mức lương</option>
-                      {dataAuto.salary.map((s) => {
+                      {dataAuto.salary_types.map((s) => {
                         return <option value={s}>{s}</option>;
                       })}
                     </select>

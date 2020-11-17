@@ -8,6 +8,7 @@ module.exports = data => {
   data.user_name = !isEmpty(data.user_name) ? data.user_name : '';
   data.password = !isEmpty(data.password) ? data.password : '';
   data.password2 = !isEmpty(data.password2) ? data.password2 : '';
+  data.gender = !isEmpty(data.gender) ? data.gender : '';
 
   if (!Validator.isLength(data.user_name, { min: 2, max: 30 })) {
     errors.user_name = 'Tên phải chứa từ 2 đến 30 ký tự';
@@ -32,6 +33,18 @@ module.exports = data => {
   if (!Validator.equals(data.password, data.password2)) {
     errors.password2 = 'Mật khẩu chưa khớp';
   }
+
+  if (Validator.isEmpty(data.gender)) {
+    errors.gender = 'Giới tính không được bỏ trống';
+  }
+
+  if (!Validator.isEmpty(data.gender)) {
+    data.gender
+    if (!["nam", "nữ"].includes(data.gender.toLowerCase())) {
+      errors.gender = 'Giới tính không được khác nam hoặc nữ';
+    }
+  }
+
 
   return {
     errors,

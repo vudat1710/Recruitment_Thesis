@@ -8,11 +8,11 @@ module.exports = data => {
   data.password = !isEmpty(data.password) ? data.password : '';
 
   if (Validator.isEmpty(data.user_name)) {
-    errors.login = 'Vui lòng nhập tên tài khoản đã đăng ký';
+    errors.user_name = 'Vui lòng nhập tên tài khoản đã đăng ký';
   }
 
   if (Validator.isEmpty(data.password)) {
-    errors.login = 'Vui lòng nhập mật khẩu';
+    errors.password = 'Vui lòng nhập mật khẩu';
   }
   return {
     errors,

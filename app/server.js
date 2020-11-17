@@ -47,9 +47,9 @@ app.use('/api/workplace', workplaceRouter);
 app.use('/api/company', companyRouter);
 app.use('/api/stats', statsRouter);
 
-app.use((req, res, next) => {
-  next(createError(404));
-});
+// app.use((req, res, next) => {
+//   next(createError(404));
+// });
 
 // error handler
 app.use((err, req, res) => {

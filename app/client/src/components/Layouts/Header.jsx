@@ -3,6 +3,7 @@ import { Link, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import { logoutUser } from "../../actions/auth.action";
 import Logo from "../../assets/img/logo.png";
+import UserLogo from "../../assets/img/logo_user.png";
 import classnames from "classnames";
 
 const userLoginA = {
@@ -39,18 +40,15 @@ class Header extends Component {
       <div className="pull-right">
         <div className="dropdown user-account">
           <a className="dropdown-toggle" href="#" data-toggle="dropdown">
-            <img src="assets/img/logo-envato.png" alt="avatar" />
+            <img src={UserLogo} alt="avatar" />
           </a>
 
           <ul className="dropdown-menu dropdown-menu-right">
             <li>
-              <Link to="/login">Đăng nhập</Link>
+              <Link to="/">Cập nhật thông tin cá nhân</Link>
             </li>
             <li>
-              <Link to="/register">Đăng ký</Link>
-            </li>
-            <li>
-              <Link to="/forgotPassword">Quên mật khẩu</Link>
+              <Link to="/changePassword">Đổi mật khẩu</Link>
             </li>
             <li>
               <a onClick={(e) => this.onLogoutClick(e)}>Đăng xuất</a>

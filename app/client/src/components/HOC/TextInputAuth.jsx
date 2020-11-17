@@ -29,7 +29,7 @@ const TextInputAuth = ({
         onChange={onChange}
         disabled={disabled}
       />
-      {error && <div className="invalid-feedback">{error}</div>}
+      {error && <div className="invalid-feedback" style={{color: "red"}}>{error}</div>}
     </>
   );
 };
