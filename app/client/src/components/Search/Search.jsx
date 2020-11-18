@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Link, withRouter, Redirect } from "react-router-dom";
 import { connect } from "react-redux";
+import { getSearchData } from "../../utils/utils";
 import Banner from "../../assets/img/banner.jpg";
 import {
   getDataAutoComplete,
@@ -9,6 +10,10 @@ import {
 import PropTypes from "prop-types";
 import AutoCompleteText from "../HOC/AutoCompleteText";
 import classnames from "classnames";
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 class Search extends Component {
   constructor(props) {
@@ -54,13 +59,17 @@ class Search extends Component {
     }
   };
 
-  async onSearchClick() {
+  async onSubmit(e) {
+    e.preventDefault();
     const { positionTypes, workplaces, majors } = this.state;
-    const searchData = {
-      positions: positionTypes,
-      workplaces: workplaces,
-      majors: majors,
+    let searchData = {
+      position: positionTypes === "" ? [] : positionTypes.split(",").map(a => a.trim()),
+      workplace: workplaces === "" ? [] : workplaces.split(",").map(a => a.trim()),
+      major: majors === "" ? [] : majors.split(",").map(a => a.trim()),
     };
+
+    searchData = getSearchData(searchData);
+    searchData.size = 20;
     await this.props.searchPosts(searchData);
     this.setState({
       ...this.state,
@@ -101,7 +110,7 @@ class Search extends Component {
               <br />
               <br />
               <br />
-              <form className="header-job-search">
+              <form className="header-job-search" onSubmit={e => this.onSubmit(e)}>
                 <div className="input-keyword">
                   <AutoCompleteText
                     name="positionTypes"
@@ -136,9 +145,6 @@ class Search extends Component {
                   <button
                     className="btn btn-primary"
                     type="submit"
-                    onClick={() => {
-                      this.onSearchClick();
-                    }}
                   >
                     Tìm kiếm
                   </button>

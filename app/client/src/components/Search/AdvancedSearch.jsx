@@ -1,14 +1,18 @@
 import React, { Component } from "react";
 import { Link, withRouter } from "react-router-dom";
+import { experienceDict, getSearchData } from "../../utils/utils";
 import { connect } from "react-redux";
 import Banner from "../../assets/img/banner_details.jpg";
-import {
-  getDataAutoComplete,
-  searchPosts,
-} from "../../actions/post.action";
+import { getDataAutoComplete, searchPosts } from "../../actions/post.action";
 import PropTypes from "prop-types";
 import AutoCompleteText from "../HOC/AutoCompleteText";
+import Pagination from "../Pagination/Pagination";
 import classnames from "classnames";
+
+function assign(obj, value) {
+  obj[value] = !obj[value];
+  return obj
+}
 
 class AdvancedSearch extends Component {
   constructor(props) {
@@ -20,19 +24,89 @@ class AdvancedSearch extends Component {
       positionTypes: "",
       workplaces: "",
       majors: "",
+      salaryType: "",
+      experience: [],
+      jobType: [],
       loading: false,
-      resultPosts: [],
+      resultPosts: {},
+      experienceSelect: {},
+      jobTypeSelect: {},
+      page: 1,
     };
   }
 
   async componentDidMount() {
     await this.props.getDataAutoComplete();
+    let experienceSelect = {};
+    let jobTypeSelect = {};
+    for (let i = 0; i < this.props.posts.autoComplete.experience.length; i++) {
+      experienceSelect[this.props.posts.autoComplete.experience[i]] = false;
+    }
+
+    for (let i = 0; i < this.props.posts.autoComplete.jobTypes.length; i++) {
+      jobTypeSelect[this.props.posts.autoComplete.jobTypes[i]] = false;
+    }
     this.setState({
       ...this.state,
       dataAuto: this.props.posts.autoComplete,
-      resultPosts: this.props.posts.postData,
+      resultPosts: this.props.posts.searchResults,
+      positionTypes: this.props.posts.searchParams.position.join(", "),
+      workplaces: this.props.posts.searchParams.workplace.join(", "),
+      majors: this.props.posts.searchParams.major.join(", "),
+      experience: this.props.posts.searchParams.experience,
+      jobType: this.props.posts.searchParams.job_type,
+      salaryType: this.props.posts.searchParams.salary_type,
+      experienceSelect: experienceSelect,
+      jobTypeSelect: jobTypeSelect,
       loading: true,
     });
+  }
+
+  onChange(e) {
+    e.preventDefault();
+    this.setState({
+      ...this.state,
+      [e.target.name]: e.target.value,
+    });
+    console.log(this.state);
+  }
+
+  onClick(name, value) {
+    this.setState((prevState) => ({
+      [name]: assign(prevState[name], value),
+    }));
+  }
+
+  getSearchDataAd() {
+    let {
+      positionTypes,
+      workplaces,
+      majors,
+      salaryType,
+      experienceSelect,
+      jobTypeSelect,
+    } = this.state;
+    if (salaryType === "Tất cả mức lương") {
+      salaryType = "";
+    }
+
+    let searchData = {
+      position:
+        positionTypes === ""
+          ? []
+          : positionTypes.split(",").map((a) => a.trim()),
+      workplace:
+        workplaces === "" ? [] : workplaces.split(",").map((a) => a.trim()),
+      major: majors === "" ? [] : majors.split(",").map((a) => a.trim()),
+      experience: Object.keys(experienceSelect).filter(key => experienceSelect[key] === true),
+      job_type: Object.keys(jobTypeSelect).filter(key => jobTypeSelect[key] === true),
+      salary_type: salaryType,
+    };
+
+    searchData = getSearchData(searchData);
+    searchData.size = 20;
+
+    return searchData;
   }
 
   getChildState = (data) => {
@@ -54,41 +128,83 @@ class AdvancedSearch extends Component {
     }
   };
 
-  async onSearchClick() {
-    const { positionTypes, workplaces, majors } = this.state;
-    const searchData = {
-      positions: positionTypes,
-      workplaces: workplaces,
-      majors: majors,
-    };
+  getChildStatePagination = (data) => {
+    this.setState({
+      ...this.state,
+      resultPosts: data.resultPosts,
+    });
+  };
+
+  async onSubmit(e) {
+    e.preventDefault();
+    let searchData = this.getSearchDataAd();
+    searchData.page = 1;
+
     await this.props.searchPosts(searchData);
     this.setState({
       ...this.state,
-      resultPosts: this.props.posts.postData,
+      resultPosts: this.props.posts.searchResults,
     });
   }
 
   render() {
-    const { numAllPosts, dataAuto, loading, resultPosts } = this.state;
-    let PostComp = resultPosts.map((post) => {
-      return (
-        <div className="col-xs-12">
-          <a className="item-block" href="job-detail.html">
-            <header>
-              <img src={post.img} alt="" />
-              <div className="hgroup">
-                <h4>{post.title}</h4>
-                <h5>{post.companyTitle}</h5>
-              </div>
-              <div className="header-meta">
-                <span className="location">{post.workplace}</span>
-                <span className="label label-success">{post.salary}</span>
-              </div>
-            </header>
-          </a>
-        </div>
+    const {
+      dataAuto,
+      loading,
+      resultPosts,
+      experienceSelect,
+      jobTypeSelect,
+    } = this.state;
+    let searchData = this.getSearchDataAd();
+    let PostComp = resultPosts.posts ? (
+      resultPosts.posts.map((post) => {
+        return (
+          <div className="col-xs-12">
+            <a className="item-block" href="job-detail.html">
+              <header>
+                <img src={post.Companies[0].img_url} alt="" />
+                <div className="hgroup">
+                  <h4>{post.title}</h4>
+                  <h5>{post.Companies[0].name}</h5>
+                </div>
+                <div className="header-meta">
+                  <span className="location">
+                    {post.WorkPlaces.map((a) => a.name).join(", ")}
+                  </span>
+                  <span className="label label-success">
+                    {post.salary_type}
+                  </span>
+                </div>
+              </header>
+            </a>
+          </div>
+        );
+      })
+    ) : (
+      <></>
+    );
+
+    let pagination =
+      resultPosts.totalItems && resultPosts.totalItems > 0 ? (
+        <Pagination
+          totalPages={resultPosts.totalPages}
+          currentPage={resultPosts.currentPage}
+          searchData={searchData}
+          getChildState={this.getChildStatePagination}
+        />
+      ) : (
+        <></>
       );
-    });
+
+    let extraComp = resultPosts.currentPage ? (
+      <h5>
+        Hệ thống đã tìm thấy <strong>{resultPosts.totalItems}</strong> kết quả,
+        bạn đang xem trang thứ <i>{resultPosts.currentPage}</i> trong tổng số{" "}
+        <i>{resultPosts.totalPages} trang</i>
+      </h5>
+    ) : (
+      <></>
+    );
     if (!loading) {
       return <></>;
     } else {
@@ -99,14 +215,15 @@ class AdvancedSearch extends Component {
             style={{ backgroundImage: `url(${Banner})` }}
           >
             <div className="container page-name">
-              <h1 className="text-center">Browse jobs</h1>
+              <h1 className="text-center">Tìm kiếm việc làm nâng cao</h1>
               <p className="lead text-center">
-                Use following search box to find jobs that fits you better
+                Lựa chọn các tiêu chí dưới đây để tìm ra việc làm phù hợp với
+                bản thân
               </p>
             </div>
 
             <div className="container">
-              <form action="#">
+              <form action="#" onSubmit={(e) => this.onSubmit(e)}>
                 <div className="row">
                   <div className="form-group col-xs-12 col-sm-4">
                     <AutoCompleteText
@@ -139,8 +256,12 @@ class AdvancedSearch extends Component {
                   </div>
 
                   <div className="form-group col-xs-12 col-sm-4">
-                    <select class="form-control">
-                      <option selected>Mức lương</option>
+                    <select
+                      class="form-control"
+                      name="salaryType"
+                      onClick={(e) => this.onChange(e)}
+                    >
+                      <option selected>Tất cả mức lương</option>
                       {dataAuto.salary_types.map((s) => {
                         return <option value={s}>{s}</option>;
                       })}
@@ -149,30 +270,47 @@ class AdvancedSearch extends Component {
 
                   <div className="form-group col-xs-12 col-sm-4">
                     <h6>Kinh nghiệm</h6>
-                    <div className="checkall-group">
-                      {dataAuto.experience.map((ex) => {
+                    {/* <div className="radio"> */}
+                      {Object.keys(this.state.experienceSelect).map((ex) => {
                         return (
                           <div className="checkbox">
-                            <input type="checkbox" id={ex} name="rate" />
-                            <label for={ex}>{ex}</label>
+                            <input
+                              type="checkbox"
+                              id={ex}
+                              checked={experienceSelect[ex]}
+                              name="experience"
+                              value={ex}
+                              onClick={() => this.onClick("experienceSelect", ex)}
+                            />
+                            <label for={ex}>{experienceDict[ex]}</label>
                           </div>
                         );
                       })}
-                    </div>
+                    {/* </div> */}
                   </div>
 
                   <div className="form-group col-xs-12 col-sm-4">
                     <h6>Hình thức làm việc</h6>
-                    <div className="checkall-group">
-                      {dataAuto.jobTypes.map((jT) => {
+                    {/* <div className="radio"> */}
+                      {Object.keys(this.state.jobTypeSelect).map((jT) => {
+                        // console.log(this.state.jobType.includes(jT));
                         return (
                           <div className="checkbox">
-                            <input type="checkbox" id={jT} name="degree" />
+                            <input
+                              type="checkbox"
+                              id={jT}
+                              checked={jobTypeSelect[jT]}
+                              value={jT}
+                              name="jobType"
+                              onClick={() =>
+                                this.onClick("jobTypeSelect", jT)
+                              }
+                            />
                             <label for={jT}>{jT}</label>
                           </div>
                         );
                       })}
-                    </div>
+                    {/* </div> */}
                   </div>
                 </div>
 
@@ -192,41 +330,13 @@ class AdvancedSearch extends Component {
                 <div className="row item-blocks-condensed">
                   <div className="col-xs-12">
                     <br />
-                    <h5>
-                      We found <strong>357</strong> matches, you're watching{" "}
-                      <i>10</i> to <i>20</i>
-                    </h5>
+                    {extraComp}
                   </div>
 
                   {PostComp}
                 </div>
 
-                <nav className="text-center">
-                  <ul className="pagination">
-                    <li>
-                      <a href="#" aria-label="Previous">
-                        <i className="ti-angle-left"></i>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#">1</a>
-                    </li>
-                    <li className="active">
-                      <a href="#">2</a>
-                    </li>
-                    <li>
-                      <a href="#">3</a>
-                    </li>
-                    <li>
-                      <a href="#">4</a>
-                    </li>
-                    <li>
-                      <a href="#" aria-label="Next">
-                        <i className="ti-angle-right"></i>
-                      </a>
-                    </li>
-                  </ul>
-                </nav>
+                <nav className="text-center">{pagination}</nav>
               </div>
             </section>
           </main>

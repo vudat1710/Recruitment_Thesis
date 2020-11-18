@@ -6,7 +6,16 @@ const initialState = {
     params: {},
     getType: "latest",
     autoComplete: null,
-    loading: false
+    loading: false,
+    searchParams: {
+        position: [],
+        workplace: [],
+        major: [],
+        salary_type: "",
+        job_type: [],
+        experience: []
+    },
+    searchResults: []
 };
 
 export default (state = initialState, {type, payload}) => {
@@ -28,7 +37,15 @@ export default (state = initialState, {type, payload}) => {
         case SEARCH_POSTS:
             return {
                 ...state,
-                postData: payload,
+                searchParams: {
+                    position: payload.searchParams.position ? payload.searchParams.position : [],
+                    workplace: payload.searchParams.workplace ? payload.searchParams.workplace : [],
+                    major: payload.searchParams.major ? payload.searchParams.major : [],
+                    job_type: payload.searchParams.job_type ? payload.searchParams.job_type : [],
+                    experience: payload.searchParams.experience ? payload.searchParams.experience : [],
+                    salary_type: payload.searchParams.salary_type ? payload.searchParams.salary_type : ""
+                },
+                searchResults: payload.data,
                 loading: false
             }
         default:

@@ -16,7 +16,6 @@ class Index extends Component {
 
   async componentDidMount() {
     await this.props.getPosts({ type: "home", limit: 5, attributes: ['postId', 'title', 'salary_type', 'valid_through'] });
-    console.log(this.props.posts.postData)
     this.setState({
       ...this.state,
       postsDisplay: this.props.posts.postData,

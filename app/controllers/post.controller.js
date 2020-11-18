@@ -181,16 +181,28 @@ exports.searchPosts = (req, res) => {
     conditions["include"].push({ model: Major, attributes: ["name"] });
   }
 
-  Post.findAndCountAll(conditions, { subQuery: false })
+  Post.findAll(conditions, { subQuery: false })
     .then((data) => {
-      const { count: totalItems, rows: posts } = data;
-      const currentPage = page ? page : 0;
-      const totalPages = Math.ceil(totalItems / size);
-
-      res.send({ totalItems, posts, currentPage, totalPages });
+      const posts = data;
+      conditions["distinct"] = true;
+      conditions["col"] = "postId";
+      Post.count(conditions, { subQuery: false })
+        .then((totalItems) => {
+          const currentPage = page ? page : 1;
+          const totalPages = Math.ceil(totalItems / size);
+          res.send({ totalItems, posts, currentPage, totalPages });
+        })
+        .catch((err) => {
+          return res.json({
+            status: 400,
+            message:
+              err.message || "Some errors occurred while retrieving all posts.",
+          });
+        });
     })
     .catch((err) => {
-      res.status(500).send({
+      res.json({
+        status: 400,
         message:
           err.message || "Some errors occurred while retrieving all posts.",
       });
@@ -365,70 +377,99 @@ exports.addPost = (req, res) => {
     }
   }
 
-  Company.findOne({where: { name: req.body.name }}).then((company) => {
+  Company.findOne({ where: { name: req.body.name } }).then((company) => {
     if (!company) {
       Post.create(conditions, { include: [Company, WorkPlacePost, MajorPost] })
-      .then(function (x) {
-        const postId = x.postId;
-        const a = Major.findAll({
-          where: {
-            name: req.body.majors
-          },
-          attributes: ['majorId']
-        });
-        const b= WorkPlace.findAll({
-          where: {
-            name: req.body.workplaces
-          },
-          attributes: ['workPlaceId']
-        });
-
-        Promise.all([a, b]).then((response) => {
-          const c = WorkPlacePost.bulkCreate(
-            convertToObject(response[1].map(a => a.workPlaceId), "postId", postId, "workPlaceId")
-          );
-          const d = MajorPost.bulkCreate(
-            convertToObject(response[0].map(a => a.majorId), "postId", postId, "majorId")
-          );
-
-          Promise.all([c,d]).then((response) => {
-            res.json({
-              success: true,
-              message: "Add post successful"
-            });
-          }).catch((err) => {
-            res.status(500).send({
-              message: err.message || "Some errors occurred while creating post.",
-            });
+        .then(function (x) {
+          const postId = x.postId;
+          const a = Major.findAll({
+            where: {
+              name: req.body.majors,
+            },
+            attributes: ["majorId"],
           });
-        }).catch((err) => {
+          const b = WorkPlace.findAll({
+            where: {
+              name: req.body.workplaces,
+            },
+            attributes: ["workPlaceId"],
+          });
+
+          Promise.all([a, b])
+            .then((response) => {
+              const c = WorkPlacePost.bulkCreate(
+                convertToObject(
+                  response[1].map((a) => a.workPlaceId),
+                  "postId",
+                  postId,
+                  "workPlaceId"
+                )
+              );
+              const d = MajorPost.bulkCreate(
+                convertToObject(
+                  response[0].map((a) => a.majorId),
+                  "postId",
+                  postId,
+                  "majorId"
+                )
+              );
+
+              Promise.all([c, d])
+                .then((response) => {
+                  res.json({
+                    success: true,
+                    message: "Add post successful",
+                  });
+                })
+                .catch((err) => {
+                  res.status(500).send({
+                    message:
+                      err.message ||
+                      "Some errors occurred while creating post.",
+                  });
+                });
+            })
+            .catch((err) => {
+              res.status(500).send({
+                message:
+                  err.message || "Some errors occurred while creating post.",
+              });
+            });
+        })
+        .catch((err) => {
           res.status(500).send({
             message: err.message || "Some errors occurred while creating post.",
           });
         });
-      }) 
-      .catch((err) => {
-        res.status(500).send({
-          message: err.message || "Some errors occurred while creating post.",
-        });
-      });
     } else {
       let otherConditions = {};
       for (key in req.body) {
-        if (key !== "name" && key !== "company_description" && key !== "company_address" && key !== "img_url" && key !== "majors" && key !== "workplaces") {
+        if (
+          key !== "name" &&
+          key !== "company_description" &&
+          key !== "company_address" &&
+          key !== "img_url" &&
+          key !== "majors" &&
+          key !== "workplaces"
+        ) {
           otherConditions[key] = req.body[key];
         }
-        Post.create(otherConditions).then(function(x) {
-          PostCompany.create({ postId: x.postId, companyId: company.companyId })
-        }).then((response) => {
-          res.json({
-            success: true,
-            message: "Add post successful"
+        Post.create(otherConditions)
+          .then(function (x) {
+            PostCompany.create({
+              postId: x.postId,
+              companyId: company.companyId,
+            });
+          })
+          .then((response) => {
+            res.json({
+              success: true,
+              message: "Add post successful",
+            });
           });
-        })
       }
     }
-  })
+  });
 };
 
 exports.deletePost = (req, res) => {
@@ -465,7 +506,7 @@ exports.updatePost = (req, res) => {
     where: { postId: postId },
     include: [
       { model: WorkPlace, attributes: ["workPlaceId"] },
-      { model: Major, attributes: ["majorId"] }
+      { model: Major, attributes: ["majorId"] },
     ],
   }).then((post) => {
     if (post) {
@@ -473,23 +514,37 @@ exports.updatePost = (req, res) => {
       const workPlaceIdsExist = post.WorkPlaces.map((a) => a.workPlaceId);
 
       const updatePost = post.update({
-        experience: req.body.experience? req.body.experience : post.experience,
-        qualification: req.body.qualification ? req.body.qualification : post.qualification,
-        salary_type: req.body.salary_type? req.body.salary_type : post.salary_type,
+        experience: req.body.experience ? req.body.experience : post.experience,
+        qualification: req.body.qualification
+          ? req.body.qualification
+          : post.qualification,
+        salary_type: req.body.salary_type
+          ? req.body.salary_type
+          : post.salary_type,
         job_type: req.body.job_type ? req.body.job_type : post.job_type,
         gender: req.body.gender ? req.body.gender : post.gender,
         title: req.body.title ? req.body.title : post.title,
         min_value: req.body.min_value ? req.body.min_value : post.min_value,
-        max_value: req.body.max_value? req.body.max_value : post.max_value,
-        num_hiring: req.body.num_hiring? req.body.num_hiring : post.num_hiring,
-        valid_through: req.body.valid_through? req.body.valid_through : post.valid_through,
-        address: req.body.address? req.body.address : post.address,
-        extra_requirements: req.body.extra_requirements? req.body.extra_requirements : post.extra_requirements,
-        description: req.body.description? req.body.description : post.description,
-        job_benefits: req.body.job_benefits? req.body.job_benefits : post.job_benefits,
-        post_url: req.body.post_url? req.body.post_url : post.post_url,
-        position: req.body.position? req.body.position : post.position,
-        contact_name: req.body.contact_name? req.body.contact_name : post.contact_name
+        max_value: req.body.max_value ? req.body.max_value : post.max_value,
+        num_hiring: req.body.num_hiring ? req.body.num_hiring : post.num_hiring,
+        valid_through: req.body.valid_through
+          ? req.body.valid_through
+          : post.valid_through,
+        address: req.body.address ? req.body.address : post.address,
+        extra_requirements: req.body.extra_requirements
+          ? req.body.extra_requirements
+          : post.extra_requirements,
+        description: req.body.description
+          ? req.body.description
+          : post.description,
+        job_benefits: req.body.job_benefits
+          ? req.body.job_benefits
+          : post.job_benefits,
+        post_url: req.body.post_url ? req.body.post_url : post.post_url,
+        position: req.body.position ? req.body.position : post.position,
+        contact_name: req.body.contact_name
+          ? req.body.contact_name
+          : post.contact_name,
       });
 
       const majorIds = Major.findAll({

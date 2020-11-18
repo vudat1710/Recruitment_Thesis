@@ -44,6 +44,7 @@ export default class AutoCompleteText extends React.Component {
       text: value,
     });
   };
+
   renderSuggestions() {
     const { suggestions } = this.state;
     if (suggestions.length === 0) {
@@ -58,6 +59,7 @@ export default class AutoCompleteText extends React.Component {
       </ul>
     );
   }
+
   suggestionSelected(value) {
     this.setState(() => ({
       text: value,
