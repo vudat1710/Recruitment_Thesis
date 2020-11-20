@@ -95,9 +95,9 @@ class MyWorkCrawler(CrawlSpider):
         item["workplace"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-map-marker")]]/span/div/text()').extract_first().strip()
         item["img"] = ""
         content = response.xpath('//div[@class="mw-box-item"]')
-        item["description"] = '\n'.join(content[0].xpath('.//text()').extract())
-        item["job_benefits"] = '\n'.join(content[1].xpath('.//text()').extract())
-        item["extra_requirements"] = '\n'.join(content[2].xpath('.//text()').extract())
+        item["description"] = '\n'.join([x.replace("\n", " ") for x in content[0].xpath('.//text()').extract() if x != "\n" and x != ""])
+        item["job_benefits"] = '\n'.join([x.replace("\n", " ") for x in content[1].xpath('.//text()').extract() if x != "\n" and x != ""])
+        item["extra_requirements"] = '\n'.join([x.replace("\n", " ") for x in content[2].xpath('.//text()').extract() if x != "\n" and x != ""])
         item["majors"] = [x.strip() for x in response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-hammer-wrench")]]/span//div/text()').extract_first().strip().split(',')]
         item["qualification"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-library2")]]/span/text()').extract_first().strip()
         company_url = BASE_URL + response.xpath('//*[@id="box_info_job_detail"]/div/div[1]/a/@href').extract_first()

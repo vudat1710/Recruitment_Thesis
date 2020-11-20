@@ -81,7 +81,8 @@ exports.getPostById = (req, res) => {
       res.send(data);
     })
     .catch((err) => {
-      res.status(500).send({
+      res.send({
+        status: 400,
         message: "Error retrieving Tutorial with id=" + id,
       });
     });
@@ -150,7 +151,7 @@ exports.searchPosts = (req, res) => {
     }
   }
   conditions["limit"] = parseInt(size);
-  conditions["offset"] = page || page === 0 ? size * (page - 1) : 0;
+  conditions["offset"] = page || page !== 0 ? size * (page - 1) : 0;
 
   conditions["include"] = [
     {

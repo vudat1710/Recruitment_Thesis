@@ -60,6 +60,21 @@ def load_stop_list(file_path):
 
     return result
 
+def normalize_long_text(text_list):
+    result = []
+    temp = []
+    for text in text_list:
+        if "\n" in text:
+            if len(temp) != 0:
+                result.append("".join(temp))
+                temp = []
+                temp.append(text.replace("\n", ""))
+            else:
+                temp.append(text.replace("\n", ""))
+        else:
+            temp.append(text)
+    return result
+
 
 def transform_response(json_response):
     result = {}

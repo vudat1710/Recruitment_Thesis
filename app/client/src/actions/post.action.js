@@ -1,4 +1,4 @@
-import { GET_POSTS, GET_DATA_AUTOCOMPLETE, SEARCH_POSTS } from "./actionTypes";
+import { GET_POSTS, GET_DATA_AUTOCOMPLETE, SEARCH_POSTS, GET_POST_BY_ID, GET_ERRORS } from "./actionTypes";
 import axios from "axios";
 
 export const getPosts = (params) => async (dispatch) => {
@@ -33,9 +33,25 @@ export const getDataAutoComplete = () => async (dispatch) => {
 };
 
 export const searchPosts = (searchParams) => async (dispatch) => {
-  const res = await axios.post(`api/post/searchPosts`, searchParams);
+  const res = await axios.post(`/api/post/searchPosts`, searchParams);
   dispatch({
     type: SEARCH_POSTS,
     payload: { searchParams: searchParams, data: res.data },
   });
 };
+
+export const getPostById = (postId) => async (dispatch) => {
+  const res = await axios.post(`/api/post/getPostById`, {postId});
+  console.log(res.data)
+  if (res.status !== 400) {
+    dispatch({
+      type: GET_POST_BY_ID,
+      payload: res.data,
+    });
+  } else {
+    dispatch({
+      type: GET_ERRORS,
+      payload: res.message,
+    });
+  }
+}

@@ -1,10 +1,11 @@
 import React, { Component } from "react";
-import { connect } from "react-redux";
+import { connect } from "react-redux"; 
 import PropTypes from "prop-types";
 import { getPosts } from "../../actions/post.action";
 import Search from "../Search/Search";
 import HowItWork from "../../assets/img/job-vacancy.jpg"
 import BGFact from "../../assets/img/bg-facts.jpg";
+import { getPostById } from "../../actions/post.action";
 
 class Index extends Component {
   constructor(props) {
@@ -32,9 +33,9 @@ class Index extends Component {
           let workplace = post.WorkPlaces.map(function(ele){ return ele.name;}).join(", ");
           return (
             <div className="col-xs-12">
-              <a className="item-block" href="job-detail.html">
+              <a className="item-block" href={`/post/${post.postId}`}>
                 <header>
-                  <img src={post.Companies[0].img_url} alt="" />
+                  <img src={post.Companies[0].img_url} alt=""/>
                   <div className="hgroup">
                     <h4>{post.title}</h4>
                     <h5>{post.Companies[0].name}</h5>
@@ -294,6 +295,7 @@ class Index extends Component {
 Index.propTypes = {
   posts: PropTypes.object.isRequired,
   getPosts: PropTypes.func.isRequired,
+  getPostById: PropTypes.func.isRequired
 };
 
 const mapStateToProps = (state) => ({
@@ -302,6 +304,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = {
   getPosts,
+  getPostById
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Index);

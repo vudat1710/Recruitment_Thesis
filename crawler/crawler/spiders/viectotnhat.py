@@ -3,6 +3,7 @@ from scrapy.spiders import CrawlSpider, Rule
 from scrapy.exceptions import CloseSpider
 from scrapy.linkextractors import LinkExtractor
 from ..items import VTNItem, VTNCompanyItem, VTNMajorItem
+from ..utils import normalize_long_text
 
 BASE_URL = "https://www.viectotnhat.com"
 START_LINKS_PATH = "./crawler/data/viectotnhat/viectotnhat_start_links.txt"
@@ -87,9 +88,9 @@ class VTNCrawler(CrawlSpider):
         item["gender"] = ''.join([x for x in response.xpath('//div[contains(@class, "list-thong-tin")]/div[1]/div/ul/li[descendant::span[contains(@class, "icon-gioi-tinh2")]]/text()').extract() if x.strip() != ""]).strip()
         item["workplace"] = ''.join([x for x in response.xpath('//div[contains(@class, "list-thong-tin")]/div[1]/div/ul/li[descendant::span[contains(@class, "icon-dia-diem")]]//text()').extract() if x.strip() != ""]).strip()[19:]
         item["img"] = response.xpath('//div[contains(@class, "img-ads")]/img/@src').extract_first().strip()
-        item["description"] = ''.join(response.xpath('//div[contains(@class, "mo-ta-cv")]//text()').extract()).strip()
-        item["job_benefits"] = ''.join(response.xpath('//div[contains(@class, "quyen-loi")]//text()').extract()).strip()
-        item["extra_requirements"] = ''.join(response.xpath('//div[contains(@class, "yeu-cau")]//text()').extract()).strip()
+        item["description"] = '\n'.join(normalize_long_text(response.xpath('//div[contains(@class, "mo-ta-cv")]//text()').extract())).strip()
+        item["job_benefits"] = '\n'.join(normalize_long_text(response.xpath('//div[contains(@class, "quyen-loi")]//text()').extract())).strip()
+        item["extra_requirements"] = '\n'.join(normalize_long_text(response.xpath('//div[contains(@class, "yeu-cau")]//text()').extract())).strip()
         majors = response.xpath('//div[contains(@class, "list-thong-tin")]/div[1]/div/ul/li[descendant::span[contains(@class, "icon-nganh-nghe")]]/a/text()').extract()
         # item["majors"] = [MAJOR_LINK.format(m[-7:-5]) for m in majors]
         item["majors"] = majors

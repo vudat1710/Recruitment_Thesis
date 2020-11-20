@@ -1,17 +1,17 @@
 import React, { Component } from "react";
-import { Link, withRouter } from "react-router-dom";
+// import { Link, withRouter } from "react-router-dom";
 import { experienceDict, getSearchData } from "../../utils/utils";
 import { connect } from "react-redux";
 import Banner from "../../assets/img/banner_details.jpg";
-import { getDataAutoComplete, searchPosts } from "../../actions/post.action";
+import { getDataAutoComplete, searchPosts, getPostById } from "../../actions/post.action";
 import PropTypes from "prop-types";
 import AutoCompleteText from "../HOC/AutoCompleteText";
 import Pagination from "../Pagination/Pagination";
-import classnames from "classnames";
+// import classnames from "classnames";
 
 function assign(obj, value) {
   obj[value] = !obj[value];
-  return obj
+  return obj;
 }
 
 class AdvancedSearch extends Component {
@@ -68,7 +68,6 @@ class AdvancedSearch extends Component {
       ...this.state,
       [e.target.name]: e.target.value,
     });
-    console.log(this.state);
   }
 
   onClick(name, value) {
@@ -98,8 +97,12 @@ class AdvancedSearch extends Component {
       workplace:
         workplaces === "" ? [] : workplaces.split(",").map((a) => a.trim()),
       major: majors === "" ? [] : majors.split(",").map((a) => a.trim()),
-      experience: Object.keys(experienceSelect).filter(key => experienceSelect[key] === true),
-      job_type: Object.keys(jobTypeSelect).filter(key => jobTypeSelect[key] === true),
+      experience: Object.keys(experienceSelect).filter(
+        (key) => experienceSelect[key] === true
+      ),
+      job_type: Object.keys(jobTypeSelect).filter(
+        (key) => jobTypeSelect[key] === true
+      ),
       salary_type: salaryType,
     };
 
@@ -160,7 +163,7 @@ class AdvancedSearch extends Component {
       resultPosts.posts.map((post) => {
         return (
           <div className="col-xs-12">
-            <a className="item-block" href="job-detail.html">
+            <a className="item-block" href={`/post/${post.postId}`}>
               <header>
                 <img src={post.Companies[0].img_url} alt="" />
                 <div className="hgroup">
@@ -208,6 +211,9 @@ class AdvancedSearch extends Component {
     if (!loading) {
       return <></>;
     } else {
+      const prevSearchData = this.props.location.prev
+        ? this.props.location.prev
+        : { positionTypes: "", workplaces: "", majors: "" };
       return (
         <>
           <header
@@ -229,7 +235,7 @@ class AdvancedSearch extends Component {
                     <AutoCompleteText
                       name="positionTypes"
                       items={dataAuto.positions}
-                      value=""
+                      value={prevSearchData.positionTypes}
                       getChildState={this.getChildState}
                       placeholder="Vị trí mong muốn ứng tuyển"
                     />
@@ -239,7 +245,7 @@ class AdvancedSearch extends Component {
                     <AutoCompleteText
                       name="workplaces"
                       items={dataAuto.workplaces}
-                      value=""
+                      value={prevSearchData.workplaces}
                       getChildState={this.getChildState}
                       placeholder="Địa điểm làm việc"
                     />
@@ -249,7 +255,7 @@ class AdvancedSearch extends Component {
                     <AutoCompleteText
                       name="majors"
                       items={dataAuto.majors}
-                      value=""
+                      value={prevSearchData.majors}
                       getChildState={this.getChildState}
                       placeholder="Ngành nghề mong muốn"
                     />
@@ -257,11 +263,11 @@ class AdvancedSearch extends Component {
 
                   <div className="form-group col-xs-12 col-sm-4">
                     <select
-                      class="form-control"
+                      className="form-control"
                       name="salaryType"
                       onClick={(e) => this.onChange(e)}
                     >
-                      <option selected>Tất cả mức lương</option>
+                      <option defaultValue>Tất cả mức lương</option>
                       {dataAuto.salary_types.map((s) => {
                         return <option value={s}>{s}</option>;
                       })}
@@ -271,45 +277,43 @@ class AdvancedSearch extends Component {
                   <div className="form-group col-xs-12 col-sm-4">
                     <h6>Kinh nghiệm</h6>
                     {/* <div className="radio"> */}
-                      {Object.keys(this.state.experienceSelect).map((ex) => {
-                        return (
-                          <div className="checkbox">
-                            <input
-                              type="checkbox"
-                              id={ex}
-                              checked={experienceSelect[ex]}
-                              name="experience"
-                              value={ex}
-                              onClick={() => this.onClick("experienceSelect", ex)}
-                            />
-                            <label for={ex}>{experienceDict[ex]}</label>
-                          </div>
-                        );
-                      })}
+                    {Object.keys(this.state.experienceSelect).map((ex) => {
+                      return (
+                        <div className="checkbox">
+                          <input
+                            type="checkbox"
+                            id={ex}
+                            checked={experienceSelect[ex]}
+                            name="experience"
+                            value={ex}
+                            onClick={() => this.onClick("experienceSelect", ex)}
+                          />
+                          <label htmlFor={ex}>{experienceDict[ex]}</label>
+                        </div>
+                      );
+                    })}
                     {/* </div> */}
                   </div>
 
                   <div className="form-group col-xs-12 col-sm-4">
                     <h6>Hình thức làm việc</h6>
                     {/* <div className="radio"> */}
-                      {Object.keys(this.state.jobTypeSelect).map((jT) => {
-                        // console.log(this.state.jobType.includes(jT));
-                        return (
-                          <div className="checkbox">
-                            <input
-                              type="checkbox"
-                              id={jT}
-                              checked={jobTypeSelect[jT]}
-                              value={jT}
-                              name="jobType"
-                              onClick={() =>
-                                this.onClick("jobTypeSelect", jT)
-                              }
-                            />
-                            <label for={jT}>{jT}</label>
-                          </div>
-                        );
-                      })}
+                    {Object.keys(this.state.jobTypeSelect).map((jT) => {
+                      // console.log(this.state.jobType.includes(jT));
+                      return (
+                        <div className="checkbox">
+                          <input
+                            type="checkbox"
+                            id={jT}
+                            checked={jobTypeSelect[jT]}
+                            value={jT}
+                            name="jobType"
+                            onClick={() => this.onClick("jobTypeSelect", jT)}
+                          />
+                          <label htmlFor={jT}>{jT}</label>
+                        </div>
+                      );
+                    })}
                     {/* </div> */}
                   </div>
                 </div>
@@ -350,10 +354,11 @@ AdvancedSearch.propTypes = {
   posts: PropTypes.object.isRequired,
   getDataAutoComplete: PropTypes.func.isRequired,
   searchPosts: PropTypes.func.isRequired,
+  getPostById: PropTypes.func.isRequired
 };
 
 const mapStateToProps = (state) => ({ posts: state.posts });
 
-const mapDispatchToProps = { getDataAutoComplete, searchPosts };
+const mapDispatchToProps = { getDataAutoComplete, searchPosts, getPostById };
 
 export default connect(mapStateToProps, mapDispatchToProps)(AdvancedSearch);

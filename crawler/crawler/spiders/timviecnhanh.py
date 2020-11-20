@@ -2,6 +2,7 @@ from scrapy import Request, FormRequest
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 from scrapy.exceptions import CloseSpider
+from ..utils import normalize_long_text
 from ..items import TVNItem, TVNCompanyItem, TVNMajorItem
 
 BASE_URL = "https://www.timviecnhanh.com/"
@@ -84,9 +85,9 @@ class TVNCrawler(CrawlSpider):
         item["gender"] = ''.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[2]/ul/li[2]/text()').extract() if x.strip() != ""]).strip()          
         item["workplace"] = ', '.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[1]/ul/li[4]/a/text()').extract() if x.strip() != ""]).strip()
         item["img"] = response.xpath('//div[@class="block-sidebar"]/div/div/div/img/@src').extract_first()
-        item["description"] = ''.join(response.xpath('//article[@class="block-content"]/table/tbody/tr[1]/td[2]/p//text()').extract())
-        item["job_benefits"] = ''.join(response.xpath('//article[@class="block-content"]/table/tbody/tr[3]/td[2]/p//text()').extract())
-        item["extra_requirements"] = ''.join(response.xpath('//article[@class="block-content"]/table/tbody/tr[2]/td[2]/p//text()').extract())
+        item["description"] = '\n'.join(normalize_long_text(response.xpath('//article[@class="block-content"]/table/tbody/tr[1]/td[2]/p//text()').extract())).strip()
+        item["job_benefits"] = '\n'.join(normalize_long_text(response.xpath('//article[@class="block-content"]/table/tbody/tr[3]/td[2]/p//text()').extract())).strip()
+        item["extra_requirements"] = '\n'.join(normalize_long_text(response.xpath('//article[@class="block-content"]/table/tbody/tr[2]/td[2]/p//text()').extract())).strip()
         item["majors"] = response.xpath('//article[@class="block-content"]/div[5]/div[1]/ul/li[5]/a/text()').extract()
         item["qualification"] = ''.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[1]/ul/li[3]/text()').extract() if x.strip() != ""]).strip()
         company_url = response.xpath('//article[@class="block-content"]/div[2]/h3/a/@href').extract_first()

@@ -11,7 +11,6 @@ import "./assets/css/custom.css";
 import "./assets/css/app.min.css";
 import "./assets/vendors/dropify/css/dropify.css";
 import "./assets/vendors/dropify/css/dropify.min.css";
-// import './assets/vendors/dropify/css/demo.css';
 import "./assets/vendors/themify-icons/css/themify-icons.css";
 import "./assets/vendors/font-awesome/css/font-awesome.css";
 import "./assets/vendors/font-awesome/css/font-awesome.min.css";
@@ -34,6 +33,7 @@ import Header from "./components/Layouts/Header";
 import Footer from "./components/Layouts/Footer";
 import AdvancedSearch from "./components/Search/AdvancedSearch";
 import ChangePassword from "./components/Auth/ChangePassword";
+import PostDetails from "./components/Post/Post";
 import PrivateRoute from "./components/HOC/PrivateRoute";
 
 if (localStorage.jwtToken) {
@@ -55,7 +55,8 @@ class App extends Component {
             <Route exact path="/login" component={Login} />
             <Route exact path="/register" component={Register} />
             <Route exact path="/forgotPassword" component={ForgotPassword} />
-            <Route exact path="/advancedSearch" component={AdvancedSearch} />
+            <Route exact path="/post/:id" component={PostDetails} />
+            <Route exact path="/advancedSearch" render={(props) => <AdvancedSearch {...props}/>} />
             <PrivateRoute exact path="/changePassword" component={ChangePassword}/>
           </BrowserRouter>
           <Footer />

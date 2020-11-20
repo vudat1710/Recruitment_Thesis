@@ -1,7 +1,9 @@
 const db = require("../models");
-const User = db.User;
+const WorkPlace = db.WorkPlace;
 const Post = db.Post;
 const WishList = db.WishList;
+const Company = db.Company;
+const Major = db.Major;
 const Op = db.Sequelize.Op;
 
 exports.addToWishList = (req, res) => {
@@ -14,13 +16,15 @@ exports.addToWishList = (req, res) => {
     },
   })
     .then((data) => {
-      if (!data) {
-        WishList.create({ userId: userId, postId: postId });
-        res.json({success: true, message: "Post added to wishlist"});
+      if (data.length === 0) {
+        WishList.create({ userId: userId, postId: postId }).then((x) => {
+          if (x) {
+            res.json({ success: true, message: "Post added to wishlist" });
+          }
+        });
       } else {
-        res.json({success: true, message: "Post already added to wishlist"});
+        res.json({ success: true, message: "Post already added to wishlist" });
       }
-      
     })
     .catch((err) => {
       res.status(500).send({
@@ -30,28 +34,87 @@ exports.addToWishList = (req, res) => {
     });
 };
 
-exports.removeFromWishList = (req, res) => {
-    const { postId, userId } = req.body;
-  
-    WishList.findAll({
-      where: {
-        postId: postId,
-        userId: userId,
-      },
+exports.getWishList = (req, res) => {
+  const { userId } = req.body;
+  const size = parseInt(req.body.size);
+  const page = req.body.page ? size * (parseInt(req.body.page) - 1) : 0;
+
+  WishList.findAll({
+    where: { userId: userId },
+    attributes: ["postId"],
+  })
+    .then((data) => {
+      if (data) {
+        const postIds = data.map((a) => a.postId);
+        console.log(data);
+        Post.findAll(
+          {
+            where: {
+              postId: postIds,
+            },
+            include: [
+              {
+                model: Company,
+                attributes: ["name", "description", "img_url", "companyId"],
+              },
+              { model: WorkPlace, attributes: ["name"] },
+              { model: Major, attributes: ["name"] },
+            ],
+            limit: size ? size : 20,
+            offset: page,
+          },
+          { subQuery: false }
+        )
+          .then((posts) => {
+            const totalItems = postIds.length;
+            const currentPage = page + 1;
+            const totalPages = Math.ceil(totalItems / size);
+            res.send({ totalItems, posts, currentPage, totalPages });
+          })
+          .catch((err) => {
+            return res.json({
+              status: 400,
+              message:
+                err.message ||
+                "Some errors occurred while retrieving all posts.",
+            });
+          });
+      } else {
+        res.send({ posts: [] });
+      }
     })
-      .then((data) => {
-        if (!data) {
-          WishList.destroy({ userId: userId, postId: postId });
-          res.json({success: true, message: "Post removed from wishlist"});
-        } else {
-          res.json({success: true, message: "Post is not in wishlist"});
-        }
-        
-      })
-      .catch((err) => {
-        res.status(500).send({
-          message:
-            err.message || "Some errors occurred while retrieving all posts.",
-        });
+    .catch((err) => {
+      return res.json({
+        status: 400,
+        message:
+          err.message || "Some errors occurred while retrieving all posts.",
       });
-  };
+    });
+};
+
+exports.removeFromWishList = (req, res) => {
+  const { postId, userId } = req.body;
+
+  WishList.findAll({
+    where: {
+      postId: postId,
+      userId: userId,
+    },
+  })
+    .then((data) => {
+      if (data.length !== 0) {
+        WishList.destroy({ userId: userId, postId: postId }).then(() => {
+          res.json({ success: true, message: "Post removed from wishlist" });
+        });
+      } else {
+        res.json({ success: true, message: "Post is not in wishlist" });
+      }
+    })
+    .catch((err) => {
+      res.send({
+        status: 400,
+        message:
+          err.message || "Some errors occurred while retrieving all posts.",
+      });
+    });
+};

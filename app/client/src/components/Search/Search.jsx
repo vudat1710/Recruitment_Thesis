@@ -9,11 +9,6 @@ import {
 } from "../../actions/post.action";
 import PropTypes from "prop-types";
 import AutoCompleteText from "../HOC/AutoCompleteText";
-import classnames from "classnames";
-
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 class Search extends Component {
   constructor(props) {
@@ -70,6 +65,7 @@ class Search extends Component {
 
     searchData = getSearchData(searchData);
     searchData.size = 20;
+    searchData.page = 1;
     await this.props.searchPosts(searchData);
     this.setState({
       ...this.state,
@@ -79,7 +75,7 @@ class Search extends Component {
 
   renderRedirect = () => {
     if (this.state.redirect) {
-      return <Redirect to="/advancedSearch" />;
+      return <Redirect to={{pathname: "/advancedSearch", prev: { positionTypes: this.state.positionTypes, workplaces: this.state.workplaces, majors: this.state.majors }}}/>;
     }
   };
 

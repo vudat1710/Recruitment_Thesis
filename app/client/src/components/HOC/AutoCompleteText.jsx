@@ -15,14 +15,17 @@ export default class AutoCompleteText extends React.Component {
   componentDidMount() {
     const name = this.props.name;
     const placeholder = this.props.placeholder;
+    const text = this.props.value;
     this.setState({
       ...this.state,
       name: name,
+      text: text,
       placeholder: placeholder,
     });
     this.props.getChildState({
       ...this.state,
       name,
+      text
     });
   }
 
