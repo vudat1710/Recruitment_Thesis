@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { searchPosts } from "../../actions/post.action";
+import { getPostByCompanyId } from "../../actions/company.action";
 
 function range(start, end) {
   return Array(end - start + 1)
@@ -18,12 +19,19 @@ class Pagination extends Component {
       currentPage: 1,
       searchData: {},
       resultPosts: {},
+      type: "search",
     };
   }
 
   async onClickPage(page, searchData) {
     searchData.page = page;
-    await this.props.searchPosts(searchData);
+    const { type } = this.state;
+
+    if (type === "search") {
+      await this.props.searchPosts(searchData);
+    } else if (type === "company") {
+      await this.props.getPostByCompanyId(searchData);
+    }
     this.setState({
       ...this.state,
       currentPage: page,
@@ -41,30 +49,32 @@ class Pagination extends Component {
       totalPages: this.props.totalPages,
       currentPage: this.props.currentPage,
       searchData: this.props.searchData,
+      type: this.props.type,
     });
   }
 
   render() {
     const { totalPages, currentPage, searchData } = this.state;
     let element = [];
+
     if (totalPages <= 5) {
-        new Array(totalPages).map((page) => {
-          if (page === currentPage) {
-            element.push(
-              <li className="active">
-                <a onClick={() => this.onClickPage(page, searchData)}>{page}</a>
-              </li>
-            );
-          } else {
-            element.push(
-              <li>
-                <a onClick={() => this.onClickPage(page, searchData)}>{page}</a>
-              </li>
-            );
-          }
-        });
+      const newArr = range(1,totalPages);
+      newArr.map((page) => {
+        if (page === currentPage) {
+          element.push(
+            <li className="active">
+              <a onClick={() => this.onClickPage(page, searchData)}>{page}</a>
+            </li>
+          );
+        } else {
+          element.push(
+            <li>
+              <a onClick={() => this.onClickPage(page, searchData)}>{page}</a>
+            </li>
+          );
+        }
+      });
     } else {
-        
       if (currentPage <= 5) {
         const newArr = range(1, 5);
         newArr.map((page) => {
@@ -86,7 +96,9 @@ class Pagination extends Component {
           <li>
             <a
               aria-label="Next"
-              onClick={() => {this.onClickPage(currentPage+1, searchData)}}
+              onClick={() => {
+                this.onClickPage(currentPage + 1, searchData);
+              }}
             >
               <i className="ti-angle-right"></i>
             </a>
@@ -144,10 +156,11 @@ class Pagination extends Component {
 Pagination.propTypes = {
   posts: PropTypes.object.isRequired,
   searchPosts: PropTypes.func.isRequired,
+  getPostByCompanyId: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({ posts: state.posts });
 
-const mapDispatchToProps = { searchPosts };
+const mapDispatchToProps = { searchPosts, getPostByCompanyId };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Pagination);

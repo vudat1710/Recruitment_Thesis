@@ -6,9 +6,8 @@ import {
 } from "./actionTypes";
 import axios from "axios";
 
-export const getWishList = () => async (dispatch) => {
-  const userId = localStorage.userId;
-  const res = await axios.post(`/api/other/getWishList`, userId);
+export const getWishList = (params) => async (dispatch) => {
+  const res = await axios.post(`/api/other/getWishList`, params);
   if (res.status !== 400) {
     dispatch({
       type: GET_WISHLIST,
@@ -38,7 +37,7 @@ export const addToWishList = (params) => async (dispatch) => {
 };
 
 export const removeFromWishList = (params) => async (dispatch) => {
-  const res = await axios.post(`api/other/removeFromWishList`, params);
+  const res = await axios.post(`/api/other/removeFromWishList`, params);
   if (res.status !== 400) {
     dispatch({
       type: REMOVE_FROM_WISHLIST,

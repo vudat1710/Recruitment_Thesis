@@ -45,7 +45,7 @@ class Header extends Component {
 
           <ul className="dropdown-menu dropdown-menu-right">
             <li>
-              <Link to="/">Cập nhật thông tin cá nhân</Link>
+              <Link to="/updateUser">Cập nhật thông tin cá nhân</Link>
             </li>
             <li>
               <Link to="/changePassword">Đổi mật khẩu</Link>
@@ -83,81 +83,23 @@ class Header extends Component {
               <Link className="active" to="/">
                 Trang chủ
               </Link>
-              <ul>
-                <li>
-                  <a className="active" href="index.html">
-                    Version 1
-                  </a>
-                </li>
-                <li>
-                  <a href="index-2.html">Version 2</a>
-                </li>
-              </ul>
             </li>
             <li>
-              <a href="#">Position</a>
-              <ul>
-                <li>
-                  <a href="job-list-1.html">Browse jobs - 1</a>
-                </li>
-                <li>
-                  <a href="job-list-2.html">Browse jobs - 2</a>
-                </li>
-                <li>
-                  <a href="job-list-3.html">Browse jobs - 3</a>
-                </li>
-                <li>
-                  <a href="job-detail.html">Job detail</a>
-                </li>
-                <li>
-                  <a href="job-apply.html">Apply for job</a>
-                </li>
-                <li>
-                  <a href="job-add.html">Post a job</a>
-                </li>
-                <li>
-                  <a href="job-manage.html">Manage jobs</a>
-                </li>
-                <li>
-                  <a href="job-candidates.html">Candidates</a>
-                </li>
-              </ul>
+              <Link className="active" to="/wishlist">
+                Danh sách yêu thích
+              </Link>
             </li>
             <li>
-              <a href="#">Resume</a>
-              <ul>
-                <li>
-                  <a href="resume-list.html">Browse resumes</a>
-                </li>
-                <li>
-                  <a href="resume-detail.html">Resume detail</a>
-                </li>
-                <li>
-                  <a href="resume-add.html">Create a resume</a>
-                </li>
-                <li>
-                  <a href="resume-manage.html">Manage resumes</a>
-                </li>
-              </ul>
+              <Link className="active" to="/updateUser">
+                Cài đặt gợi ý việc làm
+              </Link>
             </li>
             <li>
-              <a href="#">Company</a>
-              <ul>
-                <li>
-                  <a href="company-list.html">Browse companies</a>
-                </li>
-                <li>
-                  <a href="company-detail.html">Company detail</a>
-                </li>
-                <li>
-                  <a href="company-add.html">Create a company</a>
-                </li>
-                <li>
-                  <a href="company-manage.html">Manage companies</a>
-                </li>
-              </ul>
+              <Link className="active" to="/compare">
+                So sánh việc làm
+              </Link>
             </li>
-            <li>
+            {/* <li>
               <a href="#">Pages</a>
               <ul>
                 <li>
@@ -185,7 +127,7 @@ class Header extends Component {
                   <a href="page-ui-elements.html">UI elements</a>
                 </li>
               </ul>
-            </li>
+            </li> */}
           </ul>
         </div>
       </nav>

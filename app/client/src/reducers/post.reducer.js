@@ -3,6 +3,12 @@ import {
   GET_DATA_AUTOCOMPLETE,
   SEARCH_POSTS,
   GET_POST_BY_ID,
+  POST_COMMENT,
+  RATE_POST,
+  GET_RATE_BY_USER_ID_POST_ID,
+  GET_COMMENT_BY_POST_ID,
+  GET_POST_BY_COMPANY_ID,
+  DELETE_COMMENT,
 } from "../actions/actionTypes";
 
 const initialState = {
@@ -22,6 +28,11 @@ const initialState = {
   },
   searchResults: [],
   postDetails: {},
+  postCommentSuccess: false,
+  postRateSuccess: false,
+  rate: 0,
+  comments: [],
+  deleteCommentSuccess: false,
 };
 
 export default (state = initialState, { type, payload }) => {
@@ -64,11 +75,54 @@ export default (state = initialState, { type, payload }) => {
         searchResults: payload.data,
         loading: false,
       };
+    case GET_POST_BY_COMPANY_ID:
+      return {
+        ...state,
+        searchResults: payload,
+        loading: false
+      }
     case GET_POST_BY_ID:
       return {
         ...state,
         postDetails: payload,
       };
+    case POST_COMMENT:
+      let change = false;
+      if (payload === "success") {
+        change = true;
+      }
+      return {
+        ...state,
+        postCommentSuccess: change,
+      };
+    case RATE_POST:
+      let change2 = false;
+      if (payload === "success") {
+        change2 = true;
+      }
+      return {
+        ...state,
+        postRateSuccess: change2,
+      };
+    case GET_RATE_BY_USER_ID_POST_ID:
+      return {
+        ...state,
+        rate: payload,
+      };
+    case DELETE_COMMENT:
+      let change3 = false;
+      if (payload === "success") {
+        change3 = true;
+      }
+      return {
+        ...state,
+        deleteCommentSuccess: change3,
+      };
+    case GET_COMMENT_BY_POST_ID:
+      return {
+        ...state,
+        comments: payload
+      }
     default:
       return state;
   }

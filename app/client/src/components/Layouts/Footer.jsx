@@ -8,21 +8,17 @@ export default class Footer extends Component {
         <div className="container">
           <div className="row">
             <div className="col-sm-12 col-md-6">
-              <h6>About</h6>
+              <h6>Về trang web</h6>
               <p className="text-justify">
-                An employment website is a web site that deals specifically with
-                employment or careers. Many employment websites are designed to
-                allow employers to post job requirements for a position to be
-                filled and are commonly known as job boards. Other employment
-                sites offer employer reviews, career and job-search advice, and
-                describe different job descriptions or employers. Through a job
-                website a prospective employee can locate and fill out a job
-                application.
+                Ứng dụng giúp tìm kiếm công việc theo vị trí người tìm việc.
+                Điều đó giúp người dùng tìm được các công việc gần chỗ ở, tiện
+                đi lại, giảm bớt được nhiều chi phí và có thể check thông tin
+                bất cứ lúc nào!
               </p>
             </div>
 
             <div className="col-xs-6 col-md-3">
-              <h6>Company</h6>
+              <h6>Job Recruitment</h6>
               <ul className="footer-links">
                 <li>
                   <a href="page-about.html">About us</a>
@@ -43,7 +39,7 @@ export default class Footer extends Component {
             </div>
 
             <div className="col-xs-6 col-md-3">
-              <h6>Trendeing jobs</h6>
+              <h6>Các công việc gợi ý</h6>
               <ul className="footer-links">
                 <li>
                   <a href="job-list.html">Front-end developer</a>

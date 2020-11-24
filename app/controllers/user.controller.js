@@ -123,18 +123,26 @@ exports.findUserByUserName = (req, res) => {
 };
 
 exports.findUserById = (req, res) => {
-  const { userId, attributes } = req.body;
-  let conditions = { where: { userId: userId }, attributes: attributes };
+  const { userId } = req.body;
+  let conditions = { where: { userId: userId } };
   conditions["include"] = [
     { model: db.WorkPlace, attributes: ["name"] },
     { model: db.Major, attributes: ["name"] },
   ];
   User.findOne(conditions, { subQuery: false })
     .then((user) => {
-      res.send(user);
+      if (user.userId) {
+        res.send(user);
+      } else {
+        res.send({
+          status: 400,
+          message: err.message || "Tài khoản không tồn tại",
+        });
+      }
     })
     .catch((err) => {
-      res.status(500).send({
+      res.send({
+        status: 400,
         message: err.message || "Tài khoản không tồn tại",
       });
     });
@@ -233,14 +241,16 @@ exports.updateUser = (req, res) => {
             });
           })
           .catch((err) => {
-            res.status(500).send({
+            res.send({
+              status: 400,
               message:
                 err.message ||
                 "Some errors occurred while retrieving all posts.",
             });
           })
           .catch((err) => {
-            res.status(500).send({
+            res.send({
+              status: 400,
               message:
                 err.message ||
                 "Some errors occurred while retrieving all posts.",
@@ -402,8 +412,8 @@ exports.forgotPassword = (req, res) => {
       return res.json({
         status: 400,
         errors: {
-          user_name: "Tài khoản không tồn tại"
-        }
+          user_name: "Tài khoản không tồn tại",
+        },
       });
     }
   });

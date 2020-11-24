@@ -30,10 +30,13 @@ import Login from "./components/Auth/Login";
 import Register from "./components/Auth/Register";
 import ForgotPassword from "./components/Auth/ForgotPassword";
 import Header from "./components/Layouts/Header";
+import WishList from "./components/WishList/WishList";
+import CompanyDetails from "./components/Company/Company";
 import Footer from "./components/Layouts/Footer";
 import AdvancedSearch from "./components/Search/AdvancedSearch";
 import ChangePassword from "./components/Auth/ChangePassword";
 import PostDetails from "./components/Post/Post";
+import UpdateInfo from "./components/Profile/Profile";
 import PrivateRoute from "./components/HOC/PrivateRoute";
 
 if (localStorage.jwtToken) {
@@ -56,8 +59,11 @@ class App extends Component {
             <Route exact path="/register" component={Register} />
             <Route exact path="/forgotPassword" component={ForgotPassword} />
             <Route exact path="/post/:id" component={PostDetails} />
+            <Route exact path="/company/:id" component={CompanyDetails} />
+            <PrivateRoute exact path="/updateUser" component={UpdateInfo} />
             <Route exact path="/advancedSearch" render={(props) => <AdvancedSearch {...props}/>} />
             <PrivateRoute exact path="/changePassword" component={ChangePassword}/>
+            <PrivateRoute exact path="/wishlist" component={WishList}/>
           </BrowserRouter>
           <Footer />
         </Provider>

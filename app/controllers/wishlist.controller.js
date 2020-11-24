@@ -16,6 +16,7 @@ exports.addToWishList = (req, res) => {
     },
   })
     .then((data) => {
+      console.log(data);
       if (data.length === 0) {
         WishList.create({ userId: userId, postId: postId }).then((x) => {
           if (x) {
@@ -36,8 +37,6 @@ exports.addToWishList = (req, res) => {
 
 exports.getWishList = (req, res) => {
   const { userId } = req.body;
-  const size = parseInt(req.body.size);
-  const page = req.body.page ? size * (parseInt(req.body.page) - 1) : 0;
 
   WishList.findAll({
     where: { userId: userId },
@@ -46,7 +45,6 @@ exports.getWishList = (req, res) => {
     .then((data) => {
       if (data) {
         const postIds = data.map((a) => a.postId);
-        console.log(data);
         Post.findAll(
           {
             where: {
@@ -60,16 +58,11 @@ exports.getWishList = (req, res) => {
               { model: WorkPlace, attributes: ["name"] },
               { model: Major, attributes: ["name"] },
             ],
-            limit: size ? size : 20,
-            offset: page,
           },
           { subQuery: false }
         )
           .then((posts) => {
-            const totalItems = postIds.length;
-            const currentPage = page + 1;
-            const totalPages = Math.ceil(totalItems / size);
-            res.send({ totalItems, posts, currentPage, totalPages });
+            res.send({ posts});
           })
           .catch((err) => {
             return res.json({
@@ -103,9 +96,18 @@ exports.removeFromWishList = (req, res) => {
   })
     .then((data) => {
       if (data.length !== 0) {
-        WishList.destroy({ userId: userId, postId: postId }).then(() => {
-          res.json({ success: true, message: "Post removed from wishlist" });
-        });
+        WishList.destroy({ where:{ userId: userId, postId: postId }})
+          .then(() => {
+            res.json({ success: true, message: "Post removed from wishlist" });
+          })
+          .catch((err) => {
+            res.send({
+              status: 400,
+              message:
+                err.message ||
+                "Some errors occurred while retrieving all posts.",
+            });
+          });
       } else {
         res.json({ success: true, message: "Post is not in wishlist" });
       }

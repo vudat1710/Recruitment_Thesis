@@ -28,23 +28,57 @@ exports.getDataAutoComplete = (req, res) => {
 
   const salary = Post.findAll({
     attributes: [
-      [db.Sequelize.fn("DISTINCT", db.Sequelize.col("salary_type")), "salary_type"],
+      [
+        db.Sequelize.fn("DISTINCT", db.Sequelize.col("salary_type")),
+        "salary_type",
+      ],
     ],
   });
 
-  const majors = Major.findAll({attributes: ['name']});
-  const workplaces = WorkPlace.findAll({attributes: ['name']});
+  const majors = Major.findAll({ attributes: ["name"] });
+  const workplaces = WorkPlace.findAll({ attributes: ["name"] });
   const num_posts = Post.count();
 
-  Promise.all([positions, job_types, experience, salary, majors, workplaces, num_posts])
+  const qualifications = Post.findAll({
+    attributes: [
+      [
+        db.Sequelize.fn("DISTINCT", db.Sequelize.col("qualification")),
+        "qualification",
+      ],
+    ],
+  });
+
+  Promise.all([
+    positions,
+    job_types,
+    experience,
+    salary,
+    majors,
+    workplaces,
+    num_posts,
+    qualifications,
+  ])
     .then((responses) => {
-      returnData["positions"] = responses[0].map(a => a.position);
-      returnData["job_types"] = responses[1].map(a => a.job_type);
-      returnData["experience"] = responses[2].map(a => a.experience);
-      returnData["salary_types"] = responses[3].map(a => a.salary_type);
-      returnData["majors"] = responses[4].map(a => a.name);
-      returnData["workplaces"] = responses[5].map(a => a.name);
+      returnData["positions"] = responses[0].map((a) => a.position);
+      returnData["job_types"] = responses[1].map((a) => a.job_type);
+      returnData["experience"] = responses[2].map((a) => a.experience);
+      returnData["salary_types"] = responses[3].map((a) => a.salary_type);
+      returnData["majors"] = responses[4].map((a) => a.name);
+      returnData["workplaces"] = responses[5].map((a) => a.name);
       returnData["num_posts"] = responses[6];
+      let a = [];
+      responses[7] = responses[7].map(a => a.qualification);
+      for (let i = 0; i < responses[7].length; i++) {
+        const temp = responses[7][i].split(",");
+        for (let j = 0; j < temp.length; j++) {
+          const tempEle = temp[j].trim();
+          if (!a.includes(tempEle)) {
+            a.push(tempEle);
+          }
+        }
+      }
+
+      returnData["qualifications"] = a
       res.send(returnData);
     })
     .catch((err) => {

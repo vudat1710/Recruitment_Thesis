@@ -48,7 +48,8 @@ exports.getCompanyById = (req, res) => {
       res.send(m);
     })
     .catch((err) => {
-      res.status(500).send({
+      res.send({
+        status: 400,
         message: err.message || "Some errors occurred.",
       });
     });

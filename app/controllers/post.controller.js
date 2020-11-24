@@ -1,3 +1,4 @@
+const { User } = require("../models");
 const db = require("../models");
 const Post = db.Post;
 const WorkPlace = db.WorkPlace;
@@ -90,22 +91,43 @@ exports.getPostById = (req, res) => {
 
 exports.getPostByCompanyId = (req, res) => {
   const companyId = req.body.companyId;
-  Post.findAll({
-    where: {
-      postId: postId,
-    },
+  const size = parseInt(req.body.size);
+  const page = parseInt(req.body.page);
+
+  let conditions = {
     include: [
       { model: Company, where: { companyId: companyId } },
       { model: WorkPlace, attributes: ["name"] },
       { model: Major, attributes: ["name"] },
     ],
-  })
+    limit: size,
+    offset: page || page !== 0 ? size * (page - 1) : 0,
+  };
+
+  Post.findAll(conditions)
     .then((data) => {
-      res.send(data);
+      const posts = data;
+      conditions["distinct"] = true;
+      conditions["col"] = "postId";
+      Post.count(conditions, { subQuery: false })
+        .then((totalItems) => {
+          const currentPage = page ? page : 1;
+          const totalPages = Math.ceil(totalItems / size);
+          res.send({ totalItems, posts, currentPage, totalPages });
+        })
+        .catch((err) => {
+          return res.json({
+            status: 400,
+            message:
+              err.message || "Some errors occurred while retrieving all posts.",
+          });
+        });
     })
     .catch((err) => {
-      res.status(500).send({
-        message: "Error retrieving Tutorial with id=" + id,
+      res.json({
+        status: 400,
+        message:
+          err.message || "Some errors occurred while retrieving all posts.",
       });
     });
 };
@@ -118,7 +140,7 @@ exports.getPostByMajorName = (req, res) => {
         postId: postId,
       },
       include: [
-        { model: Company, attributes: ["name"] },
+        { model: Company, attributes: ["name", "companyId"] },
         { model: WorkPlace, attributes: ["name"] },
         { model: Major, attributes: ["name"], where: { name: major } },
       ],
@@ -228,14 +250,82 @@ exports.comment = (req, res) => {
 exports.rate = (req, res) => {
   const { rate, postId, userId } = req.body;
 
-  CommentPost.create({ rate: rate, postId: postId, userId: userId })
+  RatePost.findOne({
+    where: { userId: userId, postId: postId },
+  })
     .then((data) => {
-      res.json({ success: true, message: "Rate has been posted" });
+      if (!data.id) {
+        RatePost.create({ rate: rate, postId: postId, userId: userId })
+          .then((data) => {
+            res.json({ success: true, message: "Rate has been posted" });
+          })
+          .catch((err) => {
+            res.send({
+              status: 400,
+              message: err.message || "Some errors occurred.",
+            });
+          });
+      } else {
+        // console.log(data)
+        data
+          .update({ rate: rate, postId: postId, userId: parseInt(userId) })
+          .then((x) => {
+            console.log(x);
+            res.send({ success: true, message: "Rate has been updated" });
+          })
+          .catch((err) => {
+            res.send({
+              status: 400,
+              message: err.message || "Some errors occurred.",
+            });
+          });
+      }
     })
     .catch((err) => {
-      res.status(500).send({
-        message:
-          err.message || "Some errors occurred while retrieving all posts.",
+      res.send({
+        status: 400,
+        message: err.message || "Some errors occurred.",
+      });
+    });
+};
+
+exports.getCommentByPostId = (req, res) => {
+  const { postId } = req.body;
+
+  CommentPost.findAll({ where: { postId, postId }, include: [User] })
+    .then((comments) => {
+      if (comments.length !== 0) {
+        res.send(comments);
+      } else {
+        res.send({ comments: [] });
+      }
+    })
+    .catch((err) => {
+      res.send({
+        status: 400,
+        message: err.message || "Some errors occurred.",
+      });
+    });
+};
+
+exports.getRateByUserIdPostId = (req, res) => {
+  const { userId, postId } = req.body;
+
+  RatePost.findAll({
+    where: { userId: userId, postId: postId },
+  })
+    .then((data) => {
+      if (data.length === 0) {
+        res.send({ rate: 0 });
+      } else {
+        const rate = data[0].rate;
+        res.send({ rate: rate });
+      }
+    })
+    .catch((err) => {
+      res.send({
+        status: 400,
+        message: err.message || "Some errors occurred.",
       });
     });
 };
@@ -625,20 +715,19 @@ exports.updatePost = (req, res) => {
 };
 
 exports.deleteComment = (req, res) => {
-  const { postId, userId, content } = req.body;
+  const { id } = req.body;
 
   CommentPost.destroy({
     where: {
-      content: content,
-      postId: postId,
-      userId: userId,
+      id: id,
     },
   })
     .then((data) => {
       res.json({ success: true, message: "Comment has been deleted" });
     })
     .catch((err) => {
-      res.status(500).send({
+      res.send({
+        status: 400,
         message: err.message || "Some errors occurred while deleting comment.",
       });
     });

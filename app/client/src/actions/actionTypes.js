@@ -4,12 +4,19 @@ export const SET_CURRENT_USER = 'SET_CURRENT_USER';
 export const FORGET_PASSWORD = 'FORGET_PASSWORD';
 export const CHANGE_PASSWORD = 'CHANGE_PASSWORD';
 export const CLEAR_CURRENT_PROFILE = 'CLEAR_CURRENT_PROFILE';
+export const GET_USER_BY_USER_ID = 'GET_USER_BY_USER_ID';
+export const UPDATE_USER = 'UPDATE_USER';
 
 //Post actions
 export const GET_POSTS = 'GET_POSTS';
 export const GET_DATA_AUTOCOMPLETE = "GET_DATA_AUTOCOMPLETE";
 export const SEARCH_POSTS = 'SEARCH_POSTS';
 export const GET_POST_BY_ID = 'GET_POST_BY_ID';
+export const POST_COMMENT = 'POST_COMMENT';
+export const RATE_POST = 'RATE_POST';
+export const GET_RATE_BY_USER_ID_POST_ID = 'GET_RATE_BY_USER_ID_POST_ID';
+export const DELETE_COMMENT = 'DELETE_COMMENT';
+export const GET_COMMENT_BY_POST_ID = 'GET_COMMENT_BY_POST_ID';
 
 //Wishlist actions
 export const ADD_TO_WISHLIST = 'ADD_TO_WISHLIST';
