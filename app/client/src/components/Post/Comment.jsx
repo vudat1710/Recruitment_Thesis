@@ -190,7 +190,13 @@ class Comment extends Component {
       listComments = <></>;
     }
     if (comments === null) {
-      return <></>;
+      return (
+        <div className="spinner">
+          <span className="dot1"></span>
+          <span className="dot2"></span>
+          <span className="dot3"></span>
+        </div>
+      );
     }
 
     return (

@@ -10,7 +10,7 @@ import { clearCurrentProfile } from "./user.action";
 
 export const registerUser = (userData, history) => async (dispatch) => {
   const res = await axios.post(`api/user/register`, userData);
-  console.log(res);
+
   if (res.data.status === 400) {
     dispatch({
       type: GET_ERRORS,
@@ -22,7 +22,7 @@ export const registerUser = (userData, history) => async (dispatch) => {
 export const loginUser = (userData) => async (dispatch) => {
   const res = await axios.post(`api/user/login`, userData);
   if (res.data.status !== 400) {
-    console.log(res.data);
+
     const token = res.data.token;
     const userId = res.data.payload.userId;
     const user_name = res.data.payload.user_name;

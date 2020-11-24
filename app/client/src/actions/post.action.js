@@ -8,6 +8,7 @@ import {
   GET_RATE_BY_USER_ID_POST_ID,
   DELETE_COMMENT,
   GET_COMMENT_BY_POST_ID,
+  COMPARE,
   GET_ERRORS,
 } from "./actionTypes";
 import axios from "axios";
@@ -39,7 +40,7 @@ export const getDataAutoComplete = () => async (dispatch) => {
       jobTypes: res.data.job_types,
       experience: res.data.experience,
       numPosts: res.data.num_posts,
-      qualifications: res.data.quaxlifications,
+      qualifications: res.data.qualifications,
     },
   });
 };
@@ -133,6 +134,21 @@ export const getCommentByPostId = (postId) => async (dispatch) => {
     dispatch({
       type: GET_COMMENT_BY_POST_ID,
       payload: res.data,
+    });
+  } else {
+    dispatch({
+      type: GET_ERRORS,
+      payload: res.message,
+    });
+  }
+};
+
+export const compare = (params) => async (dispatch) => {
+  const res = await axios.post(`/api/post/compare`, params);
+  if (res.status !== 400) {
+    dispatch({
+      type: COMPARE,
+      payload: res.data.data,
     });
   } else {
     dispatch({

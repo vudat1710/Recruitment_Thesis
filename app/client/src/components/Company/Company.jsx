@@ -65,7 +65,13 @@ class CompanyDetails extends Component {
     };
 
     if (isLoading) {
-      return <></>;
+      return (
+        <div className="spinner">
+          <span className="dot1"></span>
+          <span className="dot2"></span>
+          <span className="dot3"></span>
+        </div>
+      );
     } else {
       // console.log(pagination)
       let compDesc;
@@ -97,7 +103,7 @@ class CompanyDetails extends Component {
             })}
           </div>
         );
-      } else if(companyDetails.description !== "" && compDesc === undefined) {
+      } else if (companyDetails.description !== "" && compDesc === undefined) {
         companyDescription = (
           <div className="container">
             <header className="section-header">

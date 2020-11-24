@@ -3,10 +3,7 @@ import { Link, withRouter, Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 import { getSearchData } from "../../utils/utils";
 import Banner from "../../assets/img/banner.jpg";
-import {
-  getDataAutoComplete,
-  searchPosts,
-} from "../../actions/post.action";
+import { getDataAutoComplete, searchPosts } from "../../actions/post.action";
 import PropTypes from "prop-types";
 import AutoCompleteText from "../HOC/AutoCompleteText";
 
@@ -58,9 +55,13 @@ class Search extends Component {
     e.preventDefault();
     const { positionTypes, workplaces, majors } = this.state;
     let searchData = {
-      position: positionTypes === "" ? [] : positionTypes.split(",").map(a => a.trim()),
-      workplace: workplaces === "" ? [] : workplaces.split(",").map(a => a.trim()),
-      major: majors === "" ? [] : majors.split(",").map(a => a.trim()),
+      position:
+        positionTypes === ""
+          ? []
+          : positionTypes.split(",").map((a) => a.trim()),
+      workplace:
+        workplaces === "" ? [] : workplaces.split(",").map((a) => a.trim()),
+      major: majors === "" ? [] : majors.split(",").map((a) => a.trim()),
     };
 
     searchData = getSearchData(searchData);
@@ -75,14 +76,31 @@ class Search extends Component {
 
   renderRedirect = () => {
     if (this.state.redirect) {
-      return <Redirect to={{pathname: "/advancedSearch", prev: { positionTypes: this.state.positionTypes, workplaces: this.state.workplaces, majors: this.state.majors }}}/>;
+      return (
+        <Redirect
+          to={{
+            pathname: "/advancedSearch",
+            prev: {
+              positionTypes: this.state.positionTypes,
+              workplaces: this.state.workplaces,
+              majors: this.state.majors,
+            },
+          }}
+        />
+      );
     }
   };
 
   render() {
     const { dataAuto, loading } = this.state;
     if (!loading) {
-      return <></>;
+      return (
+        <div className="spinner">
+          <span className="dot1"></span>
+          <span className="dot2"></span>
+          <span className="dot3"></span>
+        </div>
+      );
     } else {
       return (
         <header
@@ -97,8 +115,8 @@ class Search extends Component {
               <br />
               <br />
               <h2>
-                Hiện tại đang có <mark>{dataAuto.numPosts}</mark> công việc trên hệ
-                thống
+                Hiện tại đang có <mark>{dataAuto.numPosts}</mark> công việc trên
+                hệ thống
               </h2>
               <h5 className="font-alt">
                 Tìm công việc bạn mong muốn trên hệ thống
@@ -106,7 +124,10 @@ class Search extends Component {
               <br />
               <br />
               <br />
-              <form className="header-job-search" onSubmit={e => this.onSubmit(e)}>
+              <form
+                className="header-job-search"
+                onSubmit={(e) => this.onSubmit(e)}
+              >
                 <div className="input-keyword">
                   <AutoCompleteText
                     name="positionTypes"
@@ -138,10 +159,7 @@ class Search extends Component {
                 </div>
 
                 <div className="btn-search">
-                  <button
-                    className="btn btn-primary"
-                    type="submit"
-                  >
+                  <button className="btn btn-primary" type="submit">
                     Tìm kiếm
                   </button>
                   <Link to="/advancedSearch">Tìm kiếm nâng cao</Link>

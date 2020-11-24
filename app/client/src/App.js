@@ -37,6 +37,7 @@ import AdvancedSearch from "./components/Search/AdvancedSearch";
 import ChangePassword from "./components/Auth/ChangePassword";
 import PostDetails from "./components/Post/Post";
 import UpdateInfo from "./components/Profile/Profile";
+import Compare from "./components/Compare/Compare";
 import PrivateRoute from "./components/HOC/PrivateRoute";
 
 if (localStorage.jwtToken) {
@@ -61,6 +62,7 @@ class App extends Component {
             <Route exact path="/post/:id" component={PostDetails} />
             <Route exact path="/company/:id" component={CompanyDetails} />
             <PrivateRoute exact path="/updateUser" component={UpdateInfo} />
+            <PrivateRoute exact path="/compare" component={Compare} />
             <Route exact path="/advancedSearch" render={(props) => <AdvancedSearch {...props}/>} />
             <PrivateRoute exact path="/changePassword" component={ChangePassword}/>
             <PrivateRoute exact path="/wishlist" component={WishList}/>

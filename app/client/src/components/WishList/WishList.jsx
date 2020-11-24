@@ -39,7 +39,7 @@ class WishList extends Component {
   async onRemoveFromWishList(postId) {
     await this.props.removeFromWishList({
       userId: localStorage.userId,
-      postId: postId
+      postId: postId,
     });
     this.setState({
       ...this.state,
@@ -50,7 +50,13 @@ class WishList extends Component {
   render() {
     const { posts, loading } = this.state;
     if (!loading) {
-      return <></>;
+      return (
+        <div className="spinner">
+          <span className="dot1"></span>
+          <span className="dot2"></span>
+          <span className="dot3"></span>
+        </div>
+      );
     } else {
       const PostContent = posts.map((post) => {
         return (
@@ -80,7 +86,10 @@ class WishList extends Component {
                 </p>
 
                 <div className="action-btn">
-                  <a className="btn btn-xs btn-danger" onClick={() => this.onRemoveFromWishList(post.postId)}>
+                  <a
+                    className="btn btn-xs btn-danger"
+                    onClick={() => this.onRemoveFromWishList(post.postId)}
+                  >
                     Xóa
                   </a>
                 </div>

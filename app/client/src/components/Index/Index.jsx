@@ -1,11 +1,12 @@
 import React, { Component } from "react";
-import { connect } from "react-redux"; 
+import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import { getPosts } from "../../actions/post.action";
 import Search from "../Search/Search";
-import HowItWork from "../../assets/img/job-vacancy.jpg"
+import HowItWork from "../../assets/img/job-vacancy.jpg";
 import BGFact from "../../assets/img/bg-facts.jpg";
 import { getPostById } from "../../actions/post.action";
+import { Link, withRouter } from "react-router-dom";
 
 class Index extends Component {
   constructor(props) {
@@ -16,7 +17,11 @@ class Index extends Component {
   }
 
   async componentDidMount() {
-    await this.props.getPosts({ type: "home", limit: 5, attributes: ['postId', 'title', 'salary_type', 'valid_through'] });
+    await this.props.getPosts({
+      type: "home",
+      limit: 5,
+      attributes: ["postId", "title", "salary_type", "valid_through"],
+    });
     this.setState({
       ...this.state,
       postsDisplay: this.props.posts.postData,
@@ -27,22 +32,30 @@ class Index extends Component {
     const { postsDisplay } = this.state;
     let recentJobs =
       postsDisplay.length === 0 ? (
-        <></>
+        <div className="spinner">
+          <span className="dot1"></span>
+          <span className="dot2"></span>
+          <span className="dot3"></span>
+        </div>
       ) : (
         postsDisplay.map((post) => {
-          let workplace = post.WorkPlaces.map(function(ele){ return ele.name;}).join(", ");
+          let workplace = post.WorkPlaces.map(function (ele) {
+            return ele.name;
+          }).join(", ");
           return (
             <div className="col-xs-12">
               <a className="item-block" href={`/post/${post.postId}`}>
                 <header>
-                  <img src={post.Companies[0].img_url} alt=""/>
+                  <img src={post.Companies[0].img_url} alt="" />
                   <div className="hgroup">
                     <h4>{post.title}</h4>
                     <h5>{post.Companies[0].name}</h5>
                   </div>
                   <div className="header-meta">
                     <span className="location">{workplace}</span>
-                    <span className="label label-success">{post.salary_type}</span>
+                    <span className="label label-success">
+                      {post.salary_type}
+                    </span>
                   </div>
                 </header>
               </a>
@@ -60,7 +73,9 @@ class Index extends Component {
               <header className="section-header">
                 <span>Gần nhất</span>
                 <h2>Các công việc mới được cập nhật</h2>
-                <p>Dưới đây là 5 công việc được cập nhật gần nhất trên hệ thống</p>
+                <p>
+                  Dưới đây là 5 công việc được cập nhật gần nhất trên hệ thống
+                </p>
               </header>
 
               <div className="row item-blocks-condensed">{recentJobs}</div>
@@ -68,9 +83,9 @@ class Index extends Component {
               <br />
               <br />
               <p className="text-center">
-                <a className="btn btn-info" href="job-list.html">
-                  Browse all jobs
-                </a>
+                <Link to="/advancedSearch" className="btn btn-primary">
+                  Xem tất cả các công việc
+                </Link>
               </p>
             </div>
           </section>
@@ -295,7 +310,7 @@ class Index extends Component {
 Index.propTypes = {
   posts: PropTypes.object.isRequired,
   getPosts: PropTypes.func.isRequired,
-  getPostById: PropTypes.func.isRequired
+  getPostById: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -304,7 +319,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = {
   getPosts,
-  getPostById
+  getPostById,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Index);

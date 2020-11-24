@@ -352,20 +352,29 @@ exports.compare = (req, res) => {
       ],
     });
 
-    const u = User.findOne({ where: { userId: userId } });
+    const u = User.findOne({
+      where: { userId: userId },
+      include: [
+        { model: WorkPlace, attributes: ["name"] },
+        { model: Major, attributes: ["name"] },
+      ],
+    });
 
     Promise.all([p, u])
       .then((response) => {
         let data = {};
         const postId1 = response[0][0].postId;
         const postId2 = response[0][1].postId;
+
         const userWorkPlace = response[1].WorkPlaces.map((a) => a.name);
+
         const wpPost1 = response[0][0].WorkPlaces.map(
           (a) => a.name
         ).filter((e) => userWorkPlace.includes(e));
         const wpPost2 = response[0][1].WorkPlaces.map(
           (a) => a.name
         ).filter((e) => userWorkPlace.includes(e));
+
         const userMajor = response[1].Majors.map((a) => a.name);
         const majorPost1 = response[0][0].Majors.map(
           (a) => a.name
@@ -441,7 +450,8 @@ exports.compare = (req, res) => {
       })
 
       .catch((err) => {
-        res.status(500).send({
+        res.send({
+          status: 400,
           message: err.message || "Some errors occurred.",
         });
       });

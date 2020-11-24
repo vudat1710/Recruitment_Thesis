@@ -132,14 +132,20 @@ class UpdateInfo extends Component {
       ></SweetAlert>
     );
 
-    experience = experience ? experience : "1";
-    jobType = jobType ? jobType : "Toàn thời gian";
-    salary = salary ? salary : "Tất cả mức lương";
-    qualification = qualification ? qualification : "không yêu cầu";
-
     if (isLoading) {
-      return <></>;
+      return (
+        <div className="spinner">
+          <span className="dot1"></span>
+          <span className="dot2"></span>
+          <span className="dot3"></span>
+        </div>
+      );
     } else {
+      experience = experience ? experience : "1";
+      jobType = jobType ? jobType : "Toàn thời gian";
+      salary = salary ? salary : "Tất cả mức lương";
+      qualification = qualification ? qualification : "không yêu cầu";
+
       const age =
         parseInt(new Date().getFullYear()) -
         parseInt(this.state.yearOfBirth.split("-")[0]);

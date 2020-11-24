@@ -9,6 +9,7 @@ import {
   GET_COMMENT_BY_POST_ID,
   GET_POST_BY_COMPANY_ID,
   DELETE_COMMENT,
+  COMPARE,
 } from "../actions/actionTypes";
 
 const initialState = {
@@ -33,6 +34,7 @@ const initialState = {
   rate: 0,
   comments: [],
   deleteCommentSuccess: false,
+  compare: {}
 };
 
 export default (state = initialState, { type, payload }) => {
@@ -122,6 +124,11 @@ export default (state = initialState, { type, payload }) => {
       return {
         ...state,
         comments: payload
+      }
+    case COMPARE:
+      return {
+        ...state,
+        compare: payload
       }
     default:
       return state;

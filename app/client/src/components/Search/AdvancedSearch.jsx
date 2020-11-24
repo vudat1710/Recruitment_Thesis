@@ -1,9 +1,12 @@
 import React, { Component } from "react";
-// import { Link, withRouter } from "react-router-dom";
 import { experienceDict, getSearchData } from "../../utils/utils";
 import { connect } from "react-redux";
 import Banner from "../../assets/img/banner_details.jpg";
-import { getDataAutoComplete, searchPosts, getPostById } from "../../actions/post.action";
+import {
+  getDataAutoComplete,
+  searchPosts,
+  getPostById,
+} from "../../actions/post.action";
 import PropTypes from "prop-types";
 import AutoCompleteText from "../HOC/AutoCompleteText";
 import Pagination from "../Pagination/Pagination";
@@ -209,7 +212,13 @@ class AdvancedSearch extends Component {
       <></>
     );
     if (!loading) {
-      return <></>;
+      return (
+        <div className="spinner">
+          <span className="dot1"></span>
+          <span className="dot2"></span>
+          <span className="dot3"></span>
+        </div>
+      );
     } else {
       const prevSearchData = this.props.location.prev
         ? this.props.location.prev
@@ -354,7 +363,7 @@ AdvancedSearch.propTypes = {
   posts: PropTypes.object.isRequired,
   getDataAutoComplete: PropTypes.func.isRequired,
   searchPosts: PropTypes.func.isRequired,
-  getPostById: PropTypes.func.isRequired
+  getPostById: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({ posts: state.posts });

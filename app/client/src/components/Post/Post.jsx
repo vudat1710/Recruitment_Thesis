@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Link, withRouter } from "react-router-dom";
+import { Link, withRouter, Redirect } from "react-router-dom";
 import Details1 from "../../assets/img/details1.jpg";
 import Details2 from "../../assets/img/details2.jpg";
 import Details3 from "../../assets/img/details3.jpg";
@@ -16,12 +16,9 @@ import {
 import { experienceDict } from "../../utils/utils";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
-import Button from "../common/Button";
 import "./Rating.scss";
 import Comment from "./Comment";
-import BGImage from "../../assets/img/product-info.png";
-// import TextInputAuth from "../HOC/TextInputAuth";
-// import SwappingSquaresSpinner from "../common/SwappingSquaresSpinner";
+import SweetAlert from "react-bootstrap-sweetalert";
 import Rating from "@material-ui/lab/Rating";
 
 let BgBanner;
@@ -42,6 +39,8 @@ class PostDetails extends Component {
       isLoading: false,
       valueRating: 0,
       isAdded: false,
+      canCompare: false,
+      isAddedCompare: "",
     };
   }
 
@@ -107,12 +106,61 @@ class PostDetails extends Component {
     });
   }
 
+  onCompareClick(action) {
+    let a = JSON.parse(localStorage.getItem("compareList")) || [];
+    // Push the new data (whether it be an object or anything else) onto the array
+    if (a.length < 2) {
+      if (!a.includes(this.state.postId)) {
+        a.push(this.state.postId);
+        localStorage.setItem("compareList", JSON.stringify(a));
+        this.setState({
+          ...this.state,
+          isAddedCompare: "added",
+        });
+      }
+    }
+    if (a.length === 2) {
+      if (action === "remove") {
+        a = a.filter((x) => x !== this.state.postId);
+        localStorage.setItem("compareList", JSON.stringify(a));
+        this.setState({
+          ...this.state,
+          isAddedCompare: "existed",
+        });
+      } else {
+        this.setState({
+          ...this.state,
+          canCompare: true,
+        });
+      }
+    }
+  }
+
+  onCancelConfirm() {
+    this.setState({
+      ...this.state,
+      isAddedCompare: "",
+    });
+  }
+
+  renderRedirect = () => {
+    if (this.state.canCompare) {
+      return <Redirect to={{ pathname: "/compare" }} />;
+    }
+  };
+
   render() {
     const { postDetails, isLoading } = this.state;
     const { isAuthenticated } = this.props.auth;
 
     if (!isLoading) {
-      return <></>;
+      return (
+        <div className="spinner">
+          <span className="dot1"></span>
+          <span className="dot2"></span>
+          <span className="dot3"></span>
+        </div>
+      );
     } else {
       let addToWishList =
         this.state.isAdded === false ? (
@@ -189,8 +237,58 @@ class PostDetails extends Component {
 
       let avgRate = postDetails.RatePosts.map((a) => parseInt(a.rate));
       avgRate = avgRate.reduce((a, b) => a + b, 0) / avgRate.length || 0;
+
+      let compareElement;
+      const a = JSON.parse(localStorage.getItem("compareList")) || [];
+      if (a.includes(this.state.postId)) {
+        compareElement = (
+          <button
+            className="btn btn-block btn-primary"
+            onClick={() => this.onCompareClick("remove")}
+          >
+            Loại khỏi so sánh
+          </button>
+        );
+      } else {
+        compareElement = (
+          <button
+            className="btn btn-block btn-primary"
+            onClick={() => this.onCompareClick("add")}
+          >
+            Thêm vào so sánh
+          </button>
+        );
+      }
+
+      let alertS;
+      if (this.state.isAddedCompare === "added") {
+        alertS = (
+          <SweetAlert
+            success
+            title="Bài viết đã được thêm vào so sánh!"
+            onConfirm={() => {
+              this.onCancelConfirm();
+            }}
+          ></SweetAlert>
+        );
+      } else if (this.state.isAddedCompare === "existed") {
+        alertS = (
+          <SweetAlert
+            success
+            title="Đã loại khỏi so sánh!"
+            onConfirm={() => {
+              this.onCancelConfirm();
+            }}
+          ></SweetAlert>
+        );
+      } else {
+        alertS = <></>;
+      }
+
       return (
         <>
+          {this.renderRedirect()}
+          {alertS}
           <header
             className="page-header bg-img size-lg"
             style={{
@@ -218,7 +316,6 @@ class PostDetails extends Component {
                 </div>
                 {/* <time datetime="2016-03-03 20:00"></time> */}
                 <hr />
-                {/* <p className="lead">{postDetails.Companies[0].description}</p> */}
 
                 <ul className="details cols-12">
                   <li>
@@ -257,27 +354,12 @@ class PostDetails extends Component {
                   <ul className="social-icons">
                     <li className="title">Thêm vào danh sách ưa thích</li>
                     <li>{addToWishListButton}</li>
-                    {/* <li>
-                      <a className="facebook" href="#">
-                        <i className="fa fa-facebook"></i>
-                      </a>
-                    </li>
-                    <li>
-                      <a className="google-plus" href="#">
-                        <i className="fa fa-google-plus"></i>
-                      </a>
-                    </li>
-                    <li>
-                      <a className="twitter" href="#">
-                        <i className="fa fa-twitter"></i>
-                      </a>
-                    </li>
-                    <li>
-                      <a className="linkedin" href="#">
-                        <i className="fa fa-linkedin"></i>
-                      </a>
-                    </li> */}
                   </ul>
+                  <div className="action-buttons">
+                    <div className="upload-button">
+                      {isAuthenticated ? compareElement : <></>}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -295,25 +377,31 @@ class PostDetails extends Component {
                   >
                     <h4>Mô tả công việc</h4>
                     <ul>
-                      {postDesc.map((item) => {
-                        if (item.trim() !== "") return <li>{item}</li>;
-                      })}
+                      {postDesc
+                        ? postDesc.map((item) => {
+                            if (item.trim() !== "") return <li>{item}</li>;
+                          })
+                        : postDetails.description}
                     </ul>
 
                     <br />
                     <h4>Yêu cầu bổ sung</h4>
                     <ul>
-                      {extraReqs.map((item) => {
-                        if (item.trim() !== "") return <li>{item}</li>;
-                      })}
+                      {extraReqs
+                        ? extraReqs.map((item) => {
+                            if (item.trim() !== "") return <li>{item}</li>;
+                          })
+                        : postDetails.extra_requirements}
                     </ul>
 
                     <br />
                     <h4>Quyền lợi được hưởng</h4>
                     <ul>
-                      {jobBenefits.map((item) => {
-                        if (item.trim() !== "") return <li>{item}</li>;
-                      })}
+                      {jobBenefits
+                        ? jobBenefits.map((item) => {
+                            if (item.trim() !== "") return <li>{item}</li>;
+                          })
+                        : postDetails.job_benefits}
                     </ul>
                   </div>
                   <div className="col-lg-3 col-md-12 col-sm-12">
