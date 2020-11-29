@@ -11,6 +11,7 @@ const WorkPlacePost = db.WorkPlacePost;
 const WishList = db.WishList;
 const MajorPost = db.MajorPost;
 const PostCompany = db.PostCompany;
+const validatePostInput = require("../validation/post");
 
 function convertToObject(array, externalKey, externalValue, key) {
   let res = [];
@@ -54,7 +55,8 @@ exports.findPosts = (req, res) => {
       res.send(data);
     })
     .catch((err) => {
-      res.status(500).send({
+      res.send({
+        status: 400,
         message:
           err.message || "Some errors occurred while retrieving all posts.",
       });
@@ -84,7 +86,7 @@ exports.getPostById = (req, res) => {
     .catch((err) => {
       res.send({
         status: 400,
-        message: "Error retrieving Tutorial with id=" + id,
+        message: "Error retrieving Post",
       });
     });
 };
@@ -151,7 +153,8 @@ exports.getPostByMajorName = (req, res) => {
       res.send(data);
     })
     .catch((err) => {
-      res.status(500).send({
+      res.send({
+        status: 400,
         message: "Error retrieving Tutorial with id=" + id,
       });
     });
@@ -240,7 +243,8 @@ exports.comment = (req, res) => {
       res.json({ success: true, message: "Comment has been posted" });
     })
     .catch((err) => {
-      res.status(500).send({
+      res.send({
+        status: 400,
         message:
           err.message || "Some errors occurred while retrieving all posts.",
       });
@@ -459,6 +463,14 @@ exports.compare = (req, res) => {
 };
 
 exports.addPost = (req, res) => {
+  const { errors, isValid } = validatePostInput(req.body);
+  if (!isValid) {
+    return res.json({
+      status: 400,
+      errors,
+    });
+  }
+
   let conditions = { Companies: [{ PostCompany: { selfGranted: true } }] };
 
   for (key in req.body) {
@@ -478,10 +490,23 @@ exports.addPost = (req, res) => {
     }
   }
 
+  let otherConditions = {};
+  for (key in req.body) {
+    if (
+      key !== "name" &&
+      key !== "company_description" &&
+      key !== "company_address" &&
+      key !== "img_url" &&
+      key !== "majors" &&
+      key !== "workplaces"
+    )
+      otherConditions[key] = req.body[key];
+  }
+
   Company.findOne({ where: { name: req.body.name } }).then((company) => {
     if (!company) {
-      Post.create(conditions, { include: [Company, WorkPlacePost, MajorPost] })
-        .then(function (x) {
+      Post.create(conditions, { include: [Company] })
+        .then((x) => {
           const postId = x.postId;
           const a = Major.findAll({
             where: {
@@ -523,7 +548,8 @@ exports.addPost = (req, res) => {
                   });
                 })
                 .catch((err) => {
-                  res.status(500).send({
+                  res.send({
+                    status: 400,
                     message:
                       err.message ||
                       "Some errors occurred while creating post.",
@@ -531,44 +557,91 @@ exports.addPost = (req, res) => {
                 });
             })
             .catch((err) => {
-              res.status(500).send({
+              res.send({
+                status: 400,
                 message:
                   err.message || "Some errors occurred while creating post.",
               });
             });
         })
         .catch((err) => {
-          res.status(500).send({
+          res.send({
+            status: 400,
             message: err.message || "Some errors occurred while creating post.",
           });
         });
     } else {
-      let otherConditions = {};
-      for (key in req.body) {
-        if (
-          key !== "name" &&
-          key !== "company_description" &&
-          key !== "company_address" &&
-          key !== "img_url" &&
-          key !== "majors" &&
-          key !== "workplaces"
-        ) {
-          otherConditions[key] = req.body[key];
-        }
-        Post.create(otherConditions)
-          .then(function (x) {
-            PostCompany.create({
-              postId: x.postId,
-              companyId: company.companyId,
-            });
-          })
-          .then((response) => {
-            res.json({
-              success: true,
-              message: "Add post successful",
-            });
+      const companyId = company.companyId;
+      Post.create(otherConditions)
+        .then((x) => {
+          const postId = x.postId;
+          const a = Major.findAll({
+            where: {
+              name: req.body.majors,
+            },
+            attributes: ["majorId"],
           });
-      }
+          const b = WorkPlace.findAll({
+            where: {
+              name: req.body.workplaces,
+            },
+            attributes: ["workPlaceId"],
+          });
+
+          Promise.all([a, b])
+            .then((response) => {
+              const c = WorkPlacePost.bulkCreate(
+                convertToObject(
+                  response[1].map((a) => a.workPlaceId),
+                  "postId",
+                  postId,
+                  "workPlaceId"
+                )
+              );
+              const d = MajorPost.bulkCreate(
+                convertToObject(
+                  response[0].map((a) => a.majorId),
+                  "postId",
+                  postId,
+                  "majorId"
+                )
+              );
+
+              const e = PostCompany.create({
+                postId: postId,
+                companyId: companyId,
+              });
+
+              Promise.all([c, d, e])
+                .then((response) => {
+                  res.json({
+                    success: true,
+                    message: "Add post successful",
+                  });
+                })
+                .catch((err) => {
+                  res.send({
+                    status: 400,
+                    message:
+                      err.message ||
+                      "Some errors occurred while creating post.",
+                  });
+                });
+            })
+            .catch((err) => {
+              res.send({
+                status: 400,
+                message:
+                  err.message || "Some errors occurred while creating post.",
+              });
+            });
+        })
+        .catch((err) => {
+          res.send({
+            status: 400,
+            message: err.message || "Some errors occurred while creating post.",
+          });
+        });
     }
   });
 };
@@ -588,19 +661,28 @@ exports.deletePost = (req, res) => {
           res.json({ success: true, message: "Post has been deleted" });
         })
         .catch((err) => {
-          res.status(500).send({
+          res.send({
+            status: 400,
             message: err.message || "Some errors occurred while deleting post.",
           });
         });
     })
     .catch((err) => {
-      res.status(500).send({
+      res.send({
+        status: 400,
         message: err.message || "Some errors occurred while deleting post.",
       });
     });
 };
 
 exports.updatePost = (req, res) => {
+  const { errors, isValid } = validatePostInput(req.body);
+  if (!isValid) {
+    return res.json({
+      status: 400,
+      errors,
+    });
+  }
   const { postId, majors, workplaces } = req.body;
 
   Post.findOne({
@@ -706,14 +788,16 @@ exports.updatePost = (req, res) => {
             });
           })
           .catch((err) => {
-            res.status(500).send({
+            res.send({
+              status: 400,
               message:
                 err.message ||
                 "Some errors occurred while retrieving all posts.",
             });
           })
           .catch((err) => {
-            res.status(500).send({
+            res.send({
+              status: 400,
               message:
                 err.message ||
                 "Some errors occurred while retrieving all posts.",

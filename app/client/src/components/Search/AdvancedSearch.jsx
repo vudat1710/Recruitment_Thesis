@@ -171,17 +171,38 @@ class AdvancedSearch extends Component {
                 <img src={post.Companies[0].img_url} alt="" />
                 <div className="hgroup">
                   <h4>{post.title}</h4>
-                  <h5>{post.Companies[0].name}</h5>
+                  <h5>
+                    {post.Companies[0].name}{" "}
+                    <span className="label label-success">{post.job_type}</span>
+                  </h5>
                 </div>
-                <div className="header-meta">
-                  <span className="location">
-                    {post.WorkPlaces.map((a) => a.name).join(", ")}
-                  </span>
-                  <span className="label label-success">
-                    {post.salary_type}
-                  </span>
-                </div>
+                <time datetime="2016-03-10 20:00">
+                  Deadline: {post.valid_through}
+                </time>
               </header>
+
+              <footer>
+                <ul className="details cols-3">
+                  <li>
+                    <i className="fa fa-map-marker"></i>
+                    <span>{post.WorkPlaces.map((a) => a.name).join(", ")}</span>
+                  </li>
+
+                  <li>
+                    <i className="fa fa-money"></i>
+                    <span>{post.salary_type}</span>
+                  </li>
+
+                  {post.qualification ? (
+                    <li>
+                      <i className="fa fa-certificate"></i>
+                      <span>{post.qualification}</span>
+                    </li>
+                  ) : (
+                    <></>
+                  )}
+                </ul>
+              </footer>
             </a>
           </div>
         );

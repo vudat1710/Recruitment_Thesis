@@ -5,5 +5,6 @@ router.post("/getCompanyById", companies.getCompanyById);
 router.post("/getCompanyByName", companies.getCompanyByName);
 router.post("/updateCompany", companies.updateCompany);
 router.post("/deleteCompany", companies.deleteCompany);
+router.post("/searchCompanies", companies.searchCompanies);
 
 module.exports = router;

@@ -1,4 +1,5 @@
 const db = require("../models");
+const Company = require("../models/Company");
 const Post = db.Post;
 const WorkPlace = db.WorkPlace;
 const Major = db.Major;
@@ -78,11 +79,12 @@ exports.getDataAutoComplete = (req, res) => {
         }
       }
 
-      returnData["qualifications"] = a
+      returnData["qualifications"] = a;
       res.send(returnData);
     })
     .catch((err) => {
-      res.status(500).send({
+      res.send({
+        status: 400,
         message:
           err.message || "Some errors occurred while retrieving all posts.",
       });
