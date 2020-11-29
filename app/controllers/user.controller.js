@@ -116,7 +116,8 @@ exports.findUserByUserName = (req, res) => {
       res.send(user);
     })
     .catch((err) => {
-      res.status(500).send({
+      res.send({
+        status: 400,
         message: err.message || "Tài khoản không tồn tại",
       });
     });
@@ -274,14 +275,15 @@ exports.lockAccount = (req, res) => {
           message: "Lock account successful",
         });
       } else {
-        res.json({
-          success: true,
-          message: "Account is already locked",
+        return res.json({
+          status: 400,
+          errors: {user_name: "Tài khoản đã bị khóa từ trước"},
         });
       }
     })
     .catch((err) => {
-      res.status(500).send({
+      res.send({
+        status: 400,
         message: err.message || "Tài khoản không tồn tại",
       });
     });
@@ -300,14 +302,15 @@ exports.unlockAccount = (req, res) => {
           message: "Unlock account successful",
         });
       } else {
-        res.json({
-          success: true,
-          message: "Account is already unlocked",
+        return res.json({
+          status: 400,
+          errors: {user_name: "Tài khoản đã được mở khóa từ trước"},
         });
       }
     })
     .catch((err) => {
-      res.status(500).send({
+      res.send({
+        status: 400,
         message: err.message || "Tài khoản không tồn tại",
       });
     });
@@ -316,7 +319,6 @@ exports.unlockAccount = (req, res) => {
 exports.changePassword = (req, res) => {
   const { errors, isValid } = validateChangePassword(req.body);
   if (!isValid) {
-    console.log(errors);
     return res.json({
       status: 400,
       errors,
@@ -417,4 +419,47 @@ exports.forgotPassword = (req, res) => {
       });
     }
   });
+};
+
+exports.searchUsers = (req, res) => {
+  const { user_name } = req.body;
+  let conditions = {
+    where: { user_name: { [Op.like]: `%${user_name}%` } },
+    include: [
+      { model: WorkPlace, attributes: ["workPlaceId"] },
+      { model: Major, attributes: ["majorId"] },
+    ],
+  };
+  const size = parseInt(req.body.size);
+  const page = parseInt(req.body.page);
+
+  conditions["limit"] = parseInt(size);
+  conditions["offset"] = page || page !== 0 ? size * (page - 1) : 0;
+
+  User.findAll(conditions, { subQuery: false })
+    .then((data) => {
+      const users = data;
+      conditions["distinct"] = true;
+      conditions["col"] = "userId";
+      User.count(conditions, { subQuery: false })
+        .then((totalItems) => {
+          const currentPage = page ? page : 1;
+          const totalPages = Math.ceil(totalItems / size);
+          res.send({ totalItems, users, currentPage, totalPages });
+        })
+        .catch((err) => {
+          return res.json({
+            status: 400,
+            message:
+              err.message || "Some errors occurred",
+          });
+        });
+    })
+    .catch((err) => {
+      res.json({
+        status: 400,
+        message:
+          err.message || "Some errors occurred",
+      });
+    });
 };

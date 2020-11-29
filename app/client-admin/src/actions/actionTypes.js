@@ -1,11 +1,9 @@
 //Authentication and user actions
 
-export const SET_CURRENT_USER = 'SET_CURRENT_USER';
-export const FORGET_PASSWORD = 'FORGET_PASSWORD';
-export const CHANGE_PASSWORD = 'CHANGE_PASSWORD';
-export const CLEAR_CURRENT_PROFILE = 'CLEAR_CURRENT_PROFILE';
+export const LOCK_ACCOUNT = 'LOCK_ACCOUNT';
+export const UNLOCK_ACCOUNT = 'UNLOCK_ACCOUNT';
+export const SEARCH_USERS = 'SEARCH_USERS';
 export const GET_USER_BY_USER_ID = 'GET_USER_BY_USER_ID';
-export const UPDATE_USER = 'UPDATE_USER';
 
 //Post actions
 export const GET_DATA_AUTOCOMPLETE = "GET_DATA_AUTOCOMPLETE";

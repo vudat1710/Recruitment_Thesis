@@ -8,6 +8,7 @@ router.post("/findUserById", users.findUserById);
 router.post("/updateUser", passport.authenticate('jwt', { session: false }), users.updateUser);
 router.post("/lockAccount", users.lockAccount);
 router.post("/unlockAccount", users.unlockAccount);
+router.post("/searchUsers", users.searchUsers);
 router.post("/changePassword", passport.authenticate('jwt', { session: false }), users.changePassword);
 router.post("/forgotPassword", users.forgotPassword);
 

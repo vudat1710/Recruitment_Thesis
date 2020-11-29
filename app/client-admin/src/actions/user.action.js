@@ -1,17 +1,11 @@
 import axios from "axios";
 import {
-  CLEAR_CURRENT_PROFILE,
+  SEARCH_USERS,
+  LOCK_ACCOUNT,
+  UNLOCK_ACCOUNT,
   GET_ERRORS,
   GET_USER_BY_USER_ID,
-  UPDATE_USER
 } from "./actionTypes";
-
-// Clear profile
-export const clearCurrentProfile = () => {
-  return {
-    type: CLEAR_CURRENT_PROFILE,
-  };
-};
 
 export const getUserByUserId = (attributes) => async (dispatch) => {
   const userId = localStorage.userId;
@@ -20,7 +14,7 @@ export const getUserByUserId = (attributes) => async (dispatch) => {
     attributes,
   });
 
-  if (res.status !== 400) {
+  if (res.data.status !== 400) {
     dispatch({
       type: GET_USER_BY_USER_ID,
       payload: res.data,
@@ -28,22 +22,47 @@ export const getUserByUserId = (attributes) => async (dispatch) => {
   } else {
     dispatch({
       type: GET_ERRORS,
-      payload: res.message,
+      payload: res.data.errors,
     });
   }
 };
 
-export const updateUser = (params) => async (dispatch) => {
-  const res = await axios.post(`/api/user/updateUser`, params);
-  if (res.status !== 400) {
+export const searchUsers = (searchParams) => async (dispatch) => {
+  const res = await axios.post(`/api/user/searchUsers`, searchParams);
+  dispatch({
+    type: SEARCH_USERS,
+    payload: { searchParams: searchParams, data: res.data },
+  });
+};
+
+export const lockAccount = (params) => async (dispatch) => {
+  const res = await axios.post(`/api/user/lockAccount`, params);
+  
+  if (res.data.status !== 400) {
     dispatch({
-      type: UPDATE_USER,
+      type: LOCK_ACCOUNT,
       payload: "success",
     });
   } else {
     dispatch({
       type: GET_ERRORS,
-      payload: res.message,
+      payload: res.data.errors,
+    });
+  }
+}
+
+export const unlockAccount = (params) => async (dispatch) => {
+  const res = await axios.post(`/api/user/unlockAccount`, params);
+  
+  if (res.data.status !== 400) {
+    dispatch({
+      type: UNLOCK_ACCOUNT,
+      payload: "success",
+    });
+  } else {
+    dispatch({
+      type: GET_ERRORS,
+      payload: res.data.errors,
     });
   }
 }
