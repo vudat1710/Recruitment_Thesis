@@ -5,14 +5,11 @@ import {
   UNLOCK_ACCOUNT,
   GET_ERRORS,
   GET_USER_BY_USER_ID,
+  CHANGE_STATE
 } from "./actionTypes";
 
-export const getUserByUserId = (attributes) => async (dispatch) => {
-  const userId = localStorage.userId;
-  const res = await axios.post(`/api/user/findUserById`, {
-    userId,
-    attributes,
-  });
+export const getUserByUserId = (params) => async (dispatch) => {
+  const res = await axios.post(`/api/user/findUserById`, params);
 
   if (res.data.status !== 400) {
     dispatch({
@@ -38,6 +35,7 @@ export const searchUsers = (searchParams) => async (dispatch) => {
 export const lockAccount = (params) => async (dispatch) => {
   const res = await axios.post(`/api/user/lockAccount`, params);
   
+  console.log(res.data)
   if (res.data.status !== 400) {
     dispatch({
       type: LOCK_ACCOUNT,
@@ -63,6 +61,28 @@ export const unlockAccount = (params) => async (dispatch) => {
     dispatch({
       type: GET_ERRORS,
       payload: res.data.errors,
+    });
+  }
+}
+
+export const changeState = (params) => async (dispatch) => {
+  if (params.type === "lock") {
+    dispatch({
+      type: LOCK_ACCOUNT,
+      payload: ""
+    })
+    dispatch({
+      type: GET_ERRORS,
+      payload: {},
+    });
+  } else if (params.type === "unlock") {
+    dispatch({
+      type: UNLOCK_ACCOUNT,
+      payload: ""
+    })
+    dispatch({
+      type: GET_ERRORS,
+      payload: {},
     });
   }
 }

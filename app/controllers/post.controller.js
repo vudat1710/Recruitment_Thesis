@@ -826,3 +826,44 @@ exports.deleteComment = (req, res) => {
       });
     });
 };
+
+exports.searchComments = (req, res) => {
+  const { content } = req.body;
+  let conditions = {
+    where: { content: { [Op.like]: `%${content}%` } },
+    include: [
+      { model: Post, attributes: ["title"] },
+      { model: User, attributes: ["user_name"] },
+    ],
+  };
+  const size = parseInt(req.body.size);
+  const page = parseInt(req.body.page);
+
+  conditions["limit"] = parseInt(size);
+  conditions["offset"] = page || page !== 0 ? size * (page - 1) : 0;
+
+  CommentPost.findAll(conditions, { subQuery: false })
+    .then((data) => {
+      const comments = data;
+      conditions["distinct"] = true;
+      conditions["col"] = "id";
+      CommentPost.count(conditions, { subQuery: false })
+        .then((totalItems) => {
+          const currentPage = page ? page : 1;
+          const totalPages = Math.ceil(totalItems / size);
+          res.send({ totalItems, comments, currentPage, totalPages });
+        })
+        .catch((err) => {
+          return res.json({
+            status: 400,
+            message: err.message || "Some errors occurred",
+          });
+        });
+    })
+    .catch((err) => {
+      res.send({
+        status: 400,
+        message: err.message || "Some errors occurred while deleting comment.",
+      });
+    });
+};

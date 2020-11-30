@@ -5,6 +5,8 @@ import {
   DELETE_POST,
   UPDATE_POST,
   ADD_POST,
+  SEARCH_COMMENTS,
+  DELETE_COMMENT,
   GET_ERRORS,
 } from "./actionTypes";
 import axios from "axios";
@@ -94,4 +96,28 @@ export const addPost = (params) => async (dispatch) => {
       payload: res.data.errors,
     });
   }
+};
+
+export const deleteComment = (params) => async (dispatch) => {
+  const res = await axios.post(`/api/post/deleteCommentAdmin`, params);
+
+  if (res.data.status !== 400) {
+    dispatch({
+      type: DELETE_COMMENT,
+      payload: "success",
+    });
+  } else {
+    dispatch({
+      type: GET_ERRORS,
+      payload: res.data.errors,
+    });
+  }
+};
+
+export const searchComments = (params) => async (dispatch) => {
+  const res = await axios.post(`/api/post/searchComments`, params);
+  dispatch({
+    type: SEARCH_COMMENTS,
+    payload: { searchParams: params, data: res.data },
+  });
 };

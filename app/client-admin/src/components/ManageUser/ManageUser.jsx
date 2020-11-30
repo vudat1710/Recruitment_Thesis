@@ -1,15 +1,17 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { Link } from "react-router-dom";
 import Banner from "../../assets/img/banner_details.jpg";
 import {
   searchUsers,
   lockAccount,
   unlockAccount,
+  changeState,
 } from "../../actions/user.action";
 import PropTypes from "prop-types";
 import AutoCompleteText from "../HOC/AutoCompleteText";
 import Pagination from "../Pagination/Pagination";
+import { experienceDict } from "../../utils/utils";
+import SweetAlert from "react-bootstrap-sweetalert";
 
 class ManageUser extends Component {
   constructor(props) {
@@ -24,6 +26,7 @@ class ManageUser extends Component {
       users: [],
       lockAccount: false,
       unlockAccount: false,
+      type: "",
       errors: {},
     };
   }
@@ -79,6 +82,7 @@ class ManageUser extends Component {
     this.setState({
       ...this.state,
       lockAccount: this.props.user.lockAccount,
+      type: "lock",
     });
   }
 
@@ -87,7 +91,24 @@ class ManageUser extends Component {
     this.setState({
       ...this.state,
       unlockAccount: this.props.user.unlockAccount,
+      type: "unlock",
     });
+  }
+
+  async onCancelConfirm() {
+    await this.props.changeState({ type: this.state.type });
+
+    if (this.state.type === "lock") {
+      this.setState({
+        ...this.state,
+        lockAccount: false,
+      });
+    } else if (this.state.type === "unlock") {
+      this.setState({
+        ...this.state,
+        unlockAccount: false,
+      });
+    }
   }
 
   async onSubmit(e) {
@@ -107,42 +128,89 @@ class ManageUser extends Component {
     const { loading, resultUsers, user_name, errors } = this.state;
 
     let searchData = this.getSearchDataAd();
-    console.log(this.props.user.searchResults)
     let UserComp = this.state.users ? (
       this.state.users.map((user) => {
+        console.log(user);
         return (
           <div className="col-xs-12">
-            <a className="item-block" href={`/user/${user.userId}`}>
+            <a className="item-block">
               <header>
                 <div className="hgroup">
                   <h4>
-                    <a>{user.user_name}</a>
-                    {errors.user_name && (
-                      <div
-                        className="invalid-feedback"
-                        style={{ color: "red" }}
-                      >
-                        {errors.user_name}
-                      </div>
-                    )}
+                    <a href={`/user/${user.userId}`}>{user.user_name}</a>
                   </h4>
                 </div>
               </header>
 
               <footer>
                 <ul className="details cols-3">
+                  {user.WorkPlaces.length !== 0 ? (
+                    <li>
+                      <i className="fa fa-map-marker"></i>
+                      <span>
+                        {user.WorkPlaces.map((a) => a.name).join(", ")}
+                      </span>
+                    </li>
+                  ) : (
+                    <></>
+                  )}
+
+                  {user.Majors.length !== 0 ? (
+                    <li>
+                      <i className="fa fa-certificate"></i>
+                      <span>{user.Majors.map((a) => a.name).join(", ")}</span>
+                    </li>
+                  ) : (
+                    <></>
+                  )}
+
+                  {user.salary ? (
+                    <li>
+                      <i className="fa fa-money"></i>
+                      <span>{user.salary}</span>
+                    </li>
+                  ) : (
+                    <></>
+                  )}
+
+                  {user.experience ? (
+                    <li>
+                      <i className="fa fa-flask"></i>
+                      <span>{experienceDict[user.experience]}</span>
+                    </li>
+                  ) : (
+                    <></>
+                  )}
+
+                  {user.job_type ? (
+                    <li>
+                      <i className="fa fa-clock-o"></i>
+                      <span>{user.job_type}</span>
+                    </li>
+                  ) : (
+                    <></>
+                  )}
+
+                  {user.qualification ? (
+                    <li>
+                      <i className="fa fa-briefcase"></i>
+                      <span>{user.qualification}</span>
+                    </li>
+                  ) : (
+                    <></>
+                  )}
                   <div class="action-btn">
                     <a
                       class="btn btn-xs btn-gray"
-                      onClick={() => this.unlockAccount(user.user_name)}
+                      onClick={() => this.onUnlockClick(user.userId)}
                     >
-                      Unlock
+                      Mở khóa
                     </a>
                     <a
                       class="btn btn-xs btn-danger"
-                      onClick={() => this.lockAccount(user.user_name)}
+                      onClick={() => this.onLockClick(user.userId)}
                     >
-                      Lock
+                      Khóa
                     </a>
                   </div>
                 </ul>
@@ -186,8 +254,33 @@ class ManageUser extends Component {
         </div>
       );
     } else {
+      let alertLock = this.state.lockAccount ? (
+        <SweetAlert
+          success
+          title="Khóa thành công!"
+          onConfirm={() => {
+            this.onCancelConfirm();
+          }}
+        ></SweetAlert>
+      ) : (
+        <></>
+      );
+
+      let alertUnlock = this.state.unlockAccount ? (
+        <SweetAlert
+          success
+          title="Mở khóa thành công!"
+          onConfirm={() => {
+            this.onCancelConfirm();
+          }}
+        ></SweetAlert>
+      ) : (
+        <></>
+      );
       return (
         <>
+          {alertLock}
+          {alertUnlock}
           <header
             className="page-header bg-img"
             style={{ backgroundImage: `url(${Banner})` }}
@@ -235,7 +328,14 @@ class ManageUser extends Component {
                     <br />
                     {extraComp}
                   </div>
-
+                  {errors.user_name && (
+                    <div
+                      className="invalid-feedback text-center"
+                      style={{ color: "red" }}
+                    >
+                      {errors.user_name}
+                    </div>
+                  )}
                   {UserComp}
                 </div>
 
@@ -255,18 +355,20 @@ ManageUser.propTypes = {
   searchUsers: PropTypes.func.isRequired,
   lockAccount: PropTypes.func.isRequired,
   unlockAccount: PropTypes.func.isRequired,
+  changeState: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
   posts: state.posts,
   errors: state.errors,
-  user: state.user
+  user: state.user,
 });
 
 const mapDispatchToProps = {
   searchUsers,
   lockAccount,
   unlockAccount,
+  changeState,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ManageUser);

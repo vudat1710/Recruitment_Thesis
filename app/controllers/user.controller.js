@@ -83,24 +83,35 @@ exports.login = (req, res, next) => {
     if (!user) {
       errors.login = "Tài khoản hoặc mật khẩu không chính xác";
       return res.json({ status: 400, errors: errors });
-    }
-    bcrypt.compare(password, user.password, (err, matched) => {
-      errors.login = "Tài khoản hoặc mật khẩu không chính xác";
-      if (!matched) return res.json({ status: 400, errors: errors });
-      // User matched
-      const payload = {
-        userId: user.userId,
-        user_name: user.user_name,
-      }; // Create JWT Payload
-      // Sign Token
-      jwt.sign(payload, secretOrKey, { expiresIn: 86400 }, (err__, token) => {
-        res.json({
-          success: true,
-          token: `Bearer ${token}`,
-          payload,
+    } else {
+      if (user.is_lock === 1) {
+        errors.user_name = "Tài khoản này đã bị khóa";
+        return res.json({ status: 400, errors: errors });
+      } else {
+        bcrypt.compare(password, user.password, (err, matched) => {
+          errors.login = "Tài khoản hoặc mật khẩu không chính xác";
+          if (!matched) return res.json({ status: 400, errors: errors });
+          // User matched
+          const payload = {
+            userId: user.userId,
+            user_name: user.user_name,
+          }; // Create JWT Payload
+          // Sign Token
+          jwt.sign(
+            payload,
+            secretOrKey,
+            { expiresIn: 86400 },
+            (err__, token) => {
+              res.json({
+                success: true,
+                token: `Bearer ${token}`,
+                payload,
+              });
+            }
+          );
         });
-      });
-    });
+      }
+    }
   });
 };
 
@@ -263,13 +274,13 @@ exports.updateUser = (req, res) => {
 };
 
 exports.lockAccount = (req, res) => {
-  const { user_name } = req.body;
-  let conditions = { where: { user_name: user_name } };
+  const { userId } = req.body;
+  let conditions = { where: { userId: userId } };
   User.findOne(conditions)
     .then((user) => {
       const is_lock = user.is_lock;
-      if (is_lock === false) {
-        user.update({ is_lock: true });
+      if (is_lock === 0) {
+        user.update({ is_lock: 1 });
         res.json({
           success: true,
           message: "Lock account successful",
@@ -277,7 +288,7 @@ exports.lockAccount = (req, res) => {
       } else {
         return res.json({
           status: 400,
-          errors: {user_name: "Tài khoản đã bị khóa từ trước"},
+          errors: { user_name: "Tài khoản đã bị khóa từ trước" },
         });
       }
     })
@@ -290,13 +301,13 @@ exports.lockAccount = (req, res) => {
 };
 
 exports.unlockAccount = (req, res) => {
-  const { user_name } = req.body;
-  let conditions = { where: { user_name: user_name } };
+  const { userId } = req.body;
+  let conditions = { where: { userId: userId } };
   User.findOne(conditions)
     .then((user) => {
       const is_lock = user.is_lock;
-      if (is_lock === true) {
-        user.update({ is_lock: false });
+      if (is_lock === 1) {
+        user.update({ is_lock: 0 });
         res.json({
           success: true,
           message: "Unlock account successful",
@@ -304,7 +315,7 @@ exports.unlockAccount = (req, res) => {
       } else {
         return res.json({
           status: 400,
-          errors: {user_name: "Tài khoản đã được mở khóa từ trước"},
+          errors: { user_name: "Tài khoản đã được mở khóa từ trước" },
         });
       }
     })
@@ -426,8 +437,8 @@ exports.searchUsers = (req, res) => {
   let conditions = {
     where: { user_name: { [Op.like]: `%${user_name}%` } },
     include: [
-      { model: WorkPlace, attributes: ["workPlaceId"] },
-      { model: Major, attributes: ["majorId"] },
+      { model: WorkPlace, attributes: ["name"] },
+      { model: Major, attributes: ["name"] },
     ],
   };
   const size = parseInt(req.body.size);
@@ -450,16 +461,14 @@ exports.searchUsers = (req, res) => {
         .catch((err) => {
           return res.json({
             status: 400,
-            message:
-              err.message || "Some errors occurred",
+            message: err.message || "Some errors occurred",
           });
         });
     })
     .catch((err) => {
       res.json({
         status: 400,
-        message:
-          err.message || "Some errors occurred",
+        message: err.message || "Some errors occurred",
       });
     });
 };

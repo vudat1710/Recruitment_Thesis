@@ -4,6 +4,7 @@ export const LOCK_ACCOUNT = 'LOCK_ACCOUNT';
 export const UNLOCK_ACCOUNT = 'UNLOCK_ACCOUNT';
 export const SEARCH_USERS = 'SEARCH_USERS';
 export const GET_USER_BY_USER_ID = 'GET_USER_BY_USER_ID';
+export const CHANGE_STATE = 'CHANGE_STATE';
 
 //Post actions
 export const GET_DATA_AUTOCOMPLETE = "GET_DATA_AUTOCOMPLETE";
@@ -12,6 +13,8 @@ export const GET_POST_BY_ID = 'GET_POST_BY_ID';
 export const UPDATE_POST = 'UPDATE_POST';
 export const DELETE_POST = 'DELETE_POST';
 export const ADD_POST = 'ADD_POST';
+export const SEARCH_COMMENTS = 'SEARCH_COMMENTS';
+export const DELETE_COMMENT = 'DELETE_COMMENT';
 
 //Wishlist actions
 export const ADD_TO_WISHLIST = 'ADD_TO_WISHLIST';
