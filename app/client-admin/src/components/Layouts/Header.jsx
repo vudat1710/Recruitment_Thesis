@@ -39,26 +39,35 @@ class Header extends Component {
             </div>
           </div>
 
-
           <ul className="nav-menu">
             <li>
-              <Link className="active" to="/">
-                Trang chủ
+              <Link className="active" to="/managePost">
+                Quản lý bài đăng
               </Link>
             </li>
             <li>
-              <Link className="active" to="/wishlist">
-                Danh sách yêu thích
+              <Link className="active" to="/manageCompany">
+                Quản lý công ty
               </Link>
             </li>
             <li>
-              <Link className="active" to="/updateUser">
-                Cài đặt gợi ý việc làm
+              <Link className="active" to="/manageMajor">
+                Quản lý ngành nghề
               </Link>
             </li>
             <li>
-              <Link className="active" to="/compare">
-                So sánh việc làm
+              <Link className="active" to="/manageWorkPlace">
+                Quản lý địa điểm làm việc
+              </Link>
+            </li>
+            <li>
+              <Link className="active" to="/manageUser">
+                Quản lý người dùng
+              </Link>
+            </li>
+            <li>
+              <Link className="active" to="/manageComment">
+                Quản lý bình luận
               </Link>
             </li>
             {/* <li>
@@ -102,6 +111,6 @@ const mapStateToProps = (state) => ({
   errors: state.errors,
 });
 
-const mapDispatchToProps = { };
+const mapDispatchToProps = {};
 
 export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Header));
