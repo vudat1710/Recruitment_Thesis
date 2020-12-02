@@ -7,7 +7,7 @@ import axios from "axios";
 
 export const getCompanyById = (companyId) => async (dispatch) => {
   const res = await axios.post(`/api/company/getCompanyById`, { companyId });
-  if (res.status !== 400) {
+  if (res.data.status !== 400) {
     dispatch({
       type: GET_COMPANY_BY_ID,
       payload: res.data,
@@ -22,7 +22,7 @@ export const getCompanyById = (companyId) => async (dispatch) => {
 
 export const getPostByCompanyId = (params) => async (dispatch) => {
   const res = await axios.post(`/api/post/getPostByCompanyId`, params );
-  if (res.status !== 400) {
+  if (res.data.status !== 400) {
     dispatch({
       type: GET_POST_BY_COMPANY_ID,
       payload: res.data,

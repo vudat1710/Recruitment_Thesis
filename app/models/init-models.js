@@ -37,7 +37,9 @@ function initModels(sequelize, Sequelize) {
   ActionTypeItem.belongsTo(ActionType, { foreignKey: "actionTypeId"});
   ActionType.hasMany(ActionTypeItem, { foreignKey: "actionTypeId"});
   ActionTypeItem.belongsTo(User, { foreignKey: "userId"});
+  ActionTypeItem.belongsTo(Post, { foreignKey: "postId"});
   User.hasMany(ActionTypeItem, { foreignKey: "userId"});
+  Post.hasMany(ActionTypeItem, { foreignKey: "postId"});
   CommentPost.belongsTo(Post, { foreignKey: "postId"});
   Post.hasMany(CommentPost, { foreignKey: "postId"});
   CommentPost.belongsTo(User, { foreignKey: "userId"});
@@ -80,6 +82,7 @@ function initModels(sequelize, Sequelize) {
   User.belongsToMany(Major, { through: MajorItem, foreignKey: 'userId' });
   Major.belongsToMany(User, { through: MajorItem, foreignKey: 'majorId' });
   User.belongsToMany(ActionType, { through: ActionTypeItem, foreignKey: 'userId' });
+  Post.belongsToMany(ActionType, { through: ActionTypeItem, foreignKey: 'postId' });
   ActionType.belongsToMany(User, { through: ActionTypeItem, foreignKey: 'actionTypeId' });
   Post.belongsToMany(Company, { through: PostCompany, foreignKey: 'postId' });
   Company.belongsToMany(Post, { through: PostCompany, foreignKey: 'companyId' });

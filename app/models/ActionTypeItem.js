@@ -25,6 +25,14 @@ module.exports = function(sequelize, DataTypes) {
         key: 'userId'
       }
     },
+    postId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'Post',
+        key: 'postId'
+      }
+    },
     value: {
       type: DataTypes.INTEGER,
       allowNull: false
@@ -64,6 +72,13 @@ module.exports = function(sequelize, DataTypes) {
           { name: "userId" },
         ]
       },
+      {
+        name: "postIdAction_idx",
+        using: "BTREE",
+        fields: [
+          { name: "postId" },
+        ]
+      }
     ]
   });
 };

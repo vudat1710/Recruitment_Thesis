@@ -1,5 +1,4 @@
 const db = require("../models");
-const Company = require("../models/Company");
 const Post = db.Post;
 const WorkPlace = db.WorkPlace;
 const Major = db.Major;

@@ -13,6 +13,7 @@ const majorRouter = require("./routes/major.routes");
 const workplaceRouter = require("./routes/workplace.routes");
 const companyRouter = require("./routes/company.routes");
 const statsRouter = require("./routes/stats.routes");
+const actionRouter = require("./routes/action.routes");
 require('./configs/passport')(passport);
 
 const app = express();
@@ -46,6 +47,7 @@ app.use('/api/major', majorRouter);
 app.use('/api/workplace', workplaceRouter);
 app.use('/api/company', companyRouter);
 app.use('/api/stats', statsRouter);
+app.use('/api/action', actionRouter);
 
 // app.use((req, res, next) => {
 //   next(createError(404));

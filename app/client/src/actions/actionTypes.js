@@ -7,6 +7,9 @@ export const CLEAR_CURRENT_PROFILE = 'CLEAR_CURRENT_PROFILE';
 export const GET_USER_BY_USER_ID = 'GET_USER_BY_USER_ID';
 export const UPDATE_USER = 'UPDATE_USER';
 
+
+export const GET_CLICK_POST_EVENT = 'GET_CLICK_POST_EVENT';
+
 //Post actions
 export const GET_POSTS = 'GET_POSTS';
 export const GET_DATA_AUTOCOMPLETE = "GET_DATA_AUTOCOMPLETE";

@@ -13,6 +13,7 @@ import {
   ratePost,
   getRateByUserIdPostId,
 } from "../../actions/post.action";
+import { getClickPostEvent } from "../../actions/user.action";
 import { experienceDict } from "../../utils/utils";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
@@ -51,6 +52,11 @@ class PostDetails extends Component {
   async componentDidMount() {
     await this.props.getPostById(this.state.postId);
     if (this.props.auth.isAuthenticated) {
+      await this.props.getClickPostEvent({
+        postId: this.state.postId,
+        userId: localStorage.userId,
+        name: "CLICK_POST"
+      })
       await this.props.getWishList({
         userId: localStorage.userId,
       });
@@ -460,6 +466,7 @@ PostDetails.propTypes = {
   getWishList: PropTypes.func.isRequired,
   removeFromWishList: PropTypes.func.isRequired,
   getRateByUserIdPostId: PropTypes.func.isRequired,
+  getPostById: PropTypes.func.isRequired
 };
 
 const mapStateToProps = (state) => ({
@@ -475,6 +482,7 @@ const mapDispatchToProps = {
   getWishList,
   removeFromWishList,
   getRateByUserIdPostId,
+  getClickPostEvent
 };
 
 export default connect(

@@ -10,7 +10,6 @@ import {
 import PropTypes from "prop-types";
 import AutoCompleteText from "../HOC/AutoCompleteText";
 import Pagination from "../Pagination/Pagination";
-// import classnames from "classnames";
 
 function assign(obj, value) {
   obj[value] = !obj[value];

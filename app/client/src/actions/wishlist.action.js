@@ -8,7 +8,7 @@ import axios from "axios";
 
 export const getWishList = (params) => async (dispatch) => {
   const res = await axios.post(`/api/other/getWishList`, params);
-  if (res.status !== 400) {
+  if (res.data.status !== 400) {
     dispatch({
       type: GET_WISHLIST,
       payload: res.data,
@@ -23,7 +23,7 @@ export const getWishList = (params) => async (dispatch) => {
 
 export const addToWishList = (params) => async (dispatch) => {
   const res = await axios.post(`/api/other/addToWishList`, params);
-  if (res.status !== 400) {
+  if (res.data.status !== 400) {
     dispatch({
       type: ADD_TO_WISHLIST,
       payload: "success",
@@ -38,7 +38,7 @@ export const addToWishList = (params) => async (dispatch) => {
 
 export const removeFromWishList = (params) => async (dispatch) => {
   const res = await axios.post(`/api/other/removeFromWishList`, params);
-  if (res.status !== 400) {
+  if (res.data.status !== 400) {
     dispatch({
       type: REMOVE_FROM_WISHLIST,
       payload: "success",

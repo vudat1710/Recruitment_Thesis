@@ -38,6 +38,8 @@ import EditableMajor from "./components/ManageMajor/EditableMajor";
 import ManageUser from "./components/ManageUser/ManageUser";
 import UserDetails from "./components/ManageUser/UserDetails";
 import ManageComment from "./components/ManageComment/ManageComment";
+import ManageActionType from "./components/ManageActionType/ManageActionType";
+import EditableActionType from "./components/ManageActionType/EditableActionType";
 
 class App extends Component {
   render() {
@@ -63,6 +65,9 @@ class App extends Component {
             <Route exact path="/manageUser" component={ManageUser}/>
             <Route exact path="/user/:id" component={UserDetails} />
             <Route exact path="/manageComment" component={ManageComment}/>
+            <Route exact path="/manageActionType" component={ManageActionType}/>
+            <Route exact path="/editActionType/:id" component={EditableActionType} />
+            <Route exact path="/addActionType" component={EditableActionType} />
           </BrowserRouter>
           <Footer />
         </Provider>

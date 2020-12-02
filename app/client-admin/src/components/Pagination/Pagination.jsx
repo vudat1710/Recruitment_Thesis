@@ -7,6 +7,7 @@ import { getWorkPlaceByName } from "../../actions/workplace.action";
 import { getMajorByName } from "../../actions/major.action";
 import { searchUsers } from "../../actions/user.action";
 import { searchComments } from "../../actions/post.action";
+import { getActionTypeByName } from "../../actions/action.action";
 
 function range(start, end) {
   return Array(end - start + 1)
@@ -43,6 +44,8 @@ class Pagination extends Component {
       await this.props.searchUsers(searchData);
     } else if (type === "comment") {
       await this.props.searchComments(searchData);
+    } else if (type === "actions") {
+      await this.props.getActionTypeByName(searchData);
     }
     if (type === "search" || type === "company") {
       this.setState({
@@ -94,7 +97,17 @@ class Pagination extends Component {
         ...this.state,
         resultPosts: this.props.comments.searchResults,
       });
-    } 
+    }  else if (type === "actions") {
+      this.setState({
+        ...this.state,
+        currentPage: page,
+        resultPosts: this.props.actions.searchResults
+      })
+      this.props.getChildState({
+        ...this.state,
+        resultPosts: this.props.actions.searchResults,
+      });
+    }
   }
 
   componentDidMount() {
@@ -221,10 +234,11 @@ Pagination.propTypes = {
   getMajorByName: PropTypes.func.isRequired,
   searchUsers: PropTypes.func.isRequired,
   searchComments: PropTypes.func.isRequired,
+  getActionTypeByName: PropTypes.func.isRequired
 };
 
-const mapStateToProps = (state) => ({ posts: state.posts, company: state.company, workPlace: state.workPlace, major: state.major, user: state.user, comments: state.comments });
+const mapStateToProps = (state) => ({ posts: state.posts, company: state.company, workPlace: state.workPlace, major: state.major, user: state.user, comments: state.comments, actions: state.actions });
 
-const mapDispatchToProps = { searchPosts, getPostByCompanyId, searchCompanies, getWorkPlaceByName, getMajorByName, searchUsers, searchComments };
+const mapDispatchToProps = { searchPosts, getPostByCompanyId, searchCompanies, getWorkPlaceByName, getMajorByName, searchUsers, searchComments, getActionTypeByName };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Pagination);

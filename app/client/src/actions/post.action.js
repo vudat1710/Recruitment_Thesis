@@ -55,7 +55,7 @@ export const searchPosts = (searchParams) => async (dispatch) => {
 
 export const getPostById = (postId) => async (dispatch) => {
   const res = await axios.post(`/api/post/getPostById`, { postId });
-  if (res.status !== 400) {
+  if (res.data.status !== 400) {
     dispatch({
       type: GET_POST_BY_ID,
       payload: res.data,
@@ -70,7 +70,7 @@ export const getPostById = (postId) => async (dispatch) => {
 
 export const postComment = (params) => async (dispatch) => {
   const res = await axios.post(`/api/post/comment`, params);
-  if (res.status !== 400) {
+  if (res.data.status !== 400) {
     dispatch({
       type: POST_COMMENT,
       payload: "success",
@@ -85,7 +85,7 @@ export const postComment = (params) => async (dispatch) => {
 
 export const ratePost = (params) => async (dispatch) => {
   const res = await axios.post(`/api/post/rate`, params);
-  if (res.status !== 400) {
+  if (res.data.status !== 400) {
     dispatch({
       type: RATE_POST,
       payload: "success",
@@ -100,7 +100,7 @@ export const ratePost = (params) => async (dispatch) => {
 
 export const getRateByUserIdPostId = (params) => async (dispatch) => {
   const res = await axios.post(`/api/post/getRateByUserIdPostId`, params);
-  if (res.status !== 400) {
+  if (res.data.status !== 400) {
     dispatch({
       type: GET_RATE_BY_USER_ID_POST_ID,
       payload: res.data,
@@ -115,7 +115,7 @@ export const getRateByUserIdPostId = (params) => async (dispatch) => {
 
 export const deleteComment = (params) => async (dispatch) => {
   const res = await axios.post(`/api/post/deleteComment`, params);
-  if (res.status !== 400) {
+  if (res.data.status !== 400) {
     dispatch({
       type: DELETE_COMMENT,
       payload: "success",
@@ -130,7 +130,7 @@ export const deleteComment = (params) => async (dispatch) => {
 
 export const getCommentByPostId = (postId) => async (dispatch) => {
   const res = await axios.post(`/api/post/getCommentByPostId`, { postId });
-  if (res.status !== 400) {
+  if (res.data.status !== 400) {
     dispatch({
       type: GET_COMMENT_BY_POST_ID,
       payload: res.data,
@@ -145,7 +145,7 @@ export const getCommentByPostId = (postId) => async (dispatch) => {
 
 export const compare = (params) => async (dispatch) => {
   const res = await axios.post(`/api/post/compare`, params);
-  if (res.status !== 400) {
+  if (res.data.status !== 400) {
     dispatch({
       type: COMPARE,
       payload: res.data.data,

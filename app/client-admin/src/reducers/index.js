@@ -6,6 +6,7 @@ import workPlaceReducer from './workplace.reducer';
 import majorReducer from './major.reducer';
 import userReducer from './user.reducer';
 import commentReducer from './comment.reducer';
+import actionReducer from './action.reducer';
 
 export default combineReducers({
   posts: postReducer,
@@ -15,4 +16,5 @@ export default combineReducers({
   major: majorReducer,
   user: userReducer,
   comments: commentReducer,
+  actions: actionReducer
 });
