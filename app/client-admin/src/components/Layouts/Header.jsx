@@ -4,6 +4,7 @@ import { connect } from "react-redux";
 import Logo from "../../assets/img/logo.png";
 import UserLogo from "../../assets/img/logo_user.png";
 import classnames from "classnames";
+import "./Header.scss";
 
 const userLoginA = {
   color: "#7e8890",
