@@ -50,5 +50,13 @@ export const DELETE_COMPANY = 'DELETE_COMPANY';
 export const UPDATE_COMPANY = 'UPDATE_COMPANY';
 export const ADD_COMPANY = 'ADD_COMPANY';
 
+//Stats actions
+export const GET_MAJOR_STATS = 'GET_MAJOR_STATS';
+export const GET_WORKPLACE_STATS = 'GET_WORKPLACE_STATS';
+export const GET_JOB_TYPE_STATS = 'GET_JOB_TYPE_STATS';
+export const GET_EXPERIENCE_STATS = 'GET_EXPERIENCE_STATS';
+export const GET_GENDER_STATS = 'GET_GENDER_STATS';
+export const GET_SALARY_STATS = 'GET_SALARY_STATS';
+
 //Handle errors
 export const GET_ERRORS = 'GET_ERRORS';

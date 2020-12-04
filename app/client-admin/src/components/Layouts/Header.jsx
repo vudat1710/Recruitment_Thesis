@@ -70,35 +70,11 @@ class Header extends Component {
                 Quản lý bình luận
               </Link>
             </li>
-            {/* <li>
-              <a href="#">Pages</a>
-              <ul>
-                <li>
-                  <a href="page-blog.html">Blog</a>
-                </li>
-                <li>
-                  <a href="page-post.html">Blog-post</a>
-                </li>
-                <li>
-                  <a href="page-about.html">About</a>
-                </li>
-                <li>
-                  <a href="page-contact.html">Contact</a>
-                </li>
-                <li>
-                  <a href="page-faq.html">FAQ</a>
-                </li>
-                <li>
-                  <a href="page-pricing.html">Pricing</a>
-                </li>
-                <li>
-                  <a href="page-typography.html">Typography</a>
-                </li>
-                <li>
-                  <a href="page-ui-elements.html">UI elements</a>
-                </li>
-              </ul>
-            </li> */}
+            <li>
+              <Link className="active" to="/stats">
+                Xem thống kê
+              </Link>
+            </li>
           </ul>
         </div>
       </nav>

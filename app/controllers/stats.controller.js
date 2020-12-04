@@ -34,13 +34,15 @@ exports.getMajorStats = (req, res) => {
           res.send(result);
         })
         .catch((err) => {
-          res.status(500).send({
+          res.send({
+            status: 400,
             message: err.message || "Some errors occurred.",
           });
         });
     })
     .catch((err) => {
-      res.status(500).send({
+      res.send({
+        status: 400,
         message: err.message || "Some errors occurred.",
       });
     });
@@ -70,13 +72,15 @@ exports.getWorkPlaceStats = (req, res) => {
           res.send(result);
         })
         .catch((err) => {
-          res.status(500).send({
+          res.send({
+            status: 400,
             message: err.message || "Some errors occurred.",
           });
         });
     })
     .catch((err) => {
-      res.status(500).send({
+      res.send({
+        status: 400,
         message: err.message || "Some errors occurred.",
       });
     });
@@ -110,13 +114,15 @@ exports.getJobTypeStats = (req, res) => {
           res.send(result);
         })
         .catch((err) => {
-          res.status(500).send({
+          res.send({
+            status: 400,
             message: err.message || "Some errors occurred.",
           });
         });
     })
     .catch((err) => {
-      res.status(500).send({
+      res.send({
+        status: 400,
         message: err.message || "Some errors occurred.",
       });
     });
@@ -153,13 +159,15 @@ exports.getExperienceStats = (req, res) => {
           res.send(result);
         })
         .catch((err) => {
-          res.status(500).send({
+          res.send({
+            status: 400,
             message: err.message || "Some errors occurred.",
           });
         });
     })
     .catch((err) => {
-      res.status(500).send({
+      res.send({
+        status: 400,
         message: err.message || "Some errors occurred.",
       });
     });
@@ -193,54 +201,61 @@ exports.getGenderStats = (req, res) => {
           res.send(result);
         })
         .catch((err) => {
-          res.status(500).send({
+          res.send({
+            status: 400,
             message: err.message || "Some errors occurred.",
           });
         });
     })
     .catch((err) => {
-      res.status(500).send({
+      res.send({
+        status: 400,
         message: err.message || "Some errors occurred.",
       });
     });
 };
 
 exports.getSalaryStats = (req, res) => {
-    let result = {};
-    Post.findAndCountAll({
-      attributes: [
-        [db.sequelize.fn("DISTINCT", db.sequelize.col("salary_type")), "salary_type"],
+  let result = {};
+  Post.findAndCountAll({
+    attributes: [
+      [
+        db.sequelize.fn("DISTINCT", db.sequelize.col("salary_type")),
+        "salary_type",
       ],
-    })
-      .then((data) => {
-        const { rows: salaryTypes } = data;
-        let allReq = [];
-        for (let i = 0; i < salaryTypes.length; i++) {
-          const salaryType = salaryTypes[i];
-          const item = Post.count({
-            where: {
-              salary_type: salaryType.salary_type,
-            },
-          });
-          allReq.push(item);
-        }
-  
-        Promise.all(allReq)
-          .then((response) => {
-            for (let i = 0; i < response.length; i++) {
-              result[salaryTypes[i].salary_type] = response[i];
-            }
-            res.send(result);
-          })
-          .catch((err) => {
-            res.status(500).send({
-              message: err.message || "Some errors occurred.",
-            });
-          });
-      })
-      .catch((err) => {
-        res.status(500).send({
-          message: err.message || "Some errors occurred.",
+    ],
+  })
+    .then((data) => {
+      const { rows: salaryTypes } = data;
+      let allReq = [];
+      for (let i = 0; i < salaryTypes.length; i++) {
+        const salaryType = salaryTypes[i];
+        const item = Post.count({
+          where: {
+            salary_type: salaryType.salary_type,
+          },
         });
+        allReq.push(item);
+      }
+
+      Promise.all(allReq)
+        .then((response) => {
+          for (let i = 0; i < response.length; i++) {
+            result[salaryTypes[i].salary_type] = response[i];
+          }
+          res.send(result);
+        })
+        .catch((err) => {
+          res.send({
+            status: 400,
+            message: err.message || "Some errors occurred.",
+          });
+        });
+    })
+    .catch((err) => {
+      res.send({
+        status: 400,
+        message: err.message || "Some errors occurred.",
       });
+    });
 };

@@ -41,6 +41,7 @@ export const getDataAutoComplete = () => async (dispatch) => {
       experience: res.data.experience,
       numPosts: res.data.num_posts,
       qualifications: res.data.qualifications,
+      numCompanies: res.data.num_companies
     },
   });
 };

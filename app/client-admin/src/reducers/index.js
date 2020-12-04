@@ -7,6 +7,7 @@ import majorReducer from './major.reducer';
 import userReducer from './user.reducer';
 import commentReducer from './comment.reducer';
 import actionReducer from './action.reducer';
+import statsReducer from './stats.reducer';
 
 export default combineReducers({
   posts: postReducer,
@@ -16,5 +17,6 @@ export default combineReducers({
   major: majorReducer,
   user: userReducer,
   comments: commentReducer,
-  actions: actionReducer
+  actions: actionReducer,
+  stats: statsReducer
 });

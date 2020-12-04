@@ -5,6 +5,7 @@ import errorReducer from './error.reducer';
 import wishListReducer from './wishlist.reducer';
 import companyReducer from './company.reducer';
 import userReducer from './user.reducer';
+import statsReducer from './stats.reducer';
 
 export default combineReducers({
   posts: postReducer,
@@ -13,4 +14,5 @@ export default combineReducers({
   company: companyReducer,
   errors: errorReducer,
   user: userReducer,
+  stats: statsReducer,
 });

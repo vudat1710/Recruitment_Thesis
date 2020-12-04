@@ -2,6 +2,7 @@ const db = require("../models");
 const Post = db.Post;
 const WorkPlace = db.WorkPlace;
 const Major = db.Major;
+const Company = db.Company;
 const Op = db.Sequelize.Op;
 
 exports.getDataAutoComplete = (req, res) => {
@@ -38,6 +39,7 @@ exports.getDataAutoComplete = (req, res) => {
   const majors = Major.findAll({ attributes: ["name"] });
   const workplaces = WorkPlace.findAll({ attributes: ["name"] });
   const num_posts = Post.count();
+  const num_companies = Company.count();
 
   const qualifications = Post.findAll({
     attributes: [
@@ -57,6 +59,7 @@ exports.getDataAutoComplete = (req, res) => {
     workplaces,
     num_posts,
     qualifications,
+    num_companies,
   ])
     .then((responses) => {
       returnData["positions"] = responses[0].map((a) => a.position);
@@ -79,6 +82,7 @@ exports.getDataAutoComplete = (req, res) => {
       }
 
       returnData["qualifications"] = a;
+      returnData["num_companies"] = responses[8];
       res.send(returnData);
     })
     .catch((err) => {
