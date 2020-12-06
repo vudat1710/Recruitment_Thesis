@@ -144,7 +144,7 @@ class UpdateInfo extends Component {
       experience = experience ? experience : "1";
       jobType = jobType ? jobType : "Toàn thời gian";
       salary = salary ? salary : "Tất cả mức lương";
-      qualification = qualification ? qualification : "không yêu cầu";
+      qualification = qualification ? qualification : "Không yêu cầu";
 
       const age =
         parseInt(new Date().getFullYear()) -

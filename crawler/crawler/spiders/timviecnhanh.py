@@ -104,7 +104,7 @@ class TVNCrawler(CrawlSpider):
         item = TVNCompanyItem()
         item["name"] = response.xpath('//header[@class="block-title"]/h1/span/text()').extract_first().strip()
         item["company_url"] = response.url.replace("www.", "")
-        item["description"] = ''.join(response.xpath('//span[@id="description_detail_full"]//text()').extract())
+        item["description"] = '\n'.join(normalize_long_text(response.xpath('//span[@id="description_detail_full"]//text()').extract())).strip()
         item["address"] = response.xpath('//div[@class="block-sidebar"]/div/div/p[1]/text()').extract_first().strip()
 
         yield item

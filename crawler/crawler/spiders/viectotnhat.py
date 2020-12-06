@@ -109,7 +109,7 @@ class VTNCrawler(CrawlSpider):
         item = VTNCompanyItem()
         item["name"] = response.xpath('//h2[@class="company-name"]/text()').extract_first().strip()
         item["company_url"] = response.url.replace("www.", "")
-        item["description"] = ''.join(response.xpath('//span[@id="company_info"]//text()').extract())
+        item["description"] = '\n'.join(normalize_long_text(response.xpath('//span[@id="company_info"]//text()').extract())).strip()
         item["address"] = response.xpath('//td[@class="detail-info-company"]/span/text()').extract_first().strip()
 
         yield item

@@ -48,9 +48,9 @@ class PostNormalization:
 
     def get_qualification(self, extra_requirements):
         word_list = word_tokenize(extra_requirements.lower())
-        qualification = [x for x in word_list if x in self.qualification_list]
+        qualification = [x.capitalize() for x in word_list if x in self.qualification_list]
         if len(qualification) == 0:
-            return "không yêu cầu"
+            return "không yêu cầu".capitalize()
         else: return ", ".join(qualification)
 
     def normalize_gender(self, gender):
