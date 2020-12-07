@@ -45,10 +45,13 @@ class DuplicateFiltering:
         for y in Y:
             matched = True
             for i in range(self.num_fields_checked):
-                value_to_compare = len(y[i]) / len(X[i])
-                if not (1 / self.sim_threshold <= value_to_compare <= self.sim_threshold):
+                try:
+                    value_to_compare = len(y[i]) / len(X[i])
+                    if not (1 / self.sim_threshold <= value_to_compare <= self.sim_threshold):
+                        matched = False
+                        break
+                except:
                     matched = False
-                    break
             if matched:
                 candidates.append(y)
         

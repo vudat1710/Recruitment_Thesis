@@ -92,7 +92,7 @@ CREATE TABLE `Post` (
   `address` varchar(300) DEFAULT NULL,
   `post_url` varchar(250) DEFAULT NULL,
   `qualification` varchar(70) DEFAULT NULL,
-  `position` varchar(70) DEFAULT NULL,
+  `position` varchar(150) DEFAULT NULL,
   `contact_name` varchar(100) DEFAULT NULL,
   `min_value` int DEFAULT NULL,
   `max_value` int DEFAULT NULL,

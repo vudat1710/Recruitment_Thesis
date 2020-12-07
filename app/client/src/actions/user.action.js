@@ -41,6 +41,10 @@ export const updateUser = (params) => async (dispatch) => {
       type: UPDATE_USER,
       payload: "success",
     });
+    dispatch({
+      type: GET_ERRORS,
+      payload: {},
+    });
   } else {
     dispatch({
       type: GET_ERRORS,

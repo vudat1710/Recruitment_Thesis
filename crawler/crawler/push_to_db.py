@@ -186,7 +186,7 @@ if __name__ == "__main__":
     # companies = json.load(open('./crawler/data/topcv/company.json', 'r'))
     merged_data = []
     # post_normalization = PostNormalization()
-    merged = json.load(open('./crawler/data/topcv/norm_post.json', 'r'))
+    merged = json.load(open('./crawler/data/viectotnhat/norm_post.json', 'r'))
     for post in merged:
         if post:
             merged_data.append(post)

@@ -7,6 +7,7 @@ const validateRegisterInput = require("../validation/register");
 const validateLoginInput = require("../validation/login");
 const validateChangePassword = require("../validation/changePassword");
 const validateForgotPassword = require("../validation/forgotPassword");
+const validateUpdateUser = require("../validation/updateUser");
 const User = db.User;
 const secretOrKey = "vudat1710";
 const WorkPlace = db.WorkPlace;
@@ -161,6 +162,10 @@ exports.findUserById = (req, res) => {
 };
 
 exports.updateUser = (req, res) => {
+  const { errors, isValid } = validateUpdateUser(req.body);
+  if (!isValid) {
+    return res.json({ status: 400, errors: errors });
+  }
   const { majors, workplaces, user_name } = req.body;
   User.findOne({
     where: { user_name: user_name },

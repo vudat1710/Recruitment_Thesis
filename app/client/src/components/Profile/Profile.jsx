@@ -25,6 +25,7 @@ class UpdateInfo extends Component {
       majors: [],
       isLoading: true,
       dataAuto: null,
+      errors: {},
     };
   }
   async componentDidMount() {
@@ -118,6 +119,7 @@ class UpdateInfo extends Component {
       majors,
       isLoading,
       dataAuto,
+      errors,
     } = this.state;
 
     let alertSucc = !this.state.success ? (
@@ -146,6 +148,17 @@ class UpdateInfo extends Component {
       salary = salary ? salary : "Tất cả mức lương";
       qualification = qualification ? qualification : "Không yêu cầu";
 
+      let first = <></>;
+
+      if (majors.length === 0 || workplaces.length === 0) {
+        first = (
+          <div className="alert alert-info" role="alert">
+            <strong>Thông tin cá nhân của bạn chưa đầy đủ!</strong> Hãy cập nhật
+            đầy đủ thông tin để có được gợi ý về các công việc trên hệ thống.
+          </div>
+        );
+      }
+
       const age =
         parseInt(new Date().getFullYear()) -
         parseInt(this.state.yearOfBirth.split("-")[0]);
@@ -159,6 +172,7 @@ class UpdateInfo extends Component {
                 Thay đổi thông tin cá nhân để được gợi ý tốt nhất.
               </p>
             </div>
+            {first}
 
             <div className="container">
               <div className="row">
@@ -321,6 +335,14 @@ class UpdateInfo extends Component {
                       getChildState={this.getChildState}
                       placeholder="Ngành nghề mong muốn"
                     />
+                    {errors.majors && (
+                      <div
+                        className="invalid-feedback"
+                        style={{ color: "red" }}
+                      >
+                        {errors.majors}
+                      </div>
+                    )}
                     <span className="help-block">
                       Viết và lựa chọn trong danh sách gợi ý
                     </span>
@@ -337,6 +359,14 @@ class UpdateInfo extends Component {
                       getChildState={this.getChildState}
                       placeholder="Địa điểm làm việc mong muốn"
                     />
+                    {errors.workplaces && (
+                      <div
+                        className="invalid-feedback"
+                        style={{ color: "red" }}
+                      >
+                        {errors.workplaces}
+                      </div>
+                    )}
                     <span className="help-block">
                       Viết và lựa chọn trong danh sách gợi ý
                     </span>

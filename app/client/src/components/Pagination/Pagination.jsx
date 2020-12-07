@@ -26,11 +26,11 @@ class Pagination extends Component {
   async onClickPage(page, searchData) {
     searchData.page = page;
     const { type } = this.state;
-
-    if (type === "search") {
-      await this.props.searchPosts(searchData);
-    } else if (type === "company") {
+    
+    if (type === "company") {
       await this.props.getPostByCompanyId(searchData);
+    } else {
+      await this.props.searchPosts(searchData);
     }
     this.setState({
       ...this.state,
@@ -58,7 +58,7 @@ class Pagination extends Component {
     let element = [];
 
     if (totalPages <= 5) {
-      const newArr = range(1,totalPages);
+      const newArr = range(1, totalPages);
       newArr.map((page) => {
         if (page === currentPage) {
           element.push(

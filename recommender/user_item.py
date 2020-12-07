@@ -14,7 +14,7 @@ def experience_attr(u, x):
         else:
             return (1 - (x - u) / 5)
 
-def workplace_attr(u, x):
+def workplace_qualification_attr(u, x):
     u = set([item.strip() for item in u.split(",")])
     x = set([item.strip() for item in x.split(",")])
     
@@ -28,3 +28,6 @@ def major_attr(u, x):
     x = set([item.strip() for item in x.split(",")])
 
     return len(u.intersection(x)) / len(u.union(x))
+
+
+u = {"gender": "Nam", "experience": 2, "qualification": "Đại học", "job_type": "Toàn thời gian", "salary": "15-20 triệu", "workplaces": "Hà Nội, Hồ Chí Minh", "majors": "CNTT - Phần mềm"}

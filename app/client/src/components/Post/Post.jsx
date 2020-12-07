@@ -385,7 +385,7 @@ class PostDetails extends Component {
                     <ul>
                       {postDesc
                         ? postDesc.map((item) => {
-                            if (item.trim() !== "") return <li>{item}</li>;
+                            if (item.trim() !== "") return <p>{item}</p>;
                           })
                         : postDetails.description}
                     </ul>
@@ -395,7 +395,7 @@ class PostDetails extends Component {
                     <ul>
                       {extraReqs
                         ? extraReqs.map((item) => {
-                            if (item.trim() !== "") return <li>{item}</li>;
+                            if (item.trim() !== "") return <p>{item}</p>;
                           })
                         : postDetails.extra_requirements}
                     </ul>
@@ -405,7 +405,7 @@ class PostDetails extends Component {
                     <ul>
                       {jobBenefits
                         ? jobBenefits.map((item) => {
-                            if (item.trim() !== "") return <li>{item}</li>;
+                            if (item.trim() !== "") return <p>{item}</p>;
                           })
                         : postDetails.job_benefits}
                     </ul>

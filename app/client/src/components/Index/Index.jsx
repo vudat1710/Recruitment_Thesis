@@ -7,6 +7,7 @@ import HowItWork from "../../assets/img/job-vacancy.jpg";
 import BGFact from "../../assets/img/bg-facts.jpg";
 import { getPostById } from "../../actions/post.action";
 import { Link, withRouter } from "react-router-dom";
+import { getUserByUserId } from "../../actions/user.action";
 
 class Index extends Component {
   constructor(props) {
@@ -17,6 +18,12 @@ class Index extends Component {
   }
 
   async componentDidMount() {
+    if (this.props.auth.isAuthenticated) {
+      await this.props.getUserByUserId(localStorage.userId);
+      if (this.props.user.user.qualification === null && this.props.user.user.salary === null && this.props.user.user.Majors.length === 0 && this.props.user.user.WorkPlaces.length === 0) {
+        this.props.history.push("/updateUser");
+      }
+    }
     await this.props.getPosts({
       type: "home",
       limit: 5,
@@ -309,17 +316,20 @@ class Index extends Component {
 
 Index.propTypes = {
   posts: PropTypes.object.isRequired,
+  auth: PropTypes.object.isRequired,
   getPosts: PropTypes.func.isRequired,
   getPostById: PropTypes.func.isRequired,
+  getPosts: PropTypes.func.isRequired
 };
 
 const mapStateToProps = (state) => ({
-  posts: state.posts,
+  posts: state.posts,  user: state.user, auth: state.auth
 });
 
 const mapDispatchToProps = {
   getPosts,
   getPostById,
+  getUserByUserId
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Index);
