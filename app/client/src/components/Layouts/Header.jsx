@@ -67,8 +67,8 @@ class Header extends Component {
           <Link className="links" to="/wishlist">
             Danh sách yêu thích
           </Link>
-          <Link className="links" to="/updateUser">
-            Cài đặt gợi ý việc làm
+          <Link className="links" to="/recommend">
+            Việc làm phù hợp
           </Link>
           <Link className="links" to="/compare">
             So sánh việc làm

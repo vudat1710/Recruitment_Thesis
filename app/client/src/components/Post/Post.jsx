@@ -13,6 +13,7 @@ import {
   ratePost,
   getRateByUserIdPostId,
 } from "../../actions/post.action";
+import { getRelatedItems } from "../../actions/recommend.action";
 import { getClickPostEvent } from "../../actions/user.action";
 import { experienceDict } from "../../utils/utils";
 import { connect } from "react-redux";
@@ -42,6 +43,7 @@ class PostDetails extends Component {
       isAdded: false,
       canCompare: false,
       isAddedCompare: "",
+      relatedPosts: []
     };
   }
 
@@ -69,6 +71,8 @@ class PostDetails extends Component {
           isAdded: true,
         });
       }
+
+      await this.props.getRelatedItems(this.props.posts.postDetails);
     }
     const userRate =
       this.props.posts.postDetails.RatePosts.length !== 0 && localStorage.userId
@@ -78,6 +82,7 @@ class PostDetails extends Component {
         : 0;
     this.setState({
       ...this.state,
+      relatedPosts: this.props.recommend.items,
       postDetails: this.props.posts.postDetails,
       isLoading: true,
       valueRating: userRate,
@@ -156,7 +161,7 @@ class PostDetails extends Component {
   };
 
   render() {
-    const { postDetails, isLoading } = this.state;
+    const { postDetails, isLoading, relatedPosts } = this.state;
     const { isAuthenticated } = this.props.auth;
 
     if (!isLoading) {
@@ -168,6 +173,52 @@ class PostDetails extends Component {
         </div>
       );
     } else {
+      console.log(relatedPosts)
+      const PostContent = relatedPosts.map((post) => {
+        return (
+          <div className="col-xs-12">
+            <a className="item-block" href={`/post/${post.post.postId}`}>
+              <header>
+                <img src={post.post.Companies[0].img_url} alt="" />
+                <div className="hgroup">
+                  <h4>{post.post.title}</h4>
+                  <h5>
+                    {post.post.Companies[0].name}{" "}
+                    <span className="label label-success">{post.post.job_type}</span>
+                  </h5>
+                </div>
+                <time datetime="2016-03-10 20:00">
+                  Deadline: {post.post.valid_through}
+                </time>
+              </header>
+
+              <footer>
+                <ul className="details cols-3">
+                  <li>
+                    <i className="fa fa-map-marker"></i>
+                    <span>{post.post.WorkPlaces}</span>
+                  </li>
+
+                  <li>
+                    <i className="fa fa-money"></i>
+                    <span>{post.post.salary_type}</span>
+                  </li>
+
+                  {post.post.qualification ? (
+                    <li>
+                      <i className="fa fa-certificate"></i>
+                      <span>{post.post.qualification}</span>
+                    </li>
+                  ) : (
+                    <></>
+                  )}
+                </ul>
+              </footer>
+            </a>
+          </div>
+        );
+      });
+
       let addToWishList =
         this.state.isAdded === false ? (
           <a
@@ -449,6 +500,23 @@ class PostDetails extends Component {
                 </div>
               </div>
             </section>
+
+            {this.props.auth.isAuthenticated ? (
+            <section>
+              <div className="container">
+                <header className="section-header">
+                  <span>Các việc làm tương tự</span>
+                  <h2>Công việc tương tự với công việc này</h2>
+                </header>
+
+                <div className="row item-blocks-condensed">
+                  {PostContent}
+                </div>
+              </div>
+            </section>
+          ) : (
+            <></>
+          )}
             {/* } */}
           </main>
         </>
@@ -459,6 +527,7 @@ class PostDetails extends Component {
 
 PostDetails.propTypes = {
   posts: PropTypes.object.isRequired,
+  recommend: PropTypes.object.isRequired,
   getPostById: PropTypes.func.isRequired,
   wishlist: PropTypes.object.isRequired,
   ratePost: PropTypes.func.isRequired,
@@ -466,12 +535,14 @@ PostDetails.propTypes = {
   getWishList: PropTypes.func.isRequired,
   removeFromWishList: PropTypes.func.isRequired,
   getRateByUserIdPostId: PropTypes.func.isRequired,
-  getPostById: PropTypes.func.isRequired
+  getPostById: PropTypes.func.isRequired,
+  getRelatedItems: PropTypes.func.isRequired
 };
 
 const mapStateToProps = (state) => ({
   posts: state.posts,
   wishlist: state.wishlist,
+  recommend: state.recommend,
   auth: state.auth,
 });
 
@@ -482,7 +553,8 @@ const mapDispatchToProps = {
   getWishList,
   removeFromWishList,
   getRateByUserIdPostId,
-  getClickPostEvent
+  getClickPostEvent,
+  getRelatedItems
 };
 
 export default connect(

@@ -40,6 +40,7 @@ import UpdateInfo from "./components/Profile/Profile";
 import Compare from "./components/Compare/Compare";
 import PrivateRoute from "./components/HOC/PrivateRoute";
 import Stats from "./components/Stats/Stats";
+import Recommend from "./components/Recommend/Recommend";
 
 if (localStorage.jwtToken) {
   setAuthToken(localStorage.jwtToken);
@@ -67,6 +68,7 @@ class App extends Component {
             <Route exact path="/advancedSearch" render={(props) => <AdvancedSearch {...props}/>} />
             <PrivateRoute exact path="/changePassword" component={ChangePassword}/>
             <PrivateRoute exact path="/wishlist" component={WishList}/>
+            <PrivateRoute exact path="/recommend" component={Recommend}/>
             <Route exact path="/stats" component={Stats}/>
           </BrowserRouter>
           <Footer />

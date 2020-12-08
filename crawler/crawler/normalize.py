@@ -51,7 +51,7 @@ class PostNormalization:
         qualification = [x.capitalize() for x in word_list if x in self.qualification_list]
         if len(qualification) == 0:
             return "không yêu cầu".capitalize()
-        else: return ", ".join(qualification)
+        else: return ", ".join(list(set(qualification)))
 
     def normalize_gender(self, gender):
         if "Không" in gender or gender == "":

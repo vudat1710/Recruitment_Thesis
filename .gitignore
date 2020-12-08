@@ -10,7 +10,7 @@ bin-release/
 /.vscode
 # Other files and folders
 .settings/
-
+all_posts.json
 # Executables
 *.swf
 *.air

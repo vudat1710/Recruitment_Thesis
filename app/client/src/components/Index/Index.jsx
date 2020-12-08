@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import { getPosts } from "../../actions/post.action";
+import { getUserRecommend } from "../../actions/recommend.action";
 import Search from "../Search/Search";
 import HowItWork from "../../assets/img/job-vacancy.jpg";
 import BGFact from "../../assets/img/bg-facts.jpg";
@@ -14,14 +15,29 @@ class Index extends Component {
     super(props);
     this.state = {
       postsDisplay: [],
+      recommendedPosts: [],
     };
   }
 
   async componentDidMount() {
     if (this.props.auth.isAuthenticated) {
       await this.props.getUserByUserId(localStorage.userId);
-      if (this.props.user.user.qualification === null && this.props.user.user.salary === null && this.props.user.user.Majors.length === 0 && this.props.user.user.WorkPlaces.length === 0) {
+      if (
+        this.props.user.user.qualification === null ||
+        this.props.user.user.salary === null ||
+        this.props.user.user.Majors.length === 0 ||
+        this.props.user.user.WorkPlaces.length === 0
+      ) {
         this.props.history.push("/updateUser");
+      } else {
+        if (this.props.recommend.userRecommend.length === 0) {
+          await this.props.getUserRecommend(this.props.user.user);
+        }
+
+        this.setState({
+          ...this.state,
+          recommendedPosts: this.props.recommend.userRecommend,
+        });
       }
     }
     await this.props.getPosts({
@@ -36,7 +52,7 @@ class Index extends Component {
   }
 
   render() {
-    const { postsDisplay } = this.state;
+    const { postsDisplay, recommendedPosts } = this.state;
     let recentJobs =
       postsDisplay.length === 0 ? (
         <div className="spinner">
@@ -62,6 +78,37 @@ class Index extends Component {
                     <span className="location">{workplace}</span>
                     <span className="label label-success">
                       {post.salary_type}
+                    </span>
+                  </div>
+                </header>
+              </a>
+            </div>
+          );
+        })
+      );
+
+    let recommendedJobs =
+      recommendedPosts.length === 0 ? (
+        <div className="spinner">
+          <span className="dot1"></span>
+          <span className="dot2"></span>
+          <span className="dot3"></span>
+        </div>
+      ) : (
+        recommendedPosts.map((post) => {
+          return (
+            <div className="col-xs-12">
+              <a className="item-block" href={`/post/${post.post.postId}`}>
+                <header>
+                  <img src={post.post.Companies[0].img_url} alt="" />
+                  <div className="hgroup">
+                    <h4>{post.post.title}</h4>
+                    <h5>{post.post.Companies[0].name}</h5>
+                  </div>
+                  <div className="header-meta">
+                    <span className="location">{post.post.WorkPlaces}</span>
+                    <span className="label label-success">
+                      {post.post.salary_type}
                     </span>
                   </div>
                 </header>
@@ -110,31 +157,25 @@ class Index extends Component {
 
               <div className="col-sm-12 col-md-6">
                 <header className="section-header text-left">
-                  <span>Workflow</span>
-                  <h2>How it works</h2>
+                  <span>Giới thiệu</span>
+                  <h2>Tổng quan</h2>
                 </header>
 
                 <p className="lead">
-                  Pellentesque et pulvinar orci. Suspendisse sed euismod purus.
-                  Pellentesque nunc ex, ultrices eu enim non, consectetur
-                  interdum nisl. Nam congue interdum mauris, sed ultrices augue
-                  lacinia in. Praesent turpis purus, faucibus in tempor vel,
-                  dictum ac eros.
+                  Ứng dụng hữu ích trong việc tìm kiếm một công việc phù hợp với
+                  bản thân, đặc biệt là trong lĩnh vực CNTT. Nhờ chức năng tìm
+                  kiếm công việc xung quanh mà nhiều thành viên trong hệ thống
+                  đã tìm được một công việc phù hợp.
                 </p>
                 <p>
-                  Nulla quis felis et orci luctus semper sit amet id dui. Aenean
-                  ultricies lectus nunc, vel rhoncus odio sagittis eu. Sed at
-                  felis eu tortor mattis imperdiet et sed tortor. Nullam ac
-                  porttitor arcu. Vivamus tristique elit id tempor lacinia.
-                  Donec auctor at nibh eget tincidunt. Nulla facilisi. Nunc
-                  condimentum dictum mattis.
+                  App mới lạ, việc nộp đơn và quá trình ứng tuyển nhanh chóng
+                  hơn quá trình tìm việc thông thường. Gây ấn tượng và chinh
+                  phục nhà tuyển dụng ngay từ ban đầu với mẫu CV khác biệt,
+                  chuyên nghiệp.
                 </p>
 
                 <br />
                 <br />
-                <a className="btn btn-primary" href="page-typography.html">
-                  Learn more
-                </a>
               </div>
             </div>
           </section>
@@ -199,82 +240,26 @@ class Index extends Component {
             </div>
           </section>
 
-          <section>
-            <div className="container">
-              <header className="section-header">
-                <span>Plans</span>
-                <h2>Pricing</h2>
-                <p>Choose a plan that fits your needs</p>
-              </header>
+          {this.props.auth.isAuthenticated ? (
+            <section>
+              <div className="container">
+                <header className="section-header">
+                  <span>Gợi ý</span>
+                  <h2>Công việc gợi ý dành cho bạn</h2>
+                  <p>
+                    Dưới đây là các công việc phù hợp với hồ sơ của bạn trên hệ
+                    thống
+                  </p>
+                </header>
 
-              <ul className="pricing">
-                <li>
-                  <h6>Basic Package</h6>
-                  <div className="price">
-                    <sup>$</sup>0<span>&nbsp;</span>
-                  </div>
-                  <hr />
-                  <p>
-                    <strong>1</strong> job posting
-                  </p>
-                  <p>
-                    <strong>No</strong> featured job
-                  </p>
-                  <p>
-                    <strong>5 days</strong> listing duration
-                  </p>
-                  <br />
-                  <a className="btn btn-primary btn-block" href="#">
-                    Select plan
-                  </a>
-                </li>
-
-                <li>
-                  <h6>Medium Package</h6>
-                  <div className="price">
-                    <sup>$</sup>5<sup>.99</sup>
-                    <span>per month</span>
-                  </div>
-                  <hr />
-                  <p>
-                    <strong>5</strong> job posting
-                  </p>
-                  <p>
-                    <strong>1</strong> featured job
-                  </p>
-                  <p>
-                    <strong>30 days</strong> listing duration
-                  </p>
-                  <br />
-                  <a className="btn btn-primary btn-block" href="#">
-                    Select plan
-                  </a>
-                </li>
-
-                <li>
-                  <h6>Big Package</h6>
-                  <div className="price">
-                    <sup>$</sup>15<sup>.99</sup>
-                    <span>per month</span>
-                  </div>
-                  <hr />
-                  <p>
-                    <strong>20</strong> job posting
-                  </p>
-                  <p>
-                    <strong>5</strong> featured job
-                  </p>
-                  <p>
-                    <strong>75 days</strong> listing duration
-                  </p>
-                  <br />
-                  <a className="btn btn-primary btn-block" href="#">
-                    Select plan
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </section>
+                <div className="row item-blocks-condensed">
+                  {recommendedJobs}
+                </div>
+              </div>
+            </section>
+          ) : (
+            <></>
+          )}
 
           <section
             className="bg-img text-center"
@@ -319,17 +304,22 @@ Index.propTypes = {
   auth: PropTypes.object.isRequired,
   getPosts: PropTypes.func.isRequired,
   getPostById: PropTypes.func.isRequired,
-  getPosts: PropTypes.func.isRequired
+  getPosts: PropTypes.func.isRequired,
+  getUserRecommend: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
-  posts: state.posts,  user: state.user, auth: state.auth
+  posts: state.posts,
+  user: state.user,
+  auth: state.auth,
+  recommend: state.recommend,
 });
 
 const mapDispatchToProps = {
   getPosts,
   getPostById,
-  getUserByUserId
+  getUserByUserId,
+  getUserRecommend,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Index);
