@@ -180,7 +180,7 @@ class Index extends Component {
             </div>
           </section>
 
-          <section className="bg-alt">
+          {/* <section className="bg-alt">
             <div className="container">
               <header className="section-header">
                 <span>Categories</span>
@@ -238,7 +238,7 @@ class Index extends Component {
                 </a>
               </p>
             </div>
-          </section>
+          </section> */}
 
           {this.props.auth.isAuthenticated ? (
             <section>
@@ -270,11 +270,11 @@ class Index extends Component {
             {/* <section className="bg-img text-center"> */}
             <div className="container">
               <h2>
-                <strong>Subscribe</strong>
+                <strong>Đăng ký</strong>
               </h2>
-              <h6 className="font-alt">
+              {/* <h6 className="font-alt">
                 Get weekly top new jobs delivered to your inbox
-              </h6>
+              </h6> */}
               <br />
               <br />
               <form className="form-subscribe" action="#">
@@ -282,11 +282,11 @@ class Index extends Component {
                   <input
                     type="text"
                     className="form-control input-lg"
-                    placeholder="Your eamil address"
+                    placeholder="Địa chỉ email"
                   />
                   <span className="input-group-btn">
-                    <button className="btn btn-success btn-lg" type="submit">
-                      Subscribe
+                    <button className="btn btn-success btn-md" type="submit">
+                    Đăng ký
                     </button>
                   </span>
                 </div>

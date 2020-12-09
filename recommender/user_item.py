@@ -60,6 +60,9 @@ def get_score_user(user, post):
 
     return sqrt(gender ** 2 + job_type ** 2 + salary ** 2 + qualification ** 2 + workplace ** 2 + major ** 2 + experience ** 2)
 
+def update_score_user(user, post):
+    pass
+
 
 def test():
     u = {"gender": "Nam", "experience": 1, "qualification": "Đại học", "job_type": "Bán thời gian", "salary": "15-20 triệu", "workplaces": "Hà Nội, Hồ Chí Minh", "majors": "CNTT - Phần mềm"}

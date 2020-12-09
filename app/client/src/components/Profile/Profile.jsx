@@ -36,11 +36,11 @@ class UpdateInfo extends Component {
       ...this.state,
       dataAuto: this.props.posts.autoComplete,
       experience: this.props.user.user.experience ? this.props.user.user.experience : "1",
-      qualification: this.props.user.user.qualification ? this.props.user.user.qualification : "Không yêu cầu",
+      qualification: this.props.user.user.qualification ? this.props.user.user.qualification : "Đại học",
       yearOfBirth: this.props.user.user.year_of_birth,
       gender: this.props.user.user.gender,
       jobType: this.props.user.user.job_type ? this.props.user.user.job_type : "Toàn thời gian",
-      salary: this.props.user.user.salary ? this.props.user.user.salary : "Tất cả mức lương",
+      salary: this.props.user.user.salary ? this.props.user.user.salary : "5-7 triệu",
       workplaces: this.props.user.user.WorkPlaces.map((a) => a.name),
       majors: this.props.user.user.Majors.map((a) => a.name),
       isLoading: false,
@@ -143,11 +143,6 @@ class UpdateInfo extends Component {
         </div>
       );
     } else {
-      experience = experience ? experience : "1";
-      jobType = jobType ? jobType : "Toàn thời gian";
-      salary = salary ? salary : "Tất cả mức lương";
-      qualification = qualification ? qualification : "Không yêu cầu";
-
       let first = <></>;
 
       if (majors.length === 0 || workplaces.length === 0) {
@@ -236,7 +231,7 @@ class UpdateInfo extends Component {
                             {experienceDict[experience]}
                           </option>
                           {dataAuto.experience.map((ex) => {
-                            if (ex !== experience)
+                            if (ex !== experience && ex !== "99")
                               return (
                                 <option value={ex}>{experienceDict[ex]}</option>
                               );
@@ -316,7 +311,7 @@ class UpdateInfo extends Component {
                         >
                           <option defaultValue>{qualification}</option>
                           {dataAuto.qualifications.map((qual) => {
-                            if (qual !== qualification)
+                            if (qual !== qualification && qual !== "Không yêu cầu")
                               return <option value={qual}>{qual}</option>;
                           })}
                         </select>
