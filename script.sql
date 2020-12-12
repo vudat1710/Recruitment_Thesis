@@ -85,20 +85,22 @@ CREATE TABLE `Post` (
   `description` text NOT NULL,
   `job_benefits` text NOT NULL,
   `salary_type` varchar(30) NOT NULL,
-  `experience` varchar(50) DEFAULT NULL,
+  `experience` varchar(50) NOT NULL,
   `job_type` varchar(30) NOT NULL,
   `num_hiring` int DEFAULT NULL,
   `valid_through` date NOT NULL,
   `address` varchar(300) DEFAULT NULL,
   `post_url` varchar(250) DEFAULT NULL,
-  `qualification` varchar(70) DEFAULT NULL,
+  `qualification` varchar(70) NOT NULL,
   `position` varchar(150) DEFAULT NULL,
   `contact_name` varchar(100) DEFAULT NULL,
-  `min_value` int DEFAULT NULL,
-  `max_value` int DEFAULT NULL,
+  `min_value` int NOT NULL,
+  `max_value` int NOT NULL,
+  `createdAt` date NOT NULL,
+  `is_deleted` tinyint NOT NULL,
   PRIMARY KEY (`postId`),
   UNIQUE KEY `postId_UNIQUE` (`postId`)
-) ENGINE=InnoDB AUTO_INCREMENT=16385 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `PostCompany` (
   `postId` int NOT NULL,
@@ -143,12 +145,13 @@ CREATE TABLE `WishList` (
   `wishListId` int NOT NULL AUTO_INCREMENT,
   `userId` int NOT NULL,
   `postId` int NOT NULL,
+  `createdAt` date NOT NULL,
   PRIMARY KEY (`wishListId`),
   KEY `userIdWL_idx` (`userId`),
   KEY `postIdWL_idx` (`postId`),
   CONSTRAINT `postIdWL` FOREIGN KEY (`postId`) REFERENCES `Post` (`postId`),
   CONSTRAINT `userIdWL` FOREIGN KEY (`userId`) REFERENCES `User` (`userId`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `WorkPlace` (
   `workPlaceId` int NOT NULL AUTO_INCREMENT,

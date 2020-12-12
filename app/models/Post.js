@@ -43,7 +43,7 @@ module.exports = function(sequelize, DataTypes) {
     },
     experience: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: false
     },
     job_type: {
       type: DataTypes.STRING(30),
@@ -70,12 +70,20 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     },
     position: {
-      type: DataTypes.STRING(70),
+      type: DataTypes.STRING(150),
       allowNull: true
     },
     contact_name: {
       type: DataTypes.STRING(100),
       allowNull: true
+    },
+    createdAt: {
+      type: DataTypes.DATEONLY,
+      allowNull: false
+    },
+    is_deleted: {
+      type: DataTypes.TINYINT,
+      allowNull: false
     }
   }, {
     sequelize,

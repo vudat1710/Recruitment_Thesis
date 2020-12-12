@@ -21,6 +21,7 @@ export const GET_RATE_BY_USER_ID_POST_ID = 'GET_RATE_BY_USER_ID_POST_ID';
 export const DELETE_COMMENT = 'DELETE_COMMENT';
 export const GET_COMMENT_BY_POST_ID = 'GET_COMMENT_BY_POST_ID';
 export const COMPARE = 'COMPARE';
+export const ADD_TO_COMPARE = 'ADD_TO_COMPARE';
 
 //Wishlist actions
 export const ADD_TO_WISHLIST = 'ADD_TO_WISHLIST';

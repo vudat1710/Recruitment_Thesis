@@ -68,7 +68,7 @@ class WishList extends Component {
                 </a>
                 <div className="hgroup">
                   <h4>
-                    <a href={`/post/${post.postId}`}>{post.title}</a>
+                    {post.is_deleted === 0 ? <a href={`/post/${post.postId}`}>{post.title}</a> : <a href={`/post/${post.postId}`}>{post.title} (Đã xóa)</a>}
                   </h4>
                   <h5>
                     <a href="company-detail.html">{post.Companies[0].name}</a>

@@ -3,6 +3,7 @@ import { Link, withRouter, Redirect } from "react-router-dom";
 import Details1 from "../../assets/img/details1.jpg";
 import Details2 from "../../assets/img/details2.jpg";
 import Details3 from "../../assets/img/details3.jpg";
+import { getUserByUserId } from "../../actions/user.action";
 import {
   getWishList,
   addToWishList,
@@ -12,6 +13,7 @@ import {
   getPostById,
   ratePost,
   getRateByUserIdPostId,
+  addToCompare,
 } from "../../actions/post.action";
 import { getRelatedItems } from "../../actions/recommend.action";
 import { getClickPostEvent } from "../../actions/user.action";
@@ -41,9 +43,8 @@ class PostDetails extends Component {
       isLoading: false,
       valueRating: 0,
       isAdded: false,
-      canCompare: false,
       isAddedCompare: "",
-      relatedPosts: []
+      relatedPosts: [],
     };
   }
 
@@ -57,8 +58,8 @@ class PostDetails extends Component {
       await this.props.getClickPostEvent({
         postId: this.state.postId,
         userId: localStorage.userId,
-        name: "CLICK_POST"
-      })
+        name: "CLICK_POST",
+      });
       await this.props.getWishList({
         userId: localStorage.userId,
       });
@@ -71,9 +72,11 @@ class PostDetails extends Component {
           isAdded: true,
         });
       }
+      await this.props.getUserByUserId(localStorage.userId);
 
-      await this.props.getRelatedItems(this.props.posts.postDetails);
+      // await this.props.getRelatedItems(this.props.posts.postDetails);
     }
+
     const userRate =
       this.props.posts.postDetails.RatePosts.length !== 0 && localStorage.userId
         ? this.props.posts.postDetails.RatePosts.filter(
@@ -117,33 +120,25 @@ class PostDetails extends Component {
     });
   }
 
-  onCompareClick(action) {
-    let a = JSON.parse(localStorage.getItem("compareList")) || [];
-    // Push the new data (whether it be an object or anything else) onto the array
-    if (a.length < 2) {
-      if (!a.includes(this.state.postId)) {
-        a.push(this.state.postId);
-        localStorage.setItem("compareList", JSON.stringify(a));
-        this.setState({
-          ...this.state,
-          isAddedCompare: "added",
-        });
-      }
+  async onCompareClick(action) {
+    await this.props.addToCompare({
+      postId: this.state.postId,
+      type: action,
+      compareList: this.props.posts.compareList,
+    });
+
+    if (action === "add") {
+      this.setState({
+        ...this.state,
+        isAddedCompare: "added",
+      });
     }
-    if (a.length === 2) {
-      if (action === "remove") {
-        a = a.filter((x) => x !== this.state.postId);
-        localStorage.setItem("compareList", JSON.stringify(a));
-        this.setState({
-          ...this.state,
-          isAddedCompare: "existed",
-        });
-      } else {
-        this.setState({
-          ...this.state,
-          canCompare: true,
-        });
-      }
+
+    if (action === "remove") {
+      this.setState({
+        ...this.state,
+        isAddedCompare: "existed",
+      });
     }
   }
 
@@ -153,12 +148,6 @@ class PostDetails extends Component {
       isAddedCompare: "",
     });
   }
-
-  renderRedirect = () => {
-    if (this.state.canCompare) {
-      return <Redirect to={{ pathname: "/compare" }} />;
-    }
-  };
 
   render() {
     const { postDetails, isLoading, relatedPosts } = this.state;
@@ -173,7 +162,6 @@ class PostDetails extends Component {
         </div>
       );
     } else {
-      console.log(relatedPosts)
       const PostContent = relatedPosts.map((post) => {
         return (
           <div className="col-xs-12">
@@ -184,7 +172,9 @@ class PostDetails extends Component {
                   <h4>{post.post.title}</h4>
                   <h5>
                     {post.post.Companies[0].name}{" "}
-                    <span className="label label-success">{post.post.job_type}</span>
+                    <span className="label label-success">
+                      {post.post.job_type}
+                    </span>
                   </h5>
                 </div>
                 <time datetime="2016-03-10 20:00">
@@ -201,7 +191,19 @@ class PostDetails extends Component {
 
                   <li>
                     <i className="fa fa-money"></i>
-                    <span>{post.post.salary_type}</span>
+                    {this.props.auth.isAuthenticated ? (
+                      <span>{post.salary_type}</span>
+                    ) : (
+                      <span>
+                        <h6>
+                          Bạn cần{" "}
+                          <Link to="/login" style={{ color: "red" }}>
+                            ĐĂNG NHẬP
+                          </Link>{" "}
+                          để xem được mức lương
+                        </h6>
+                      </span>
+                    )}
                   </li>
 
                   {post.post.qualification ? (
@@ -296,8 +298,8 @@ class PostDetails extends Component {
       avgRate = avgRate.reduce((a, b) => a + b, 0) / avgRate.length || 0;
 
       let compareElement;
-      const a = JSON.parse(localStorage.getItem("compareList")) || [];
-      if (a.includes(this.state.postId)) {
+      // console.log(this.state.isAddedCompare)
+      if (this.props.posts.compareList.includes(this.state.postId)) {
         compareElement = (
           <button
             className="btn btn-block btn-primary"
@@ -341,10 +343,21 @@ class PostDetails extends Component {
       } else {
         alertS = <></>;
       }
+      const majorsUser = this.props.user.user.Majors.map((a) => a.name);
+      const workplacesUser = this.props.user.user.WorkPlaces.map((a) => a.name);
+
+      const majors = postDetails.Majors.map((a) => a.name);
+      const majorDup = majors.filter((a) => majorsUser.includes(a));
+      const majorNotDup = majors.filter((a) => !majorsUser.includes(a));
+      const workplaces = postDetails.WorkPlaces.map((a) => a.name);
+      const workplaceDup = workplaces.filter((a) => workplacesUser.includes(a));
+      const workplaceNotDup = workplaces.filter(
+        (a) => !workplacesUser.includes(a)
+      );
 
       return (
         <>
-          {this.renderRedirect()}
+          {/* {this.renderRedirect()} */}
           {alertS}
           <header
             className="page-header bg-img size-lg"
@@ -383,14 +396,47 @@ class PostDetails extends Component {
                 <ul className="details cols-3">
                   <li>
                     <i className="fa fa-briefcase"></i>
-                    <span>{postDetails.job_type}</span>
+                    {isAuthenticated ? (
+                      postDetails.job_type === this.props.user.user.job_type ? (
+                        <span>
+                          <strong style={{ color: "black" }}>
+                            {postDetails.job_type}
+                          </strong>
+                        </span>
+                      ) : (
+                        <span>{postDetails.job_type}</span>
+                      )
+                    ) : (
+                      <span>{postDetails.job_type}</span>
+                    )}
                   </li>
 
                   <li>
                     <i className="fa fa-money"></i>
-                    <span>{postDetails.salary_type} (VND) </span>
+                    {isAuthenticated ? (
+                      postDetails.salary_type ===
+                      this.props.user.user.salary_type ? (
+                        <span>
+                          <strong style={{ color: "black" }}>
+                            {postDetails.salary_type}
+                          </strong>{" "}
+                          (VND)
+                        </span>
+                      ) : (
+                        <span>{postDetails.salary_type} (VND)</span>
+                      )
+                    ) : (
+                      <span>
+                        Bạn cần{" "}
+                        <Link to="/login" style={{ color: "red" }}>
+                          ĐĂNG NHẬP
+                        </Link>{" "}
+                        để xem được mức lương
+                      </span>
+                    )}
                   </li>
-
+                </ul>
+                <ul className="details cols-3">
                   <li>
                     <i className="fa fa-clock-o"></i>
                     <span>{postDetails.valid_through}</span>
@@ -398,12 +444,40 @@ class PostDetails extends Component {
 
                   <li>
                     <i className="fa fa-flask"></i>
-                    <span>{experienceDict[postDetails.experience]}</span>
+                    {isAuthenticated ? (
+                      postDetails.experience ===
+                      this.props.user.user.experience ? (
+                        <span>
+                          <strong style={{ color: "black" }}>
+                            {experienceDict[postDetails.experience]}
+                          </strong>
+                        </span>
+                      ) : (
+                        <span>{experienceDict[postDetails.experience]}</span>
+                      )
+                    ) : (
+                      <span>{experienceDict[postDetails.experience]}</span>
+                    )}
                   </li>
 
                   <li>
                     <i className="fa fa-certificate"></i>
-                    <a href="#">{postDetails.qualification}</a>
+                    {isAuthenticated ? (
+                      postDetails.qualification
+                        .split(",")
+                        .map((a) => a.trim())
+                        .includes(this.props.user.user.qualification) ? (
+                        <span>
+                          <strong style={{ color: "black" }}>
+                            {postDetails.qualification}
+                          </strong>
+                        </span>
+                      ) : (
+                        <span>{postDetails.qualification}</span>
+                      )
+                    ) : (
+                      <span>{postDetails.qualification}</span>
+                    )}
                   </li>
                 </ul>
 
@@ -469,20 +543,36 @@ class PostDetails extends Component {
                     <ul className="details cols-12">
                       <li>
                         <label>Ngành nghề:</label>
-                        <span>
-                          {" "}
-                          {postDetails.Majors.map((a) => a.name).join(", ")}
-                        </span>
+                        {isAuthenticated ? (
+                          <span>
+                            {" "}
+                            <strong style={{ color: "black" }}>
+                              {majorDup.join(", ")}
+                            </strong>
+                            {", "}
+                            {majorNotDup.join(", ")}
+                          </span>
+                        ) : (
+                          <span> {majors.join(", ")}</span>
+                        )}
                       </li>
                     </ul>
                     <hr />
                     <ul className="details cols-12">
                       <li>
                         <label>Địa điểm làm việc:</label>
-                        <span>
-                          {" "}
-                          {postDetails.WorkPlaces.map((a) => a.name).join(", ")}
-                        </span>
+                        {isAuthenticated ? (
+                          <span>
+                            {" "}
+                            <strong style={{ color: "black" }}>
+                              {workplaceDup.join(", ")}
+                            </strong>
+                            {", "}
+                            {workplaceNotDup.join(", ")}
+                          </span>
+                        ) : (
+                          <span> {workplaces.join(", ")}</span>
+                        )}
                       </li>
                     </ul>
                     <hr />
@@ -502,21 +592,19 @@ class PostDetails extends Component {
             </section>
 
             {this.props.auth.isAuthenticated ? (
-            <section>
-              <div className="container">
-                <header className="section-header">
-                  <span>Các việc làm tương tự</span>
-                  <h2>Công việc tương tự với công việc này</h2>
-                </header>
+              <section>
+                <div className="container">
+                  <header className="section-header">
+                    <span>Các việc làm tương tự</span>
+                    <h2>Công việc tương tự với công việc này</h2>
+                  </header>
 
-                <div className="row item-blocks-condensed">
-                  {PostContent}
+                  <div className="row item-blocks-condensed">{PostContent}</div>
                 </div>
-              </div>
-            </section>
-          ) : (
-            <></>
-          )}
+              </section>
+            ) : (
+              <></>
+            )}
             {/* } */}
           </main>
         </>
@@ -527,6 +615,8 @@ class PostDetails extends Component {
 
 PostDetails.propTypes = {
   posts: PropTypes.object.isRequired,
+  auth: PropTypes.object.isRequired,
+  user: PropTypes.object.isRequired,
   recommend: PropTypes.object.isRequired,
   getPostById: PropTypes.func.isRequired,
   wishlist: PropTypes.object.isRequired,
@@ -536,7 +626,9 @@ PostDetails.propTypes = {
   removeFromWishList: PropTypes.func.isRequired,
   getRateByUserIdPostId: PropTypes.func.isRequired,
   getPostById: PropTypes.func.isRequired,
-  getRelatedItems: PropTypes.func.isRequired
+  getRelatedItems: PropTypes.func.isRequired,
+  addToCompare: PropTypes.func.isRequired,
+  getUserByUserId: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -544,6 +636,7 @@ const mapStateToProps = (state) => ({
   wishlist: state.wishlist,
   recommend: state.recommend,
   auth: state.auth,
+  user: state.user,
 });
 
 const mapDispatchToProps = {
@@ -554,7 +647,9 @@ const mapDispatchToProps = {
   removeFromWishList,
   getRateByUserIdPostId,
   getClickPostEvent,
-  getRelatedItems
+  getRelatedItems,
+  addToCompare,
+  getUserByUserId,
 };
 
 export default connect(

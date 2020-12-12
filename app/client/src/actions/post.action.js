@@ -9,6 +9,7 @@ import {
   DELETE_COMMENT,
   GET_COMMENT_BY_POST_ID,
   COMPARE,
+  ADD_TO_COMPARE,
   GET_ERRORS,
 } from "./actionTypes";
 import axios from "axios";
@@ -28,6 +29,13 @@ export const getPosts = (params) => async (dispatch) => {
   });
 };
 
+export const addToCompare = (params) => (dispatch) => {
+  dispatch({
+    type: ADD_TO_COMPARE,
+    payload: params,
+  });
+};
+
 export const getDataAutoComplete = () => async (dispatch) => {
   let res = await axios.get(`/api/other/getDataAutoComplete`);
   dispatch({
@@ -41,7 +49,7 @@ export const getDataAutoComplete = () => async (dispatch) => {
       experience: res.data.experience,
       numPosts: res.data.num_posts,
       qualifications: res.data.qualifications,
-      numCompanies: res.data.num_companies
+      numCompanies: res.data.num_companies,
     },
   });
 };

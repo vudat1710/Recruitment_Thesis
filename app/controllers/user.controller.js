@@ -141,6 +141,7 @@ exports.findUserById = (req, res) => {
   conditions["include"] = [
     { model: db.WorkPlace, attributes: ["name"] },
     { model: db.Major, attributes: ["name"] },
+    { model: db.RatePost, attributes: ["postId", "rate"] }
   ];
   User.findOne(conditions, { subQuery: false })
     .then((user) => {
@@ -166,7 +167,9 @@ exports.updateUser = (req, res) => {
   if (!isValid) {
     return res.json({ status: 400, errors: errors });
   }
-  const { majors, workplaces, user_name } = req.body;
+  let { majors, workplaces, user_name } = req.body;
+  majors = majors.split(",").map(a => a.trim());
+  workplaces = workplaces.split(",").map(a => a.trim());
   User.findOne({
     where: { user_name: user_name },
     include: [
@@ -174,6 +177,8 @@ exports.updateUser = (req, res) => {
       { model: Major, attributes: ["majorId"] },
     ],
   }).then((user) => {
+    console.log("Majors: ", majors)
+    console.log("WorkPlaces: ", workplaces)
     if (user) {
       const majorIdsExist = user.Majors.map((a) => a.majorId);
       const workPlaceIdsExist = user.WorkPlaces.map((a) => a.workPlaceId);
@@ -240,6 +245,7 @@ exports.updateUser = (req, res) => {
         const addWorkPlaceIds = newWorkPlaceIds.filter(
           (e) => !workPlaceIdsExist.includes(e)
         );
+        
         const c = WorkPlaceUser.bulkCreate(
           convertToObject(addWorkPlaceIds, "userId", user.userId, "workPlaceId")
         );

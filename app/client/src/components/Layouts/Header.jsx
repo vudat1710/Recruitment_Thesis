@@ -4,6 +4,7 @@ import { connect } from "react-redux";
 import { logoutUser } from "../../actions/auth.action";
 import Logo from "../../assets/img/logo.png";
 import UserLogo from "../../assets/img/logo_user.png";
+import CompareComp from "./CompareComp";
 import "./Header.scss";
 
 const userLoginA = {
@@ -18,6 +19,7 @@ class Header extends Component {
       isShow: false,
     };
   }
+
   onLogoutClick(e) {
     e.preventDefault();
     // this.props.clearCurrentProfile();
@@ -26,6 +28,8 @@ class Header extends Component {
   render() {
     const { isShow } = this.state;
     const { isAuthenticated, user } = this.props.auth;
+
+    let compareList = JSON.parse(localStorage.getItem("compareList")) || [];
     const PullRightAuth = !isAuthenticated ? (
       <div className="dropdown" style={userLoginA}>
         <div className="dropdown-content">
@@ -70,9 +74,11 @@ class Header extends Component {
           <Link className="links" to="/recommend">
             Việc làm phù hợp
           </Link>
-          <Link className="links" to="/compare">
-            So sánh việc làm
-          </Link>
+          {!isAuthenticated ? (
+            <></>
+          ) : <CompareComp/>
+          }
+
           <Link className="links" to="/stats">
             Xem thống kê
           </Link>

@@ -16,9 +16,13 @@ exports.addToWishList = (req, res) => {
     },
   })
     .then((data) => {
-      console.log(data);
       if (data.length === 0) {
-        WishList.create({ userId: userId, postId: postId }).then((x) => {
+        const q = new Date();
+        const m = q.getMonth() + 1;
+        const d = q.getDate();
+        const y = q.getFullYear();
+        const currentDate = y + "-" + m + "-" + d
+        WishList.create({ userId: userId, postId: postId, createdAt: currentDate }).then((x) => {
           if (x) {
             res.json({ success: true, message: "Post added to wishlist" });
           }
@@ -43,8 +47,9 @@ exports.getWishList = (req, res) => {
     attributes: ["postId"],
   })
     .then((data) => {
-      if (data) {
+      if (data !== null && data.length !== 0) {
         const postIds = data.map((a) => a.postId);
+        console.log(postIds)
         Post.findAll(
           {
             where: {
@@ -58,11 +63,12 @@ exports.getWishList = (req, res) => {
               { model: WorkPlace, attributes: ["name"] },
               { model: Major, attributes: ["name"] },
             ],
+            order: [["createdAt", "DESC"]],
           },
           { subQuery: false }
         )
           .then((posts) => {
-            res.send({ posts});
+            res.send({ posts });
           })
           .catch((err) => {
             return res.json({
@@ -96,7 +102,7 @@ exports.removeFromWishList = (req, res) => {
   })
     .then((data) => {
       if (data.length !== 0) {
-        WishList.destroy({ where:{ userId: userId, postId: postId }})
+        WishList.destroy({ where: { userId: userId, postId: postId } })
           .then(() => {
             res.json({ success: true, message: "Post removed from wishlist" });
           })

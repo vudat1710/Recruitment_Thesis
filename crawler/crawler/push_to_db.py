@@ -6,6 +6,7 @@ from .normalize import PostNormalization
 import pandas as pd
 from collections import OrderedDict
 from .filtering import DuplicateFiltering
+from datetime import date
 
 CHUNK_SIZE = 100
 
@@ -82,12 +83,14 @@ class DBPushing:
             contact_name = get_field_data(post, "contact_name")
             majors = post["majors"]
             workplaces = post["workplace"].split(",")
+            today = date.today()
+            created_at = "'{}'".format(today.strftime("%Y-%m-%d"))
 
             query = "INSERT INTO `{}` \
                 (`title`, `extra_requirements`, `description`, `job_benefits`, `salary_type`, `job_type`, \
-                `valid_through`, `address`, `gender`, `experience`, `num_hiring`, `post_url`, `qualification`, `position`, `contact_name`, `min_value`, `max_value` ) \
-                VALUES ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{}, {}, {})".format("Post", title, extra_requirements, description, job_benefits,
-                salary_type, job_type, valid_through, address, gender, experience, num_hiring, post_url, qualification, position, contact_name, min_value, max_value)
+                `valid_through`, `address`, `gender`, `experience`, `num_hiring`, `post_url`, `qualification`, `position`, `contact_name`, `min_value`, `max_value`, `createdAt`, `is_deleted` ) \
+                VALUES ({},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{})".format("Post", title, extra_requirements, description, job_benefits,
+                salary_type, job_type, valid_through, address, gender, experience, num_hiring, post_url, qualification, position, contact_name, min_value, max_value, created_at, 0)
             try:
                 self.cursor.execute(query)
             except:
@@ -186,10 +189,10 @@ if __name__ == "__main__":
     # companies = json.load(open('./crawler/data/topcv/company.json', 'r'))
     merged_data = []
     # post_normalization = PostNormalization()
-    merged = json.load(open('./crawler/data/viectotnhat/norm_post.json', 'r'))
+    merged = json.load(open('./crawler/data/topcv/norm_post.json', 'r'))
     for post in merged:
         if post:
             merged_data.append(post)
-    dbp = DBPushing(merged_data)
+    dbp = DBPushing(merged_data[:1000])
     dbp.push_chunks()
     dbp.connection.close()

@@ -40,7 +40,7 @@ import UserDetails from "./components/ManageUser/UserDetails";
 import ManageComment from "./components/ManageComment/ManageComment";
 import ManageActionType from "./components/ManageActionType/ManageActionType";
 import EditableActionType from "./components/ManageActionType/EditableActionType";
-import Stats from "./components/Stats/Stats";
+// import Stats from "./components/Stats/Stats";
 
 class App extends Component {
   render() {
@@ -69,7 +69,7 @@ class App extends Component {
             <Route exact path="/manageActionType" component={ManageActionType}/>
             <Route exact path="/editActionType/:id" component={EditableActionType} />
             <Route exact path="/addActionType" component={EditableActionType} />
-            <Route exact path="/stats" component={Stats} />
+            {/* <Route exact path="/stats" component={Stats} /> */}
           </BrowserRouter>
           <Footer />
         </Provider>

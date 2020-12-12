@@ -3,7 +3,7 @@ import { Link, withRouter, Redirect } from "react-router-dom";
 import Details1 from "../../assets/img/details1.jpg";
 import Details2 from "../../assets/img/details2.jpg";
 import Details3 from "../../assets/img/details3.jpg";
-import { compare, getPostById } from "../../actions/post.action";
+import { addToCompare, getPostById } from "../../actions/post.action";
 import { experienceDict } from "../../utils/utils";
 import { connect } from "react-redux";
 import SweetAlert from "react-bootstrap-sweetalert";
@@ -24,7 +24,6 @@ class Compare extends Component {
     this.state = {
       isLoading: true,
       compareList: [],
-      compareResult: {},
       cancelConfirm: false,
       posts: [],
     };
@@ -33,7 +32,7 @@ class Compare extends Component {
   async componentDidMount() {
     const a = this.props.posts.compareList;
     let posts = [];
-    await this.props.compare({ compareList: a, userId: localStorage.userId });
+
     for (let i = 0; i < a.length; i++) {
       await this.props.getPostById(a[i]);
       posts.push(this.props.posts.postDetails);
@@ -42,7 +41,6 @@ class Compare extends Component {
     this.setState({
       ...this.state,
       compareList: a,
-      compareResult: this.props.posts.compare,
       isLoading: false,
       posts: posts,
     });
@@ -51,12 +49,12 @@ class Compare extends Component {
   onCancelConfirm() {
     this.setState({
       ...this.state,
-      cancelConfirm: true,
+      cancelConfirm: false,
     });
   }
 
   onDeleteClick() {
-    localStorage.removeItem("compareList");
+    this.props.addToCompare({});
     this.setState({
       ...this.state,
       cancelConfirm: true,
@@ -64,7 +62,7 @@ class Compare extends Component {
   }
 
   render() {
-    let { compareList, isLoading, compareResult, posts } = this.state;
+    let { compareList, isLoading, posts } = this.state;
 
     if (isLoading) {
       return (
@@ -75,88 +73,52 @@ class Compare extends Component {
         </div>
       );
     } else {
+      let alertS = this.state.cancelConfirm ? (
+        <SweetAlert
+          success
+          title="Đã xóa khỏi so sánh!"
+          onConfirm={() => {
+            this.onCancelConfirm();
+          }}
+        ></SweetAlert>
+      ) : (
+        <></>
+      );
       const compareListInt = compareList.map((x) => parseInt(x));
-      let sal1, sal2;
-      if (
-        posts.find((x) => x.postId === compareListInt[0]).salary_type ===
-          "Thoả thuận" ||
-        posts.find((x) => x.postId === compareListInt[1]).salary_type ===
-          "Thoả thuận"
-      ) {
-        sal1 = (
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Salary min"
-            value={
-              posts.find((x) => x.postId === compareListInt[0]).salary_type
-            }
-            readOnly
-            style={{
-              backgroundColor: compareResult[compareList[0]].salary.deal
-                ? "aqua"
-                : "white",
-            }}
-          />
-        );
-        sal2 = (
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Salary min"
-            value={
-              posts.find((x) => x.postId === compareListInt[1]).salary_type
-            }
-            readOnly
-            style={{
-              backgroundColor: compareResult[compareList[1]].salary.deal
-                ? "aqua"
-                : "white",
-            }}
-          />
-        );
-      } else if (
-        posts.find((x) => x.postId === compareListInt[0]).min_value ===
-          posts.find((x) => x.postId === compareListInt[0]).max_value &&
-        posts.find((x) => x.postId === compareListInt[1]).min_value ===
-          posts.find((x) => x.postId === compareListInt[1]).max_value
-      ) {
-        sal1 = (
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Salary min"
-            value={
-              posts.find((x) => x.postId === compareListInt[0]).salary_type
-            }
-            readOnly
-            style={{
-              backgroundColor: compareResult[compareList[0]].salary.min
-                ? "aqua"
-                : "white",
-            }}
-          />
-        );
-        sal2 = (
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Salary min"
-            value={
-              posts.find((x) => x.postId === compareListInt[1]).salary_type
-            }
-            readOnly
-            style={{
-              backgroundColor: compareResult[compareList[1]].salary.min
-                ? "aqua"
-                : "white",
-            }}
-          />
-        );
-      }
+      const sal =
+        posts.find((x) => x.postId === compareListInt[0]).salary_type !==
+        posts.find((x) => x.postId === compareListInt[1]).salary_type;
+      const gender =
+        posts.find((x) => x.postId === compareListInt[0]).gender !==
+        posts.find((x) => x.postId === compareListInt[1]).gender;
+      const qualification =
+        posts.find((x) => x.postId === compareListInt[0]).qualification !==
+        posts.find((x) => x.postId === compareListInt[1]).qualification;
+      const experience =
+        posts.find((x) => x.postId === compareListInt[0]).experience !==
+        posts.find((x) => x.postId === compareListInt[1]).experience;
+      const major =
+        posts
+          .find((x) => x.postId === compareListInt[0])
+          .Majors.map((x) => x.name)
+          .join(", ") !==
+        posts
+          .find((x) => x.postId === compareListInt[1])
+          .Majors.map((x) => x.name)
+          .join(", ");
+      const workplace =
+        posts
+          .find((x) => x.postId === compareListInt[0])
+          .WorkPlaces.map((x) => x.name)
+          .join(", ") !==
+        posts
+          .find((x) => x.postId === compareListInt[1])
+          .WorkPlaces.map((x) => x.name)
+          .join(", ");
+
       return (
         <>
-          {this.renderRedirect()}
+          {alertS}
           <header
             className="page-header bg-img size-lg"
             style={{
@@ -229,9 +191,7 @@ class Compare extends Component {
                         }
                         readOnly
                         style={{
-                          backgroundColor: compareResult[compareList[0]].gender
-                            ? "aqua"
-                            : "white",
+                          backgroundColor: gender ? "aqua" : "white",
                         }}
                       />
                     </div>
@@ -252,9 +212,7 @@ class Compare extends Component {
                         }
                         readOnly
                         style={{
-                          backgroundColor: compareResult[compareList[1]].gender
-                            ? "aqua"
-                            : "white",
+                          backgroundColor: gender ? "aqua" : "white",
                         }}
                       />
                     </div>
@@ -280,10 +238,7 @@ class Compare extends Component {
                         }
                         readOnly
                         style={{
-                          backgroundColor: compareResult[compareList[0]]
-                            .experience
-                            ? "aqua"
-                            : "white",
+                          backgroundColor: experience ? "aqua" : "white",
                         }}
                       />
                     </div>
@@ -306,10 +261,7 @@ class Compare extends Component {
                         }
                         readOnly
                         style={{
-                          backgroundColor: compareResult[compareList[1]]
-                            .experience
-                            ? "aqua"
-                            : "white",
+                          backgroundColor: experience ? "aqua" : "white",
                         }}
                       />
                     </div>
@@ -333,10 +285,7 @@ class Compare extends Component {
                         }
                         readOnly
                         style={{
-                          backgroundColor: compareResult[compareList[0]]
-                            .qualification
-                            ? "aqua"
-                            : "white",
+                          backgroundColor: qualification ? "aqua" : "white",
                         }}
                       />
                     </div>
@@ -357,144 +306,57 @@ class Compare extends Component {
                         }
                         readOnly
                         style={{
-                          backgroundColor: compareResult[compareList[1]]
-                            .qualification
-                            ? "aqua"
-                            : "white",
+                          backgroundColor: qualification ? "aqua" : "white",
                         }}
                       />
                     </div>
                   </div>
                 </div>
 
-                {sal1 ? (
-                  <>
-                    <label>Lương: </label>
-                    <div className="row">
-                      <div className="form-group col-xs-12 col-sm-6">
-                        <div className="input-group input-group-sm">
-                          <span className="input-group-addon">
-                            <i className="fa fa-money"></i>
-                          </span>
-                          {sal1}
-                        </div>
-                      </div>
-
-                      <div className="form-group col-xs-12 col-sm-6">
-                        <div className="input-group input-group-sm">
-                          <span className="input-group-addon">
-                            <i className="fa fa-money"></i>
-                          </span>
-                          {sal2}
-                        </div>
-                      </div>
+                <label>Lương: </label>
+                <div className="row">
+                  <div className="form-group col-xs-12 col-sm-6">
+                    <div className="input-group input-group-sm">
+                      <span className="input-group-addon">
+                        <i className="fa fa-money"></i>
+                      </span>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Salary"
+                        value={
+                          posts.find((x) => x.postId === compareListInt[0])
+                            .salary_type
+                        }
+                        readOnly
+                        style={{
+                          backgroundColor: sal ? "aqua" : "white",
+                        }}
+                      />
                     </div>
-                  </>
-                ) : (
-                  <>
-                    <label>Lương (min): </label>
-                    <div className="row">
-                      <div className="form-group col-xs-12 col-sm-6">
-                        <div className="input-group input-group-sm">
-                          <span className="input-group-addon">
-                            <i className="fa fa-money"></i>
-                          </span>
-                          <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Salary min"
-                            value={
-                              posts.find((x) => x.postId === compareListInt[0])
-                                .min_value
-                            }
-                            readOnly
-                            style={{
-                              backgroundColor: compareResult[compareList[0]]
-                                .salary.min
-                                ? "aqua"
-                                : "white",
-                            }}
-                          />
-                        </div>
-                      </div>
+                  </div>
 
-                      <div className="form-group col-xs-12 col-sm-6">
-                        <div className="input-group input-group-sm">
-                          <span className="input-group-addon">
-                            <i className="fa fa-money"></i>
-                          </span>
-                          <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Salary min"
-                            value={
-                              posts.find((x) => x.postId === compareListInt[1])
-                                .min_value
-                            }
-                            readOnly
-                            style={{
-                              backgroundColor: compareResult[compareList[1]]
-                                .salary.min
-                                ? "aqua"
-                                : "white",
-                            }}
-                          />
-                        </div>
-                      </div>
+                  <div className="form-group col-xs-12 col-sm-6">
+                    <div className="input-group input-group-sm">
+                      <span className="input-group-addon">
+                        <i className="fa fa-money"></i>
+                      </span>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Salary"
+                        value={
+                          posts.find((x) => x.postId === compareListInt[1])
+                            .salary_type
+                        }
+                        readOnly
+                        style={{
+                          backgroundColor: sal ? "aqua" : "white",
+                        }}
+                      />
                     </div>
-
-                    <label>Lương (max): </label>
-                    <div className="row">
-                      <div className="form-group col-xs-12 col-sm-6">
-                        <div className="input-group input-group-sm">
-                          <span className="input-group-addon">
-                            <i className="fa fa-money"></i>
-                          </span>
-                          <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Salary max"
-                            value={
-                              posts.find((x) => x.postId === compareListInt[0])
-                                .max_value
-                            }
-                            readOnly
-                            style={{
-                              backgroundColor: compareResult[compareList[0]]
-                                .salary.max
-                                ? "aqua"
-                                : "white",
-                            }}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="form-group col-xs-12 col-sm-6">
-                        <div className="input-group input-group-sm">
-                          <span className="input-group-addon">
-                            <i className="fa fa-money"></i>
-                          </span>
-                          <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Salary max"
-                            value={
-                              posts.find((x) => x.postId === compareListInt[1])
-                                .max_value
-                            }
-                            readOnly
-                            style={{
-                              backgroundColor: compareResult[compareList[1]]
-                                .salary.max
-                                ? "aqua"
-                                : "white",
-                            }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
+                  </div>
+                </div>
 
                 <label>Địa điểm làm việc: </label>
                 <div className="row">
@@ -513,16 +375,7 @@ class Compare extends Component {
                           .join(", ")}
                         readOnly
                         style={{
-                          backgroundColor:
-                            compareResult[compareList[0]].workplace.filter(
-                              (value) =>
-                                posts
-                                  .find((x) => x.postId === compareListInt[0])
-                                  .WorkPlaces.map((x) => x.name)
-                                  .includes(value)
-                            ).length !== 0
-                              ? "aqua"
-                              : "white",
+                          backgroundColor: workplace ? "aqua" : "white",
                         }}
                       />
                     </div>
@@ -543,16 +396,7 @@ class Compare extends Component {
                           .join(", ")}
                         readOnly
                         style={{
-                          backgroundColor:
-                            compareResult[compareList[1]].workplace.filter(
-                              (value) =>
-                                posts
-                                  .find((x) => x.postId === compareListInt[1])
-                                  .WorkPlaces.map((x) => x.name)
-                                  .includes(value)
-                            ).length !== 0
-                              ? "aqua"
-                              : "white",
+                          backgroundColor: workplace ? "aqua" : "white",
                         }}
                       />
                     </div>
@@ -576,16 +420,7 @@ class Compare extends Component {
                           .join(", ")}
                         readOnly
                         style={{
-                          backgroundColor:
-                            compareResult[compareList[0]].major.filter(
-                              (value) =>
-                                posts
-                                  .find((x) => x.postId === compareListInt[0])
-                                  .Majors.map((x) => x.name)
-                                  .includes(value)
-                            ).length !== 0
-                              ? "aqua"
-                              : "white",
+                          backgroundColor: major ? "aqua" : "white",
                         }}
                       />
                     </div>
@@ -606,16 +441,7 @@ class Compare extends Component {
                           .join(", ")}
                         readOnly
                         style={{
-                          backgroundColor:
-                            compareResult[compareList[1]].major.filter(
-                              (value) =>
-                                posts
-                                  .find((x) => x.postId === compareListInt[1])
-                                  .Majors.map((x) => x.name)
-                                  .includes(value)
-                            ).length !== 0
-                              ? "aqua"
-                              : "white",
+                          backgroundColor: major ? "aqua" : "white",
                         }}
                       />
                     </div>
@@ -632,7 +458,7 @@ class Compare extends Component {
 
 Compare.propTypes = {
   posts: PropTypes.object.isRequired,
-  compare: PropTypes.func.isRequired,
+  addToCompare: PropTypes.func.isRequired,
   getPostById: PropTypes.func.isRequired,
 };
 
@@ -641,7 +467,7 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = {
-  compare,
+  addToCompare,
   getPostById,
 };
 

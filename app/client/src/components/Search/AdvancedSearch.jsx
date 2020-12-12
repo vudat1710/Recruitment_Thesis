@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { experienceDict, getSearchData } from "../../utils/utils";
 import { connect } from "react-redux";
 import Banner from "../../assets/img/banner_details.jpg";
+import {Link} from 'react-router-dom';
 import {
   getDataAutoComplete,
   searchPosts,
@@ -189,7 +190,19 @@ class AdvancedSearch extends Component {
 
                   <li>
                     <i className="fa fa-money"></i>
-                    <span>{post.salary_type}</span>
+                    {this.props.auth.isAuthenticated ? (
+                      <span>{post.salary_type}</span>
+                    ) : (
+                      <span>
+                        <h6>
+                          Bạn cần{" "}
+                          <Link to="/login" style={{ color: "red" }}>
+                            ĐĂNG NHẬP
+                          </Link>{" "}
+                          để đánh giá sản phẩm này
+                        </h6>
+                      </span>
+                    )}
                   </li>
 
                   {post.qualification ? (
@@ -381,12 +394,13 @@ class AdvancedSearch extends Component {
 
 AdvancedSearch.propTypes = {
   posts: PropTypes.object.isRequired,
+  auth: PropTypes.object.isRequired,
   getDataAutoComplete: PropTypes.func.isRequired,
   searchPosts: PropTypes.func.isRequired,
   getPostById: PropTypes.func.isRequired,
 };
 
-const mapStateToProps = (state) => ({ posts: state.posts });
+const mapStateToProps = (state) => ({ posts: state.posts, auth: state.auth });
 
 const mapDispatchToProps = { getDataAutoComplete, searchPosts, getPostById };
 

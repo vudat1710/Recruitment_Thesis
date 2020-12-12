@@ -24,7 +24,11 @@ module.exports = function(sequelize, DataTypes) {
         model: 'Post',
         key: 'postId'
       }
-    }
+    },
+    createdAt: {
+      type: DataTypes.DATEONLY,
+      allowNull: false
+    },
   }, {
     sequelize,
     tableName: 'WishList',

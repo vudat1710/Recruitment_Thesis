@@ -3,6 +3,7 @@ import json
 import pandas as pd
 from math import sqrt
 import pprint
+from item_item import get_score_item
 
 def nominal_attr(u, x):
     if u == x:
@@ -60,8 +61,15 @@ def get_score_user(user, post):
 
     return sqrt(gender ** 2 + job_type ** 2 + salary ** 2 + qualification ** 2 + workplace ** 2 + major ** 2 + experience ** 2)
 
-def update_score_user(user, post):
-    pass
+# def update_recommend_user(user, updated_posts):
+#     candidates = []
+#     for post in updated_posts:
+#         postId = post["postId"]
+#         if str(postId) in computed_posts:
+#             candidates.extend(computed_posts[str(postId)])
+        
+        
+
 
 
 def test():

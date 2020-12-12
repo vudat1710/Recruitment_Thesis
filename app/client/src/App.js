@@ -1,5 +1,5 @@
 import Index from "./components/Index/Index";
-import store from "./store";
+import { store, persistor } from "./store";
 import { Provider } from "react-redux";
 import React, { Component } from "react";
 import { Route, BrowserRouter } from "react-router-dom";
@@ -37,10 +37,11 @@ import AdvancedSearch from "./components/Search/AdvancedSearch";
 import ChangePassword from "./components/Auth/ChangePassword";
 import PostDetails from "./components/Post/Post";
 import UpdateInfo from "./components/Profile/Profile";
-import Compare from "./components/Compare/Compare";
+import Compare from "./components/Compare/Compare2";
 import PrivateRoute from "./components/HOC/PrivateRoute";
 import Stats from "./components/Stats/Stats";
 import Recommend from "./components/Recommend/Recommend";
+import { PersistGate } from "redux-persist/lib/integration/react";
 
 if (localStorage.jwtToken) {
   setAuthToken(localStorage.jwtToken);
@@ -55,23 +56,33 @@ class App extends Component {
     return (
       <div>
         <Provider store={store}>
-          <BrowserRouter>
-            <Header />
-            <Route exact path="/" component={Index} />
-            <Route exact path="/login" component={Login} />
-            <Route exact path="/register" component={Register} />
-            <Route exact path="/forgotPassword" component={ForgotPassword} />
-            <Route exact path="/post/:id" component={PostDetails} />
-            <Route exact path="/company/:id" component={CompanyDetails} />
-            <PrivateRoute exact path="/updateUser" component={UpdateInfo} />
-            <PrivateRoute exact path="/compare" component={Compare} />
-            <Route exact path="/advancedSearch" render={(props) => <AdvancedSearch {...props}/>} />
-            <PrivateRoute exact path="/changePassword" component={ChangePassword}/>
-            <PrivateRoute exact path="/wishlist" component={WishList}/>
-            <PrivateRoute exact path="/recommend" component={Recommend}/>
-            <Route exact path="/stats" component={Stats}/>
-          </BrowserRouter>
-          <Footer />
+          <PersistGate persistor={persistor}>
+            <BrowserRouter>
+              <Header />
+              <Route exact path="/" component={Index} />
+              <Route exact path="/login" component={Login} />
+              <Route exact path="/register" component={Register} />
+              <Route exact path="/forgotPassword" component={ForgotPassword} />
+              <Route exact path="/post/:id" component={PostDetails} />
+              <Route exact path="/company/:id" component={CompanyDetails} />
+              <PrivateRoute exact path="/updateUser" component={UpdateInfo} />
+              <PrivateRoute exact path="/compare" component={Compare} />
+              <Route
+                exact
+                path="/advancedSearch"
+                render={(props) => <AdvancedSearch {...props} />}
+              />
+              <PrivateRoute
+                exact
+                path="/changePassword"
+                component={ChangePassword}
+              />
+              <PrivateRoute exact path="/wishlist" component={WishList} />
+              <PrivateRoute exact path="/recommend" component={Recommend} />
+              <Route exact path="/stats" component={Stats} />
+            </BrowserRouter>
+            <Footer />
+          </PersistGate>
         </Provider>
       </div>
     );

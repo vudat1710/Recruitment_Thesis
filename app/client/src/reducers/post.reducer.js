@@ -10,6 +10,7 @@ import {
   GET_POST_BY_COMPANY_ID,
   DELETE_COMMENT,
   COMPARE,
+  ADD_TO_COMPARE,
 } from "../actions/actionTypes";
 
 const initialState = {
@@ -34,7 +35,8 @@ const initialState = {
   rate: 0,
   comments: [],
   deleteCommentSuccess: false,
-  compare: {}
+  compare: {},
+  compareList: [],
 };
 
 export default (state = initialState, { type, payload }) => {
@@ -81,8 +83,8 @@ export default (state = initialState, { type, payload }) => {
       return {
         ...state,
         searchResults: payload,
-        loading: false
-      }
+        loading: false,
+      };
     case GET_POST_BY_ID:
       return {
         ...state,
@@ -123,13 +125,33 @@ export default (state = initialState, { type, payload }) => {
     case GET_COMMENT_BY_POST_ID:
       return {
         ...state,
-        comments: payload
-      }
+        comments: payload,
+      };
     case COMPARE:
       return {
         ...state,
-        compare: payload
+        compare: payload,
+      };
+    case ADD_TO_COMPARE:
+      let compareListCop = payload.compareList;
+      // console.log(payload === {})
+      if (Object.keys(payload).length === 0) {
+        compareListCop = [];
+      } else {
+        if (compareListCop.length < 2) {
+          if (!compareListCop.includes(payload.postId)) {
+            compareListCop.push(payload.postId);
+          }
+        }
+        if (payload.type === "remove") {
+          compareListCop = compareListCop.filter((x) => x !== payload.postId);
+        }
       }
+      console.log(compareListCop)
+      return {
+        ...state,
+        compareList: compareListCop,
+      };
     default:
       return state;
   }

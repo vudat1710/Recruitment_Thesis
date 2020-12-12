@@ -7,6 +7,7 @@ import Search from "../Search/Search";
 import HowItWork from "../../assets/img/job-vacancy.jpg";
 import BGFact from "../../assets/img/bg-facts.jpg";
 import { getPostById } from "../../actions/post.action";
+import { getWishList } from "../../actions/wishlist.action";
 import { Link, withRouter } from "react-router-dom";
 import { getUserByUserId } from "../../actions/user.action";
 
@@ -31,7 +32,20 @@ class Index extends Component {
         this.props.history.push("/updateUser");
       } else {
         if (this.props.recommend.userRecommend.length === 0) {
-          await this.props.getUserRecommend(this.props.user.user);
+          await this.props.getWishList(this.props.user.user.userId);
+          await this.props.getUserRecommend({
+            userId: this.props.user.user.userId,
+            Majors: this.props.user.user.Majors,
+            WorkPlaces: this.props.user.user.WorkPlaces,
+            experience: this.props.user.user.experience,
+            gender: this.props.user.user.gender,
+            job_type: this.props.user.user.job_type,
+            qualification: this.props.user.user.qualification,
+            salary: this.props.user.user.salary,
+            year_of_birth: this.props.user.user.year_of_birth,
+            RatePosts: this.props.user.user.RatePosts,
+            wishlist: this.props.wishlist.posts.map((a) => a.postId),
+          });
         }
 
         this.setState({
@@ -43,7 +57,7 @@ class Index extends Component {
     await this.props.getPosts({
       type: "home",
       limit: 5,
-      attributes: ["postId", "title", "salary_type", "valid_through"],
+      // attributes: ["postId", "title", "salary_type", "valid_through"],
     });
     this.setState({
       ...this.state,
@@ -53,6 +67,7 @@ class Index extends Component {
 
   render() {
     const { postsDisplay, recommendedPosts } = this.state;
+    console.log(postsDisplay);
     let recentJobs =
       postsDisplay.length === 0 ? (
         <div className="spinner">
@@ -76,11 +91,25 @@ class Index extends Component {
                   </div>
                   <div className="header-meta">
                     <span className="location">{workplace}</span>
+                  </div>
+                </header>
+                <footer>
+                  {this.props.auth.isAuthenticated ? (
                     <span className="label label-success">
                       {post.salary_type}
                     </span>
-                  </div>
-                </header>
+                  ) : (
+                    <span>
+                      <h6>
+                        Bạn cần{" "}
+                        <Link to="/login" style={{ color: "red" }}>
+                          ĐĂNG NHẬP
+                        </Link>{" "}
+                        để xem được mức lương
+                      </h6>
+                    </span>
+                  )}
+                </footer>
               </a>
             </div>
           );
@@ -122,6 +151,22 @@ class Index extends Component {
       <>
         <Search />
         <main>
+          {this.props.auth.isAuthenticated ? (
+            <section>
+              <div className="container">
+                <header className="section-header">
+                  <h2>Công việc gợi ý cho bạn</h2>
+                </header>
+
+                <div className="row item-blocks-condensed">
+                  {recommendedJobs}
+                </div>
+              </div>
+            </section>
+          ) : (
+            <></>
+          )}
+
           <section className="bg-alt">
             <div className="container">
               <header className="section-header">
@@ -141,42 +186,6 @@ class Index extends Component {
                   Xem tất cả các công việc
                 </Link>
               </p>
-            </div>
-          </section>
-
-          <section>
-            <div className="container">
-              <div className="col-sm-12 col-md-6 hidden-xs hidden-sm">
-                <br />
-                <img
-                  className="center-block"
-                  src={HowItWork}
-                  alt="how it works"
-                />
-              </div>
-
-              <div className="col-sm-12 col-md-6">
-                <header className="section-header text-left">
-                  <span>Giới thiệu</span>
-                  <h2>Tổng quan</h2>
-                </header>
-
-                <p className="lead">
-                  Ứng dụng hữu ích trong việc tìm kiếm một công việc phù hợp với
-                  bản thân, đặc biệt là trong lĩnh vực CNTT. Nhờ chức năng tìm
-                  kiếm công việc xung quanh mà nhiều thành viên trong hệ thống
-                  đã tìm được một công việc phù hợp.
-                </p>
-                <p>
-                  App mới lạ, việc nộp đơn và quá trình ứng tuyển nhanh chóng
-                  hơn quá trình tìm việc thông thường. Gây ấn tượng và chinh
-                  phục nhà tuyển dụng ngay từ ban đầu với mẫu CV khác biệt,
-                  chuyên nghiệp.
-                </p>
-
-                <br />
-                <br />
-              </div>
             </div>
           </section>
 
@@ -240,27 +249,6 @@ class Index extends Component {
             </div>
           </section> */}
 
-          {this.props.auth.isAuthenticated ? (
-            <section>
-              <div className="container">
-                <header className="section-header">
-                  <span>Gợi ý</span>
-                  <h2>Công việc gợi ý dành cho bạn</h2>
-                  <p>
-                    Dưới đây là các công việc phù hợp với hồ sơ của bạn trên hệ
-                    thống
-                  </p>
-                </header>
-
-                <div className="row item-blocks-condensed">
-                  {recommendedJobs}
-                </div>
-              </div>
-            </section>
-          ) : (
-            <></>
-          )}
-
           <section
             className="bg-img text-center"
             style={{
@@ -286,7 +274,7 @@ class Index extends Component {
                   />
                   <span className="input-group-btn">
                     <button className="btn btn-success btn-md" type="submit">
-                    Đăng ký
+                      Đăng ký
                     </button>
                   </span>
                 </div>
@@ -301,17 +289,20 @@ class Index extends Component {
 
 Index.propTypes = {
   posts: PropTypes.object.isRequired,
+  wishlist: PropTypes.object.isRequired,
   auth: PropTypes.object.isRequired,
   getPosts: PropTypes.func.isRequired,
   getPostById: PropTypes.func.isRequired,
   getPosts: PropTypes.func.isRequired,
   getUserRecommend: PropTypes.func.isRequired,
+  getWishList: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
   posts: state.posts,
   user: state.user,
   auth: state.auth,
+  wishlist: state.wishlist,
   recommend: state.recommend,
 });
 
@@ -320,6 +311,7 @@ const mapDispatchToProps = {
   getPostById,
   getUserByUserId,
   getUserRecommend,
+  getWishList,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Index);

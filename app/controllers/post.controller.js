@@ -27,6 +27,7 @@ function convertToObject(array, externalKey, externalValue, key) {
 }
 
 exports.findPosts = (req, res) => {
+  const today = new Date();
   const type = req.body.type;
   const attributesParams = req.body.attributes;
   let conditions;
@@ -34,7 +35,13 @@ exports.findPosts = (req, res) => {
     conditions = {
       limit: parseInt(req.body.limit),
       attributes: attributesParams,
-      order: [["valid_through", "ASC"]],
+      order: [["createdAt", "DESC"]],
+      where: {
+        [Op.and]: [
+          db.sequelize.where(db.sequelize.col("valid_through"), ">", today),
+        ],
+        is_deleted: 0
+      },
     };
   } else if (type == "all") {
     conditions = {};
@@ -161,7 +168,14 @@ exports.getPostByMajorName = (req, res) => {
 };
 
 exports.searchPosts = (req, res) => {
-  let conditions = { where: {} };
+  const today = new Date();
+  let conditions = {
+    where: {
+      [Op.and]: [
+        db.sequelize.where(db.sequelize.col("valid_through"), ">", today),
+      ],
+    },
+  };
   const size = parseInt(req.body.size);
   const page = parseInt(req.body.page);
 
@@ -177,6 +191,8 @@ exports.searchPosts = (req, res) => {
   }
   conditions["limit"] = parseInt(size);
   conditions["offset"] = page || page !== 0 ? size * (page - 1) : 0;
+  conditions["order"] = [["createdAt", "DESC"]];
+  conditions.where["is_deleted"] = 0
 
   conditions["include"] = [
     {
@@ -258,7 +274,7 @@ exports.rate = (req, res) => {
     where: { userId: userId, postId: postId },
   })
     .then((data) => {
-      if (!data.id) {
+      if (data === null) {
         RatePost.create({ rate: rate, postId: postId, userId: userId })
           .then((data) => {
             res.json({ success: true, message: "Rate has been posted" });
@@ -270,11 +286,9 @@ exports.rate = (req, res) => {
             });
           });
       } else {
-        // console.log(data)
         data
           .update({ rate: rate, postId: postId, userId: parseInt(userId) })
           .then((x) => {
-            console.log(x);
             res.send({ success: true, message: "Rate has been updated" });
           })
           .catch((err) => {
@@ -671,6 +685,33 @@ exports.deletePost = (req, res) => {
       res.send({
         status: 400,
         message: err.message || "Some errors occurred while deleting post.",
+      });
+    });
+};
+
+exports.deletePostFlag = (req, res) => {
+  const { postId } = req.body;
+  let conditions = { where: { postId: postId } };
+  Post.findOne(conditions)
+    .then((post) => {
+      const is_deleted = post.is_deleted;
+      if (is_deleted === 0) {
+        post.update({ is_deleted: 1 });
+        res.json({
+          success: true,
+          message: "Delete successful",
+        });
+      } else {
+        return res.json({
+          status: 400,
+          errors: {},
+        });
+      }
+    })
+    .catch((err) => {
+      res.send({
+        status: 400,
+        message: err.message,
       });
     });
 };

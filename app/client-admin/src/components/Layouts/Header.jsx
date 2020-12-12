@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import Logo from "../../assets/img/logo.png";
 import UserLogo from "../../assets/img/logo_user.png";
 import classnames from "classnames";
-import "./Header.scss";
+// import "./Header.scss";
 
 const userLoginA = {
   color: "#7e8890",
@@ -71,11 +71,11 @@ class Header extends Component {
                 Quản lý bình luận
               </Link>
             </li>
-            <li>
+            {/* <li>
               <Link className="active" to="/stats">
                 Xem thống kê
               </Link>
-            </li>
+            </li> */}
           </ul>
         </div>
       </nav>
