@@ -17,7 +17,7 @@ class EditableMajor extends Component {
 
     this.state = {
       majorId: 0,
-      type: this.props.location.type,
+      type: this.props.location.pathname,
       isLoading: true,
       majorUpdate: false,
       majorAdd: false,
@@ -33,7 +33,7 @@ class EditableMajor extends Component {
   }
 
   async componentDidMount() {
-    if (this.state.type !== "add") {
+    if (this.state.type !== "/addMajor") {
       await this.props.getMajorById({
         majorId: this.props.match.params.id,
       });
@@ -65,7 +65,7 @@ class EditableMajor extends Component {
     let newInfo = {
       name: name,
     };
-    if (type !== "add") {
+    if (type !== "/addMajor") {
       newInfo.majorId = this.state.majorId;
       await this.props.updateMajor(newInfo);
       this.setState({
@@ -82,7 +82,7 @@ class EditableMajor extends Component {
   }
 
   onConfirm() {
-    if (this.state.type !== "add") {
+    if (this.state.type !== "/addMajor") {
       this.setState({
         ...this.state,
         majorUpdate: false,

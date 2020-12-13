@@ -17,7 +17,7 @@ class EditableCompany extends Component {
 
     this.state = {
       companyId: 0,
-      type: this.props.location.type,
+      type: this.props.location.pathname,
       isLoading: true,
       companyUpdate: false,
       companyAdd: false,
@@ -47,7 +47,7 @@ class EditableCompany extends Component {
   }
 
   async componentDidMount() {
-    if (this.state.type !== "add") {
+    if (this.state.type !== "/addCompany") {
       await this.props.getCompanyById(this.props.match.params.id);
 
       this.setState({
@@ -83,7 +83,7 @@ class EditableCompany extends Component {
       address: address,
       img_url: img_url,
     };
-    if (type !== "add") {
+    if (type !== "/addCompany") {
       newInfo.companyId = this.state.companyId;
       await this.props.updateCompany(newInfo);
       this.setState({
@@ -100,7 +100,7 @@ class EditableCompany extends Component {
   }
 
   onConfirm() {
-    if (this.state.type !== "add") {
+    if (this.state.type !== "/addCompany") {
       this.setState({
         ...this.state,
         companyUpdate: false,

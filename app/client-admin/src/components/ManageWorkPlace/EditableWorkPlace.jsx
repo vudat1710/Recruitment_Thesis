@@ -17,7 +17,7 @@ class EditableWorkPlace extends Component {
 
     this.state = {
       workPlaceId: 0,
-      type: this.props.location.type,
+      type: this.props.location.pathname,
       isLoading: true,
       workPlaceUpdate: false,
       workPlaceAdd: false,
@@ -33,7 +33,7 @@ class EditableWorkPlace extends Component {
   }
 
   async componentDidMount() {
-    if (this.state.type !== "add") {
+    if (this.state.type !== "/addWorkPlace") {
       await this.props.getWorkPlaceById({workPlaceId: this.props.match.params.id});
 
       this.setState({
@@ -63,7 +63,7 @@ class EditableWorkPlace extends Component {
     let newInfo = {
       name: name,
     };
-    if (type !== "add") {
+    if (type !== "/addWorkPlace") {
       newInfo.workPlaceId = this.state.workPlaceId;
       await this.props.updateWorkPlace(newInfo);
       this.setState({
@@ -80,7 +80,7 @@ class EditableWorkPlace extends Component {
   }
 
   onConfirm() {
-    if (this.state.type !== "add") {
+    if (this.state.type !== "/addWorkPlace") {
       this.setState({
         ...this.state,
         workPlaceUpdate: false,

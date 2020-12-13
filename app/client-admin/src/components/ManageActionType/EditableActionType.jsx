@@ -17,7 +17,7 @@ class EditableActionType extends Component {
 
     this.state = {
       actionTypeId: 0,
-      type: this.props.location.type,
+      type: this.props.location.pathname,
       isLoading: true,
       actionTypeUpdate: false,
       actionTypeAdd: false,
@@ -33,7 +33,7 @@ class EditableActionType extends Component {
   }
 
   async componentDidMount() {
-    if (this.state.type !== "add") {
+    if (this.state.type !== "/addActionType") {
       await this.props.getActionTypeById({actionTypeId: this.props.match.params.id});
 
       this.setState({
@@ -80,7 +80,7 @@ class EditableActionType extends Component {
   }
 
   onConfirm() {
-    if (this.state.type !== "add") {
+    if (this.state.type !== "/addActionType") {
       this.setState({
         ...this.state,
         actionTypeUpdate: false,

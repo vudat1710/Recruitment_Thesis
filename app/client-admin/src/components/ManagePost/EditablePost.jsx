@@ -20,7 +20,7 @@ class EditablePost extends Component {
 
     this.state = {
       postId: 0,
-      type: this.props.location.type,
+      type: this.props.location.pathname,
       dataAuto: null,
       isLoading: true,
       postUpdate: false,
@@ -63,7 +63,7 @@ class EditablePost extends Component {
 
   async componentDidMount() {
     await this.props.getDataAutoComplete();
-    if (this.state.type !== "add") {
+    if (this.state.type !== "/addPost") {
       await this.props.getPostById(this.props.match.params.id);
 
       this.setState({
@@ -167,7 +167,7 @@ class EditablePost extends Component {
       valid_through: valid_through,
       company_address: address
     };
-    if (type !== "add") {
+    if (type !== "/addPost") {
       await this.props.updatePost(newInfo);
       this.setState({
         ...this.state,
@@ -183,7 +183,7 @@ class EditablePost extends Component {
   }
 
   onConfirm() {
-    if (this.state.type !== "add") {
+    if (this.state.type !== "/addPost") {
       this.setState({
         ...this.state,
         postUpdate: false,
