@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { searchPosts } from "../../actions/post.action";
 import { getPostByCompanyId } from "../../actions/company.action";
+import { searchPostsByTitle } from "../../actions/wishlist.action";
 
 function range(start, end) {
   return Array(end - start + 1)
@@ -29,18 +30,32 @@ class Pagination extends Component {
     
     if (type === "company") {
       await this.props.getPostByCompanyId(searchData);
+    } else if (type === "wishlist") {
+      await this.props.searchPostsByTitle(searchData);
     } else {
       await this.props.searchPosts(searchData);
     }
-    this.setState({
-      ...this.state,
-      currentPage: page,
-      resultPosts: this.props.posts.searchResults,
-    });
-    this.props.getChildState({
-      ...this.state,
-      resultPosts: this.props.posts.searchResults,
-    });
+    if (type === "wishlist") {
+      this.setState({
+        ...this.state,
+        currentPage: page,
+        resultPosts: this.props.wishlist.searchResults,
+      });
+      this.props.getChildState({
+        ...this.state,
+        resultPosts: this.props.wishlist.searchResults,
+      });
+    } else {
+      this.setState({
+        ...this.state,
+        currentPage: page,
+        resultPosts: this.props.posts.searchResults,
+      });
+      this.props.getChildState({
+        ...this.state,
+        resultPosts: this.props.posts.searchResults,
+      });
+    }
   }
 
   componentDidMount() {
@@ -156,11 +171,14 @@ class Pagination extends Component {
 Pagination.propTypes = {
   posts: PropTypes.object.isRequired,
   searchPosts: PropTypes.func.isRequired,
+  wishlist: PropTypes.object.isRequired,
   getPostByCompanyId: PropTypes.func.isRequired,
+  getWishListWithSize: PropTypes.func.isRequired,
+  searchPostsByTitle: PropTypes.func.isRequired
 };
 
-const mapStateToProps = (state) => ({ posts: state.posts });
+const mapStateToProps = (state) => ({ posts: state.posts, wishlist: state.wishlist });
 
-const mapDispatchToProps = { searchPosts, getPostByCompanyId };
+const mapDispatchToProps = { searchPosts, getPostByCompanyId, searchPostsByTitle };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Pagination);

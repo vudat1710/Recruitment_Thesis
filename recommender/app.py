@@ -66,7 +66,7 @@ def get_result_item():
     source = json.loads(request.data.decode("utf-8"))
 
     if (str(source["postId"]) in item_dict):
-        return_posts = [{"post": x} for x in df[df["postId"].isin(item_dict[str(source["userId"])])].to_dict('records')]
+        return_posts = [{"post": x} for x in df[df["postId"].isin(item_dict[str(source["postId"])])].to_dict('records')]
         return json.dumps({"data": return_posts})
     else:
         source["Majors"] = ", ".join([x["name"] for x in source["Majors"]])

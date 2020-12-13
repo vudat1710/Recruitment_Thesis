@@ -27,6 +27,7 @@ export const ADD_TO_COMPARE = 'ADD_TO_COMPARE';
 export const ADD_TO_WISHLIST = 'ADD_TO_WISHLIST';
 export const REMOVE_FROM_WISHLIST = 'REMOVE_FROM_WISHLIST';
 export const GET_WISHLIST = 'GET_WISHLIST';
+export const SEARCH_POSTS_BY_TITLE = 'SEARCH_POSTS_BY_TITLE';
 
 //Company actions
 export const GET_COMPANY_BY_ID = 'GET_COMPANY_BY_ID';

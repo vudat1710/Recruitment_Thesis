@@ -73,8 +73,9 @@ class PostDetails extends Component {
         });
       }
       await this.props.getUserByUserId(localStorage.userId);
-
-      // await this.props.getRelatedItems(this.props.posts.postDetails);
+      if (this.state.isAdded) {
+        await this.props.getRelatedItems(this.props.posts.postDetails);
+      }
     }
 
     const userRate =
@@ -99,6 +100,13 @@ class PostDetails extends Component {
       rate: parseInt(e.target.value),
       userId: localStorage.userId,
     };
+    this.setState({
+      ...this.state,
+      valueRating: parseInt(e.target.value),
+    });
+    if (parseInt(e.target.value) > 3) {
+      await this.props.getRelatedItems(this.props.posts.postDetails);
+    }
     await this.props.ratePost(details);
   }
 
@@ -118,6 +126,9 @@ class PostDetails extends Component {
       ...this.state,
       isAdded: !this.state.isAdded,
     });
+    if (this.state.isAdded) {
+      await this.props.getRelatedItems(this.props.posts.postDetails);
+    }
   }
 
   async onCompareClick(action) {
@@ -162,64 +173,86 @@ class PostDetails extends Component {
         </div>
       );
     } else {
-      const PostContent = relatedPosts.map((post) => {
-        return (
-          <div className="col-xs-12">
-            <a className="item-block" href={`/post/${post.post.postId}`}>
-              <header>
-                <img src={post.post.Companies[0].img_url} alt="" />
-                <div className="hgroup">
-                  <h4>{post.post.title}</h4>
-                  <h5>
-                    {post.post.Companies[0].name}{" "}
-                    <span className="label label-success">
-                      {post.post.job_type}
-                    </span>
-                  </h5>
-                </div>
-                <time datetime="2016-03-10 20:00">
-                  Deadline: {post.post.valid_through}
-                </time>
+      let PostContent = isAuthenticated ? (
+        this.state.isAdded || this.state.valueRating > 3 ? (
+          <section>
+            <div className="container">
+              <header className="section-header">
+                <span>Các việc làm tương tự</span>
+                <h2>Công việc tương tự với công việc này</h2>
               </header>
 
-              <footer>
-                <ul className="details cols-3">
-                  <li>
-                    <i className="fa fa-map-marker"></i>
-                    <span>{post.post.WorkPlaces}</span>
-                  </li>
+              <div className="row item-blocks-condensed">
+                {relatedPosts.map((post) => {
+                  return (
+                    <div className="col-xs-12">
+                      <a
+                        className="item-block"
+                        href={`/post/${post.post.postId}`}
+                      >
+                        <header>
+                          <img src={post.post.Companies[0].img_url} alt="" />
+                          <div className="hgroup">
+                            <h4>{post.post.title}</h4>
+                            <h5>
+                              {post.post.Companies[0].name}{" "}
+                              <span className="label label-success">
+                                {post.post.job_type}
+                              </span>
+                            </h5>
+                          </div>
+                          <time datetime="2016-03-10 20:00">
+                            Deadline: {post.post.valid_through}
+                          </time>
+                        </header>
 
-                  <li>
-                    <i className="fa fa-money"></i>
-                    {this.props.auth.isAuthenticated ? (
-                      <span>{post.salary_type}</span>
-                    ) : (
-                      <span>
-                        <h6>
-                          Bạn cần{" "}
-                          <Link to="/login" style={{ color: "red" }}>
-                            ĐĂNG NHẬP
-                          </Link>{" "}
-                          để xem được mức lương
-                        </h6>
-                      </span>
-                    )}
-                  </li>
+                        <footer>
+                          <ul className="details cols-3">
+                            <li>
+                              <i className="fa fa-map-marker"></i>
+                              <span>{post.post.WorkPlaces}</span>
+                            </li>
 
-                  {post.post.qualification ? (
-                    <li>
-                      <i className="fa fa-certificate"></i>
-                      <span>{post.post.qualification}</span>
-                    </li>
-                  ) : (
-                    <></>
-                  )}
-                </ul>
-              </footer>
-            </a>
-          </div>
-        );
-      });
+                            <li>
+                              <i className="fa fa-money"></i>
+                              {this.props.auth.isAuthenticated ? (
+                                <span>{post.post.salary_type}</span>
+                              ) : (
+                                <span>
+                                  <h6>
+                                    Bạn cần{" "}
+                                    <Link to="/login" style={{ color: "red" }}>
+                                      ĐĂNG NHẬP
+                                    </Link>{" "}
+                                    để xem được mức lương
+                                  </h6>
+                                </span>
+                              )}
+                            </li>
+
+                            {post.post.qualification ? (
+                              <li>
+                                <i className="fa fa-certificate"></i>
+                                <span>{post.post.qualification}</span>
+                              </li>
+                            ) : (
+                              <></>
+                            )}
+                          </ul>
+                        </footer>
+                      </a>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+        ) : (
+          <></>
+        )
+      ) : (
+        <></>
+      );
 
       let addToWishList =
         this.state.isAdded === false ? (
@@ -298,7 +331,7 @@ class PostDetails extends Component {
       avgRate = avgRate.reduce((a, b) => a + b, 0) / avgRate.length || 0;
 
       let compareElement;
-      // console.log(this.state.isAddedCompare)
+
       if (this.props.posts.compareList.includes(this.state.postId)) {
         compareElement = (
           <button
@@ -357,7 +390,6 @@ class PostDetails extends Component {
 
       return (
         <>
-          {/* {this.renderRedirect()} */}
           {alertS}
           <header
             className="page-header bg-img size-lg"
@@ -549,7 +581,7 @@ class PostDetails extends Component {
                             <strong style={{ color: "black" }}>
                               {majorDup.join(", ")}
                             </strong>
-                            {", "}
+                            {majorDup.length !== 0 ? ", " : ""}
                             {majorNotDup.join(", ")}
                           </span>
                         ) : (
@@ -567,7 +599,7 @@ class PostDetails extends Component {
                             <strong style={{ color: "black" }}>
                               {workplaceDup.join(", ")}
                             </strong>
-                            {", "}
+                            {workplaceDup.length !== 0 ? ", " : ""}
                             {workplaceNotDup.join(", ")}
                           </span>
                         ) : (
@@ -591,20 +623,7 @@ class PostDetails extends Component {
               </div>
             </section>
 
-            {this.props.auth.isAuthenticated ? (
-              <section>
-                <div className="container">
-                  <header className="section-header">
-                    <span>Các việc làm tương tự</span>
-                    <h2>Công việc tương tự với công việc này</h2>
-                  </header>
-
-                  <div className="row item-blocks-condensed">{PostContent}</div>
-                </div>
-              </section>
-            ) : (
-              <></>
-            )}
+            {PostContent}
             {/* } */}
           </main>
         </>

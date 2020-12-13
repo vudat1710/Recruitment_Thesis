@@ -2,13 +2,15 @@ import {
   GET_WISHLIST,
   ADD_TO_WISHLIST,
   REMOVE_FROM_WISHLIST,
+  SEARCH_POSTS_BY_TITLE
 } from "../actions/actionTypes";
 
 const initialState = {
   posts: [],
-  totalItems: 0,
-  currentPage: 0,
-  totalPages: 0,
+  searchParams: {
+    title: ""
+  },
+  searchResults: [],
   loading: true,
   addSuccess: false,
   removeSuccess: false,
@@ -20,11 +22,17 @@ export default (state = initialState, { type, payload }) => {
       return {
         ...state,
         posts: payload.posts,
-        totalItems: payload.totalItems,
-        currentPage: payload.currentPage,
-        totalPages: payload.totalPages,
         loading: false,
       };
+    case SEARCH_POSTS_BY_TITLE:
+      console.log(payload)
+      return {
+        ...state,
+        searchParams: {
+          title: payload.searchParams.title ? payload.searchParams.title : ""
+        },
+        searchResults: payload.data
+      }
     case ADD_TO_WISHLIST:
       let change = false;
       if (payload === "success") {

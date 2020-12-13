@@ -177,8 +177,6 @@ exports.updateUser = (req, res) => {
       { model: Major, attributes: ["majorId"] },
     ],
   }).then((user) => {
-    console.log("Majors: ", majors)
-    console.log("WorkPlaces: ", workplaces)
     if (user) {
       const majorIdsExist = user.Majors.map((a) => a.majorId);
       const workPlaceIdsExist = user.WorkPlaces.map((a) => a.workPlaceId);

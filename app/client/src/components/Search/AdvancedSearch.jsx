@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { experienceDict, getSearchData } from "../../utils/utils";
+import { experienceDict, getSearchData, normalizeLongName, normalizeWorkPlaces } from "../../utils/utils";
 import { connect } from "react-redux";
 import Banner from "../../assets/img/banner_details.jpg";
 import {Link} from 'react-router-dom';
@@ -66,7 +66,6 @@ class AdvancedSearch extends Component {
   }
 
   onChange(e) {
-    e.preventDefault();
     this.setState({
       ...this.state,
       [e.target.name]: e.target.value,
@@ -170,9 +169,9 @@ class AdvancedSearch extends Component {
               <header>
                 <img src={post.Companies[0].img_url} alt="" />
                 <div className="hgroup">
-                  <h4>{post.title}</h4>
+                  <h4>{normalizeLongName(post.title)}</h4>
                   <h5>
-                    {post.Companies[0].name}{" "}
+                    {normalizeLongName(post.Companies[0].name)}{" "}
                     <span className="label label-success">{post.job_type}</span>
                   </h5>
                 </div>
@@ -185,7 +184,7 @@ class AdvancedSearch extends Component {
                 <ul className="details cols-3">
                   <li>
                     <i className="fa fa-map-marker"></i>
-                    <span>{post.WorkPlaces.map((a) => a.name).join(", ")}</span>
+                    <span>{normalizeWorkPlaces(post.WorkPlaces)}</span>
                   </li>
 
                   <li>
@@ -318,7 +317,6 @@ class AdvancedSearch extends Component {
 
                   <div className="form-group col-xs-12 col-sm-4">
                     <h6>Kinh nghiệm</h6>
-                    {/* <div className="radio"> */}
                     {Object.keys(this.state.experienceSelect).map((ex) => {
                       return (
                         <div className="checkbox">
@@ -334,14 +332,11 @@ class AdvancedSearch extends Component {
                         </div>
                       );
                     })}
-                    {/* </div> */}
                   </div>
 
                   <div className="form-group col-xs-12 col-sm-4">
                     <h6>Hình thức làm việc</h6>
-                    {/* <div className="radio"> */}
                     {Object.keys(this.state.jobTypeSelect).map((jT) => {
-                      // console.log(this.state.jobType.includes(jT));
                       return (
                         <div className="checkbox">
                           <input
@@ -356,7 +351,6 @@ class AdvancedSearch extends Component {
                         </div>
                       );
                     })}
-                    {/* </div> */}
                   </div>
                 </div>
 

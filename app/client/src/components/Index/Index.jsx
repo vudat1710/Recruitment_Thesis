@@ -1,15 +1,21 @@
 import React, { Component } from "react";
+import { Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import { getPosts } from "../../actions/post.action";
 import { getUserRecommend } from "../../actions/recommend.action";
 import Search from "../Search/Search";
-import HowItWork from "../../assets/img/job-vacancy.jpg";
 import BGFact from "../../assets/img/bg-facts.jpg";
-import { getPostById } from "../../actions/post.action";
+import {
+  getPostById,
+  searchPosts,
+  getDataAutoComplete,
+} from "../../actions/post.action";
 import { getWishList } from "../../actions/wishlist.action";
-import { Link, withRouter } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { getUserByUserId } from "../../actions/user.action";
+import AutoCompleteText from "../HOC/AutoCompleteText";
+import { normalizeLongName, normalizeWorkPlaces } from "../../utils/utils";
 
 class Index extends Component {
   constructor(props) {
@@ -17,10 +23,52 @@ class Index extends Component {
     this.state = {
       postsDisplay: [],
       recommendedPosts: [],
+      name: "",
+      redirect: false,
     };
   }
 
+  onChange(e) {
+    this.setState({
+      ...this.state,
+      [e.target.name]: e.target.value,
+    });
+  }
+
+  getChildStatePagination = (data) => {
+    this.setState({
+      ...this.state,
+      postsDisplay: data.resultPosts,
+    });
+  };
+
+  getChildState = (data) => {
+    if (data.name === "name") {
+      this.setState({
+        ...this.state,
+        name: data.text,
+      });
+    }
+  };
+
+  async onSubmit(e) {
+    e.preventDefault();
+    const name = this.state.name;
+    let searchData = {
+      major: [name],
+      size: 5,
+      page: 1,
+    };
+
+    await this.props.searchPosts(searchData);
+    this.setState({
+      ...this.state,
+      postsDisplay: this.props.posts.searchResults.posts,
+    });
+  }
+
   async componentDidMount() {
+    await this.props.getDataAutoComplete();
     if (this.props.auth.isAuthenticated) {
       await this.props.getUserByUserId(localStorage.userId);
       if (
@@ -54,20 +102,40 @@ class Index extends Component {
         });
       }
     }
-    await this.props.getPosts({
-      type: "home",
-      limit: 5,
-      // attributes: ["postId", "title", "salary_type", "valid_through"],
-    });
+    await this.props.searchPosts({ size: 5, page: 1 });
     this.setState({
       ...this.state,
-      postsDisplay: this.props.posts.postData,
+      postsDisplay: this.props.posts.searchResults.posts,
     });
   }
 
+  onClick(e) {
+    this.setState({
+      ...this.state,
+      redirect: true,
+    });
+  }
+
+  renderRedirect = () => {
+    if (this.state.redirect) {
+      return (
+        <Redirect
+          to={{
+            pathname: "/advancedSearch",
+            prev: {
+              positionTypes: "",
+              workplaces: "",
+              majors: this.state.name,
+            },
+          }}
+        />
+      );
+    }
+  };
+
   render() {
     const { postsDisplay, recommendedPosts } = this.state;
-    console.log(postsDisplay);
+
     let recentJobs =
       postsDisplay.length === 0 ? (
         <div className="spinner">
@@ -77,27 +145,30 @@ class Index extends Component {
         </div>
       ) : (
         postsDisplay.map((post) => {
-          let workplace = post.WorkPlaces.map(function (ele) {
-            return ele.name;
-          }).join(", ");
           return (
             <div className="col-xs-12">
               <a className="item-block" href={`/post/${post.postId}`}>
                 <header>
                   <img src={post.Companies[0].img_url} alt="" />
                   <div className="hgroup">
-                    <h4>{post.title}</h4>
-                    <h5>{post.Companies[0].name}</h5>
+                    <h4>{normalizeLongName(post.title)}</h4>
+                    <h5>{normalizeLongName(post.Companies[0].name)}</h5>
                   </div>
                   <div className="header-meta">
-                    <span className="location">{workplace}</span>
+                    <span className="location">
+                      {normalizeWorkPlaces(post.WorkPlaces)}
+                    </span>
                   </div>
                 </header>
                 <footer>
                   {this.props.auth.isAuthenticated ? (
-                    <span className="label label-success">
-                      {post.salary_type}
-                    </span>
+                    <>
+                      <label>Mức lương:</label>
+                      <span className="label label-success">
+                        {" "}
+                        {post.salary_type}
+                      </span>
+                    </>
                   ) : (
                     <span>
                       <h6>
@@ -124,15 +195,15 @@ class Index extends Component {
           <span className="dot3"></span>
         </div>
       ) : (
-        recommendedPosts.map((post) => {
+        recommendedPosts.slice(0, 5).map((post) => {
           return (
             <div className="col-xs-12">
               <a className="item-block" href={`/post/${post.post.postId}`}>
                 <header>
                   <img src={post.post.Companies[0].img_url} alt="" />
                   <div className="hgroup">
-                    <h4>{post.post.title}</h4>
-                    <h5>{post.post.Companies[0].name}</h5>
+                    <h4>{normalizeLongName(post.post.title)}</h4>
+                    <h5>{normalizeLongName(post.post.Companies[0].name)}</h5>
                   </div>
                   <div className="header-meta">
                     <span className="location">{post.post.WorkPlaces}</span>
@@ -149,6 +220,7 @@ class Index extends Component {
 
     return (
       <>
+        {this.renderRedirect()}
         <Search />
         <main>
           {this.props.auth.isAuthenticated ? (
@@ -161,6 +233,13 @@ class Index extends Component {
                 <div className="row item-blocks-condensed">
                   {recommendedJobs}
                 </div>
+                <br />
+                <br />
+                <p className="text-center">
+                  <Link to="/recommend" className="btn btn-primary">
+                    Xem thêm
+                  </Link>
+                </p>
               </div>
             </section>
           ) : (
@@ -175,6 +254,29 @@ class Index extends Component {
                 <p>
                   Dưới đây là 5 công việc được cập nhật gần nhất trên hệ thống
                 </p>
+                <div className="container">
+                  <form action="#" onSubmit={(e) => this.onSubmit(e)}>
+                    <div className="row">
+                      <div className="form-group col-xs-12 col-sm-2">
+                        <label>Tên tiêu đề: </label>
+                      </div>
+                      <div className="form-group col-xs-12 col-sm-10">
+                        <AutoCompleteText
+                          name="name"
+                          items={this.props.posts.autoComplete.majors}
+                          value={this.state.name}
+                          getChildState={this.getChildState}
+                          placeholder="Tên ngành nghề"
+                        />
+                      </div>
+                    </div>
+                    <div className="button-group">
+                      <div className="action-buttons">
+                        <button className="btn btn-primary">Tìm kiếm</button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
               </header>
 
               <div className="row item-blocks-condensed">{recentJobs}</div>
@@ -182,9 +284,7 @@ class Index extends Component {
               <br />
               <br />
               <p className="text-center">
-                <Link to="/advancedSearch" className="btn btn-primary">
-                  Xem tất cả các công việc
-                </Link>
+                <a className="btn btn-primary" onClick={(e) => this.onClick(e)}>Xem thêm</a>
               </p>
             </div>
           </section>
@@ -296,6 +396,8 @@ Index.propTypes = {
   getPosts: PropTypes.func.isRequired,
   getUserRecommend: PropTypes.func.isRequired,
   getWishList: PropTypes.func.isRequired,
+  searchPosts: PropTypes.func.isRequired,
+  getDataAutoComplete: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -312,6 +414,8 @@ const mapDispatchToProps = {
   getUserByUserId,
   getUserRecommend,
   getWishList,
+  searchPosts,
+  getDataAutoComplete,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Index);

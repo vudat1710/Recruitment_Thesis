@@ -154,13 +154,13 @@ class Comment extends Component {
             <div className="item-block">
               <header>
                 <img src={UserLogo} alt="" />
-                {/* <div className="hgroup">
+                <div className="hgroup">
                   <h4>{e.userName}</h4>
-                  <span style={{ marginRight: "20px" }}>
+                  {/* <span style={{ marginRight: "20px" }}>
                     Giới tính: {e.gender}
                   </span>
-                  <span>Ngày sinh: {e.yearOfBirth}</span>
-                </div> */}
+                  <span>Ngày sinh: {e.yearOfBirth}</span> */}
+                </div>
                 <div className="item-body">
                   <h5>Đã bình luận: {e.content}</h5>
                 </div>

@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import Details1 from "../../assets/img/details1.jpg";
 import Details2 from "../../assets/img/details2.jpg";
 import Details3 from "../../assets/img/details3.jpg";
+import { normalizeLongName, normalizeWorkPlaces } from "../../utils/utils";
 
 let BgBanner;
 if (Math.floor(Math.random() * 3 + 1) === 1) {
@@ -51,9 +52,9 @@ class Recommend extends Component {
               <header>
                 <img src={post.post.Companies[0].img_url} alt="" />
                 <div className="hgroup">
-                  <h4>{post.post.title}</h4>
+                  <h4>{normalizeLongName(post.post.title)}</h4>
                   <h5>
-                    {post.post.Companies[0].name}{" "}
+                    {normalizeLongName(post.post.Companies[0].name)}{" "}
                     <span className="label label-success">{post.post.job_type}</span>
                   </h5>
                 </div>
@@ -66,7 +67,7 @@ class Recommend extends Component {
                 <ul className="details cols-3">
                   <li>
                     <i className="fa fa-map-marker"></i>
-                    <span>{post.post.WorkPlaces}</span>
+                    <span>{normalizeWorkPlaces(post.post.WorkPlaces)}</span>
                   </li>
 
                   <li>
