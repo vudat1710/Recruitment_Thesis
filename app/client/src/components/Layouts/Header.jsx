@@ -3,7 +3,6 @@ import { Link, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import { logoutUser } from "../../actions/auth.action";
 import Logo from "../../assets/img/logo.png";
-import UserLogo from "../../assets/img/logo_user.png";
 import CompareComp from "./CompareComp";
 import "./Header.scss";
 
@@ -22,7 +21,6 @@ class Header extends Component {
 
   onLogoutClick(e) {
     e.preventDefault();
-    // this.props.clearCurrentProfile();
     this.props.logoutUser();
   }
   render() {
@@ -78,10 +76,6 @@ class Header extends Component {
             <></>
           ) : <CompareComp/>
           }
-
-          <Link className="links" to="/stats">
-            Xem thống kê
-          </Link>
         </div>
         <div
           style={{

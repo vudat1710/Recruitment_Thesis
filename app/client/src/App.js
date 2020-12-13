@@ -39,7 +39,6 @@ import PostDetails from "./components/Post/Post";
 import UpdateInfo from "./components/Profile/Profile";
 import Compare from "./components/Compare/Compare2";
 import PrivateRoute from "./components/HOC/PrivateRoute";
-import Stats from "./components/Stats/Stats";
 import Recommend from "./components/Recommend/Recommend";
 import { PersistGate } from "redux-persist/lib/integration/react";
 
@@ -79,7 +78,6 @@ class App extends Component {
               />
               <PrivateRoute exact path="/wishlist" component={WishList} />
               <PrivateRoute exact path="/recommend" component={Recommend} />
-              <Route exact path="/stats" component={Stats} />
             </BrowserRouter>
             <Footer />
           </PersistGate>
