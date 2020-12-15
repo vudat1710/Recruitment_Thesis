@@ -18,7 +18,6 @@ const Op = db.Sequelize.Op;
 
 function convertToObject(array, externalKey, externalValue, key) {
   let res = [];
-  // console.log(array.length)
   for (const item in array) {
     let newItem = {};
     newItem[key] = parseInt(array[item]);

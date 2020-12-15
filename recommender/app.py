@@ -5,6 +5,7 @@ import numpy as np
 import json
 from user_item import get_score_user
 from item_item import get_score_item
+from profile_update import auto_update_profile
 import json
 
 APP_BIND_ADDRESS = '0.0.0.0'
@@ -86,6 +87,20 @@ def get_result_item():
         json.dump(item_dict, open("item_item.json", "w"))
 
         return json.dumps(return_data)
+
+@app.route("/api2/recommender/autoUpdateProfile", methods=['GET','POST'])
+def updateProfile():
+    data = json.loads(request.data.decode("utf-8"))
+    user = data["user"]
+    posts = data["posts"]
+
+    res = auto_update_profile(user, posts, 30, 0.1)
+    
+    return_data = {
+        "data": res,
+    }
+
+    return json.dumps(return_data)
 
 if __name__ == "__main__":
     app.run(host=APP_BIND_ADDRESS, port=APP_BIND_PORT, debug=True)

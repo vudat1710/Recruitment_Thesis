@@ -11,6 +11,7 @@ const WorkPlacePost = db.WorkPlacePost;
 const WishList = db.WishList;
 const MajorPost = db.MajorPost;
 const PostCompany = db.PostCompany;
+const Wishlist = db.WishList;
 const validatePostInput = require("../validation/post");
 
 function convertToObject(array, externalKey, externalValue, key) {
@@ -40,7 +41,7 @@ exports.findPosts = (req, res) => {
         [Op.and]: [
           db.sequelize.where(db.sequelize.col("valid_through"), ">", today),
         ],
-        is_deleted: 0
+        is_deleted: 0,
       },
     };
   } else if (type == "all") {
@@ -192,7 +193,7 @@ exports.searchPosts = (req, res) => {
   conditions["limit"] = parseInt(size);
   conditions["offset"] = page || page !== 0 ? size * (page - 1) : 0;
   conditions["order"] = [["createdAt", "DESC"]];
-  conditions.where["is_deleted"] = 0
+  conditions.where["is_deleted"] = 0;
 
   conditions["include"] = [
     {
@@ -339,6 +340,58 @@ exports.getRateByUserIdPostId = (req, res) => {
         const rate = data[0].rate;
         res.send({ rate: rate });
       }
+    })
+    .catch((err) => {
+      res.send({
+        status: 400,
+        message: err.message || "Some errors occurred.",
+      });
+    });
+};
+
+exports.getLikedPosts = (req, res, next) => {
+  const { userId } = req.body;
+
+  const a = RatePost.findAll({
+    where: { userId: userId, rate: { [Op.gt]: 3 } },
+    attributes: ["postId"],
+  });
+  const b = WishList.findAll({
+    where: { userId: userId },
+    attributes: ["postId"],
+  });
+
+  Promise.all([a, b])
+    .then((response) => {
+      let postIds = response[0].map((a) => a.postId);
+      postIds.push(...response[1].map((a) => a.postId));
+
+      Post.findAll(
+        {
+          where: {
+            postId: postIds,
+          },
+          include: [
+            {
+              model: Company,
+              attributes: ["name", "description", "img_url", "companyId"],
+            },
+            { model: WorkPlace, attributes: ["name"] },
+            { model: Major, attributes: ["name"] },
+          ],
+        },
+        { subQuery: false }
+      )
+        .then((posts) => {
+          res.send({ posts });
+        })
+        .catch((err) => {
+          return res.json({
+            status: 400,
+            message:
+              err.message || "Some errors occurred while retrieving all posts.",
+          });
+        });
     })
     .catch((err) => {
       res.send({

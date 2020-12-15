@@ -12,6 +12,7 @@ router.post("/comment", passport.authenticate('jwt', { session: false }), posts.
 router.post("/deleteComment", passport.authenticate('jwt', { session: false }), posts.deleteComment);
 router.post("/rate", passport.authenticate('jwt', { session: false }), posts.rate);
 router.post("/compare", passport.authenticate('jwt', { session: false }), posts.compare);
+router.post("/getLikedPosts", passport.authenticate('jwt', { session: false }), posts.getLikedPosts);
 router.post("/deleteCommentAdmin", posts.deleteComment);
 router.post("getRateByUserIdPostId", posts.getRateByUserIdPostId);
 router.post("/getCommentByPostId", posts.getCommentByPostId);
