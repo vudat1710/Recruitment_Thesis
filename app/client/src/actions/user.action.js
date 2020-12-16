@@ -4,7 +4,7 @@ import {
   GET_ERRORS,
   GET_USER_BY_USER_ID,
   UPDATE_USER,
-  GET_CLICK_POST_EVENT
+  GET_CLICK_POST_EVENT,
 } from "./actionTypes";
 
 // Clear profile
@@ -33,6 +33,28 @@ export const getUserByUserId = (attributes) => async (dispatch) => {
     });
   }
 };
+
+export const autoUpdateUser = (params) => async (dispatch) => {
+  const res = await axios.post(`/api2/recommender/autoUpdateProfile`, params);
+  if (Object.keys(res.data.data).length !== 0) {
+    const res2 = await axios.post(`/api/user/updateUser`, res.data.data);
+    if (res.data.status !== 400) {
+      dispatch({
+        type: UPDATE_USER,
+        payload: "success",
+      });
+      dispatch({
+        type: GET_ERRORS,
+        payload: {},
+      });
+    } else {
+      dispatch({
+        type: GET_ERRORS,
+        payload: res.data.errors,
+      });
+    }
+  }
+}
 
 export const updateUser = (params) => async (dispatch) => {
   const res = await axios.post(`/api/user/updateUser`, params);

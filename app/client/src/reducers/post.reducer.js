@@ -11,6 +11,7 @@ import {
   DELETE_COMMENT,
   COMPARE,
   ADD_TO_COMPARE,
+  GET_LIKED_POSTS
 } from "../actions/actionTypes";
 
 const initialState = {
@@ -37,6 +38,7 @@ const initialState = {
   deleteCommentSuccess: false,
   compare: {},
   compareList: [],
+  likedPosts: []
 };
 
 export default (state = initialState, { type, payload }) => {
@@ -55,6 +57,11 @@ export default (state = initialState, { type, payload }) => {
         autoComplete: payload,
         loading: false,
       };
+    case GET_LIKED_POSTS:
+      return {
+        ...state,
+        likedPosts: payload
+      }
     case SEARCH_POSTS:
       return {
         ...state,

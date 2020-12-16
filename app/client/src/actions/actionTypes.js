@@ -7,7 +7,6 @@ export const CLEAR_CURRENT_PROFILE = 'CLEAR_CURRENT_PROFILE';
 export const GET_USER_BY_USER_ID = 'GET_USER_BY_USER_ID';
 export const UPDATE_USER = 'UPDATE_USER';
 
-
 export const GET_CLICK_POST_EVENT = 'GET_CLICK_POST_EVENT';
 
 //Post actions
@@ -22,6 +21,7 @@ export const DELETE_COMMENT = 'DELETE_COMMENT';
 export const GET_COMMENT_BY_POST_ID = 'GET_COMMENT_BY_POST_ID';
 export const COMPARE = 'COMPARE';
 export const ADD_TO_COMPARE = 'ADD_TO_COMPARE';
+export const GET_LIKED_POSTS = 'GET_LIKED_POSTS';
 
 //Wishlist actions
 export const ADD_TO_WISHLIST = 'ADD_TO_WISHLIST';

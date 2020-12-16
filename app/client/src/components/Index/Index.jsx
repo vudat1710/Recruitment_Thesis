@@ -10,10 +10,10 @@ import {
   getPostById,
   searchPosts,
   getDataAutoComplete,
+  getLikedPosts
 } from "../../actions/post.action";
-import { getWishList } from "../../actions/wishlist.action";
 import { Link } from "react-router-dom";
-import { getUserByUserId } from "../../actions/user.action";
+import { getUserByUserId, autoUpdateUser } from "../../actions/user.action";
 import AutoCompleteText from "../HOC/AutoCompleteText";
 import { normalizeLongName, normalizeWorkPlaces } from "../../utils/utils";
 
@@ -80,7 +80,8 @@ class Index extends Component {
         this.props.history.push("/updateUser");
       } else {
         if (this.props.recommend.userRecommend.length === 0) {
-          await this.props.getWishList(this.props.user.user.userId);
+          await this.props.getLikedPosts();
+          let likedPosts = this.props.posts.likedPosts;
           await this.props.getUserRecommend({
             userId: this.props.user.user.userId,
             Majors: this.props.user.user.Majors,
@@ -91,9 +92,10 @@ class Index extends Component {
             qualification: this.props.user.user.qualification,
             salary: this.props.user.user.salary,
             year_of_birth: this.props.user.user.year_of_birth,
-            RatePosts: this.props.user.user.RatePosts,
-            wishlist: this.props.wishlist.posts.map((a) => a.postId),
+            likedPosts: likedPosts,
           });
+
+          await this.props.autoUpdateUser({user: this.props.user.user, posts: likedPosts})
         }
 
         this.setState({
@@ -395,9 +397,10 @@ Index.propTypes = {
   getPostById: PropTypes.func.isRequired,
   getPosts: PropTypes.func.isRequired,
   getUserRecommend: PropTypes.func.isRequired,
-  getWishList: PropTypes.func.isRequired,
+  getLikedPosts: PropTypes.func.isRequired,
   searchPosts: PropTypes.func.isRequired,
   getDataAutoComplete: PropTypes.func.isRequired,
+  autoUpdateUser: PropTypes.func.isRequired
 };
 
 const mapStateToProps = (state) => ({
@@ -413,9 +416,10 @@ const mapDispatchToProps = {
   getPostById,
   getUserByUserId,
   getUserRecommend,
-  getWishList,
+  getLikedPosts,
   searchPosts,
   getDataAutoComplete,
+  autoUpdateUser
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Index);

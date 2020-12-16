@@ -10,6 +10,7 @@ import {
   GET_COMMENT_BY_POST_ID,
   COMPARE,
   ADD_TO_COMPARE,
+  GET_LIKED_POSTS,
   GET_ERRORS,
 } from "./actionTypes";
 import axios from "axios";
@@ -53,6 +54,21 @@ export const getDataAutoComplete = () => async (dispatch) => {
     },
   });
 };
+
+export const getLikedPosts = () => async (dispatch) => {
+  const res = await axios.post(`/api/post/getLikedPosts`, { userId: localStorage.userId });
+  if (res.data.status !== 400) {
+    dispatch({
+      type: GET_LIKED_POSTS,
+      payload: res.data.posts,
+    });
+  } else {
+    dispatch({
+      type: GET_ERRORS,
+      payload: res.message,
+    });
+  }
+}
 
 export const searchPosts = (searchParams) => async (dispatch) => {
   const res = await axios.post(`/api/post/searchPosts`, searchParams);

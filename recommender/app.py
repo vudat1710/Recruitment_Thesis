@@ -92,7 +92,13 @@ def get_result_item():
 def updateProfile():
     data = json.loads(request.data.decode("utf-8"))
     user = data["user"]
-    posts = data["posts"]
+    posts = []
+    user["Majors"] = [x["name"] for x in user["Majors"]]
+    user["WorkPlaces"] = [x["name"] for x in user["WorkPlaces"]]
+    for post in data["posts"]:
+        post["Majors"] = [x["name"] for x in post["Majors"]]
+        post["WorkPlaces"] = [x["name"] for x in post["WorkPlaces"]]
+        posts.append(post)
 
     res = auto_update_profile(user, posts, 30, 0.1)
     
