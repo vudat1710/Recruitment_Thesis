@@ -28,7 +28,7 @@ def auto_update_profile(user, posts, num_appears, k):
                     res[key] = _d[key]
         else:
             _d[key] = set(_d[key].keys())  
-            if user[key].isinstance(str):  
+            if isinstance(user[key], str):  
                 temp = [x.strip() for x in user[key].split(", ")]
             else:
                 temp = user[key]

@@ -11,7 +11,6 @@ const WorkPlacePost = db.WorkPlacePost;
 const WishList = db.WishList;
 const MajorPost = db.MajorPost;
 const PostCompany = db.PostCompany;
-const Wishlist = db.WishList;
 const validatePostInput = require("../validation/post");
 
 function convertToObject(array, externalKey, externalValue, key) {
@@ -148,6 +147,7 @@ exports.getPostByMajorName = (req, res) => {
     {
       where: {
         postId: postId,
+        is_deleted: 0
       },
       include: [
         { model: Company, attributes: ["name", "companyId"] },

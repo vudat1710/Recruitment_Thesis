@@ -92,6 +92,7 @@ exports.getJobTypeStats = (req, res) => {
     attributes: [
       [db.sequelize.fn("DISTINCT", db.sequelize.col("job_type")), "job_type"],
     ],
+    where: {is_deleted: 0}
   })
     .then((data) => {
       const { rows: jobTypes } = data;
@@ -137,6 +138,7 @@ exports.getExperienceStats = (req, res) => {
         "experience",
       ],
     ],
+    where: {is_deleted: 0}
   })
     .then((data) => {
       const { rows: experienceTypes } = data;
@@ -179,6 +181,7 @@ exports.getGenderStats = (req, res) => {
     attributes: [
       [db.sequelize.fn("DISTINCT", db.sequelize.col("gender")), "gender"],
     ],
+    where: {is_deleted: 0}
   })
     .then((data) => {
       const { rows: genders } = data;
@@ -224,6 +227,7 @@ exports.getSalaryStats = (req, res) => {
         "salary_type",
       ],
     ],
+    where: {is_deleted: 0}
   })
     .then((data) => {
       const { rows: salaryTypes } = data;

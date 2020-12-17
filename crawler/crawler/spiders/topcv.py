@@ -2,12 +2,18 @@ from scrapy import Request, FormRequest
 from scrapy.exceptions import CloseSpider
 from scrapy.spiders import CrawlSpider
 from ..items import TopCVItem, CompanyItem, MajorItem
+from ..utils import normalize_date
+import datetime, json
+
+from ..utils import get_sample_data_from_json_type, get_sample_data_from_microdata_type
 
 BASE_URL = "https://www.topcv.vn/"
 USERNAME = "vudat1710@gmail.com"
 PASSWORD = "17101998"
 START_LINKS_PATH = "./crawler/data/topcv/topcv_start_links.txt"
 NUM_STOP = 100000
+today = datetime.datetime.now()
+today = datetime.datetime.strptime(today.strftime("%Y-%m-%d"), "%Y-%m-%d")
 
 class TopCVCrawler(CrawlSpider):
     name = "topcv"
@@ -84,6 +90,9 @@ class TopCVCrawler(CrawlSpider):
                 return
     
     def get_item(self, response):
+        # string = response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
+        # datePosted = json.loads(string)["datePosted"]
+
         item = TopCVItem()
         company_url = ""
         if "/brand/" in response.url:
@@ -119,6 +128,8 @@ class TopCVCrawler(CrawlSpider):
             # yield item
             pass
         else:
+            # if today <= datetime.datetime.strptime(datePosted, "%Y-%m-%d"):
+            item["valid_through"] = [x.strip() for x in response.xpath('//div[@class=" text-dark-gray  job-deadline"]/text()').extract() if x != '\n'][0]
             title_list = response.xpath('//h1[@class="job-title text-highlight bold text-uppercase"]/text()').extract()
             title_extra = response.xpath('//h1[@class="job-title text-highlight bold text-uppercase"]/a/text()').extract_first()
             if title_extra:
@@ -126,7 +137,6 @@ class TopCVCrawler(CrawlSpider):
             else: item["title"] = ' '.join(title_list)
             item["company_title"] = response.xpath('//div[@class="company-title"]/span/a/text()').extract_first()
             item["address"] = [x.strip() for x in response.xpath('//div[@class="text-dark-gray"]/text()').extract() if x != '\n'][0]
-            item["valid_through"] = [x.strip() for x in response.xpath('//div[@class=" text-dark-gray  job-deadline"]/text()').extract() if x != '\n'][0]
             recuit_info = [x.strip() for x in response.xpath('//div[@class="job-info-item"]/span/text()').extract() if x.strip() != '']
             item["salary"] = recuit_info[0]
             item["job_type"] = recuit_info[1]

@@ -193,6 +193,6 @@ if __name__ == "__main__":
     for post in merged:
         if post:
             merged_data.append(post)
-    dbp = DBPushing(merged_data[:1000])
+    dbp = DBPushing(merged_data)
     dbp.push_chunks()
     dbp.connection.close()

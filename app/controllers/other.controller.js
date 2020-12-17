@@ -38,7 +38,7 @@ exports.getDataAutoComplete = (req, res) => {
 
   const majors = Major.findAll({ attributes: ["name"] });
   const workplaces = WorkPlace.findAll({ attributes: ["name"] });
-  const num_posts = Post.count();
+  const num_posts = Post.count({where: {is_deleted: 0}});
   const num_companies = Company.count();
 
   const qualifications = Post.findAll({

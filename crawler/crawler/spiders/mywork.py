@@ -3,12 +3,15 @@ from scrapy.exceptions import CloseSpider
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 from ..items import MyWorkItem, MyWorkCompanyItem, MyWorkMajorItem
-import json
+import json, datetime
+from ..utils import normalize_date
 
 BASE_URL = "https://www.mywork.com.vn"
 START_LINKS_PATH = "./crawler/data/mywork/mywork_start_links.txt"
 START_LINK_PREFIX = "https://mywork.com.vn/tuyen-dung?categories="
 NUM_STOP = 10000
+today = datetime.datetime.now()
+today = datetime.datetime.strptime(today.strftime("%Y-%m-%d"), "%Y-%m-%d")
 
 class MyWorkCrawler(CrawlSpider):
     name = "mywork"
@@ -82,10 +85,13 @@ class MyWorkCrawler(CrawlSpider):
 
     def get_item(self, response):
         item = MyWorkItem()
+        # string = response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
+        # datePosted = json.loads(string)["datePosted"]
+        # if today <= datetime.datetime.strptime(datePosted, "%d/%m/%Y"):
+        item["valid_through"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-clock")]]/span/span[2]/text()').extract_first().strip()
         item["title"] = ' '.join([x for x in response.xpath('//h1[@class="main-title"]/span/text()').extract() if x not in ['hot', '\xa0']])
         item["company_title"] = response.xpath('//h4[contains(@class, "desc-for-title")]/span/text()').extract_first().strip()
         item["address"] = response.xpath('//*[@id="footer"]/div/div/div[3]/div[2]/span/text()').extract_first().strip()
-        item["valid_through"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-clock")]]/span/span[2]/text()').extract_first().strip()
         item["salary"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-cash-dollar")]]/span/text()').extract_first().strip()
         item["job_type"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-store")]]/span/text()').extract_first().strip()
         item["num_hiring"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-users")]]/span/text()').extract_first().strip()

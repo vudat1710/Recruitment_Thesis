@@ -2,13 +2,16 @@ from scrapy import Request, FormRequest
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 from scrapy.exceptions import CloseSpider
-from ..utils import normalize_long_text
+from ..utils import normalize_long_text, normalize_date
+import datetime, json, re
 from ..items import TVNItem, TVNCompanyItem, TVNMajorItem
 
 BASE_URL = "https://www.timviecnhanh.com/"
 START_LINKS_PATH = "./crawler/data/timviecnhanh/timviecnhanh_start_links.txt"
 MAJOR_LINK = "https://www.timviecnhanh.com/vieclam/timkiem?tu_khoa=&nganh_nghe%5B%5D={}&tinh_thanh%5B%5D="
 NUM_STOP = 10000
+today = datetime.datetime.now()
+today = datetime.datetime.strptime(today.strftime("%Y-%m-%d"), "%Y-%m-%d")
 
 class TVNCrawler(CrawlSpider):
     name = "timviecnhanh"
@@ -73,10 +76,15 @@ class TVNCrawler(CrawlSpider):
 
     def get_item(self, response):
         item = TVNItem()
+
+        # string = response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
+        # datePosted = json.loads(string.replace("\n", "").replace("\t", ""))["datePosted"]
+        # datePosted = re.search(r"\d{4}[-/]\d{2}[-/]\d{2}", datePosted).group(0)
+        # if today <= datetime.datetime.strptime(datePosted, "%Y-%m-%d"):
+        item["valid_through"] = response.xpath('//td/b[@class="text-danger"]/text()').extract_first().strip()
         item["title"] = response.xpath('//header[@class="block-title"]/h1/span/text()').extract_first().strip()
         item["company_title"] = response.xpath('//article[@class="block-content"]/div[2]/h3/a/text()').extract_first()
         item["address"] = response.xpath('//article[@class="block-content"]/div[2]/span/text()').extract_first().strip()[9:]
-        item["valid_through"] = response.xpath('//td/b[@class="text-danger"]/text()').extract_first().strip()
         item["salary"] = ''.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[1]/ul/li[1]/text()').extract() if x.strip() != ""]).strip()
         item["job_type"] = ''.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[2]/ul/li[4]/text()').extract() if x.strip() != ""]).strip()
         item["num_hiring"] = ''.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[2]/ul/li[1]/text()').extract() if x.strip() != ""]).strip()
@@ -96,6 +104,7 @@ class TVNCrawler(CrawlSpider):
         item["contact_name"] = response.xpath('//div[@class="block-info-company"]/div/table/tr[1]/td[2]/p/text()').extract_first().strip()
 
         yield item
+
         if company_url not in self.company_url_list:
             self.company_url_list.append(company_url)
             yield Request(url=company_url, callback=self.get_company, dont_filter=True)

@@ -36,9 +36,10 @@ export const getUserByUserId = (attributes) => async (dispatch) => {
 
 export const autoUpdateUser = (params) => async (dispatch) => {
   const res = await axios.post(`/api2/recommender/autoUpdateProfile`, params);
+  console.log(res.data.data)
   if (Object.keys(res.data.data).length !== 0) {
     const res2 = await axios.post(`/api/user/updateUser`, res.data.data);
-    if (res.data.status !== 400) {
+    if (res2.data.status !== 400) {
       dispatch({
         type: UPDATE_USER,
         payload: "success",
@@ -50,7 +51,7 @@ export const autoUpdateUser = (params) => async (dispatch) => {
     } else {
       dispatch({
         type: GET_ERRORS,
-        payload: res.data.errors,
+        payload: res2.data.errors,
       });
     }
   }

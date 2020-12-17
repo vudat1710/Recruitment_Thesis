@@ -6,6 +6,7 @@ import re, math
 import lxml.html as lh
 from lxml.html.clean import clean_html
 import pandas as pd
+import datetime
 
 jslde = JsonLdExtractor()
 mde = MicrodataExtractor()
@@ -185,3 +186,13 @@ def get_sample_data_from_json_type(response):
 
 def get_sample_data_from_microdata_type(response):
     return mde.extract(response.body)
+
+def normalize_date(date):
+    try:
+        date = re.search(r"\d{2}[-/]\d{2}[-/]\d{4}", date).group(0)
+    except:
+        date = ""
+    try:
+        return datetime.datetime.strptime(date, "%d/%m/%Y")
+    except:
+        return datetime.datetime.strptime(date, "%d-%m-%Y")

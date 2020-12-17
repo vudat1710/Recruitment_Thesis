@@ -18,9 +18,9 @@ class PostNormalization:
             return None
         post['workplace'] = self.normalize_workplace(post["workplace"])
         post['majors'] = self.normalize_majors(post['majors'])
-        post['title'] = re.sub(
-            r"(\\(.+\\)|\\[.+\\]|{.+}|–.+|-.*|,.*|Thu Nhập.*|Khu Vực.*|Làm Việc Tại.*|Lương.*|\d{1,2}[ ]{0,1}-[ ]{0,1}\d{1,2}.*)",
-            '', post['title']).strip()
+        # post['title'] = re.sub(
+        #     r"(\\(.+\\)|\\[.+\\]|{.+}|–.+|-.*|,.*|Thu Nhập.*|Khu Vực.*|Làm Việc Tại.*|Lương.*|\d{1,2}[ ]{0,1}-[ ]{0,1}\d{1,2}.*)",
+        #     '', post['title']).strip()
         post["min_value"], post["max_value"], post['salary_type'] = self.normalize_salary(post['salary'])
         post['description'] = re.sub(r"(<br>)", "", post['description']) 
         post['valid_through'] = self.normalize_date(post['valid_through'])

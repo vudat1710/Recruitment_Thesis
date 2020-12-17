@@ -174,6 +174,7 @@ class EditablePost extends Component {
         postUpdate: this.props.posts.postUpdate,
       });
     } else {
+      newInfo["is_deleted"] = 0;
       await this.props.addPost(newInfo);
       this.setState({
         ...this.state,
