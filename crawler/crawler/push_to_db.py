@@ -185,13 +185,13 @@ class DBPushing:
 if __name__ == "__main__":
     # posts = json.load(open('./crawler/data/topcv/post.json', 'r'))
     # companies = json.load(open('./crawler/data/topcv/company.json', 'r'))
-    for folder_name in os.listdir("./crawler/data"):
-        merged_data = []
-        # post_normalization = PostNormalization()
-        merged = json.load(open('./crawler/data/{}/norm_post.json'.format(folder_name), 'r'))
-        for post in merged:
-            if post:
-                merged_data.append(post)
-        dbp = DBPushing(merged_data[:500])
-        dbp.push_chunks()
-        dbp.connection.close()
+    # for folder_name in os.listdir("./crawler/data"):
+    merged_data = []
+    # post_normalization = PostNormalization()
+    merged = json.load(open('./crawler/data/mywork/norm_post.json'.format(), 'r'))
+    for post in merged:
+        if post:
+            merged_data.append(post)
+    dbp = DBPushing(merged_data[:1000])
+    dbp.push_chunks()
+    dbp.connection.close()
