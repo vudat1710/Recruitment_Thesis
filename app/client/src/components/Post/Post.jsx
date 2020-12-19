@@ -191,7 +191,7 @@ class PostDetails extends Component {
                         href={`/post/${post.post.postId}`}
                       >
                         <header>
-                          <img src={post.post.Companies[0].img_url} alt="" />
+                          {post.post.Companies[0].img_url || post.post.Companies[0].img_url == "" ? <img src={post.post.Companies[0].img_url} alt="" /> : <></>}
                           <div className="hgroup">
                             <h4>{post.post.title}</h4>
                             <h5>

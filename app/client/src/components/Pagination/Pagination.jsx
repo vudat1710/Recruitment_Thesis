@@ -71,6 +71,7 @@ class Pagination extends Component {
   render() {
     const { totalPages, currentPage, searchData } = this.state;
     let element = [];
+    console.log(searchData)
 
     if (totalPages <= 5) {
       const newArr = range(1, totalPages);

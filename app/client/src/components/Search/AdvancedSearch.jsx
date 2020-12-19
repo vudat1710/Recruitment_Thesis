@@ -1,8 +1,13 @@
 import React, { Component } from "react";
-import { experienceDict, getSearchData, normalizeLongName, normalizeWorkPlaces } from "../../utils/utils";
+import {
+  experienceDict,
+  getSearchData,
+  normalizeLongName,
+  normalizeWorkPlaces,
+} from "../../utils/utils";
 import { connect } from "react-redux";
 import Banner from "../../assets/img/banner_details.jpg";
-import {Link} from 'react-router-dom';
+import { Link } from "react-router-dom";
 import {
   getDataAutoComplete,
   searchPosts,
@@ -161,73 +166,81 @@ class AdvancedSearch extends Component {
       jobTypeSelect,
     } = this.state;
     let searchData = this.getSearchDataAd();
-    let PostComp = resultPosts.posts ? (
-      resultPosts.posts.map((post) => {
-        return (
-          <div className="col-xs-12">
-            <a className="item-block" href={`/post/${post.postId}`}>
-              <header>
-                <img src={post.Companies[0].img_url} alt="" />
-                <div className="hgroup">
-                  <h4>{normalizeLongName(post.title)}</h4>
-                  <h5>
-                    {normalizeLongName(post.Companies[0].name)}{" "}
-                    <span className="label label-success">{post.job_type}</span>
-                  </h5>
-                </div>
-                <time datetime="2016-03-10 20:00">
-                  Deadline: {post.valid_through}
-                </time>
-              </header>
-
-              <footer>
-                <ul className="details cols-3">
-                  <li>
-                    <i className="fa fa-map-marker"></i>
-                    <span>{normalizeWorkPlaces(post.WorkPlaces)}</span>
-                  </li>
-
-                  <li>
-                    <i className="fa fa-money"></i>
-                    {this.props.auth.isAuthenticated ? (
-                      <span>{post.salary_type}</span>
-                    ) : (
-                      <span>
-                        <h6>
-                          Bạn cần{" "}
-                          <Link to="/login" style={{ color: "red" }}>
-                            ĐĂNG NHẬP
-                          </Link>{" "}
-                          để đánh giá sản phẩm này
-                        </h6>
-                      </span>
-                    )}
-                  </li>
-
-                  {post.qualification ? (
-                    <li>
-                      <i className="fa fa-certificate"></i>
-                      <span>{post.qualification}</span>
-                    </li>
+    console.log("advanced", searchData);
+    let PostComp =
+      Object.keys(resultPosts).length !== 0 ? (
+        resultPosts.posts.map((post) => {
+          return (
+            <div className="col-xs-12">
+              <a className="item-block" href={`/post/${post.postId}`}>
+                <header>
+                  {post.Companies[0].img_url ? (
+                    <img src={post.Companies[0].img_url} alt="" />
                   ) : (
                     <></>
                   )}
-                </ul>
-              </footer>
-            </a>
-          </div>
-        );
-      })
-    ) : (
-      <></>
-    );
+                  <div className="hgroup">
+                    <h4>{normalizeLongName(post.title)}</h4>
+                    <h5>
+                      {normalizeLongName(post.Companies[0].name)}{" "}
+                      <span className="label label-success">
+                        {post.job_type}
+                      </span>
+                    </h5>
+                  </div>
+                  <time datetime="2016-03-10 20:00">
+                    Deadline: {post.valid_through}
+                  </time>
+                </header>
+
+                <footer>
+                  <ul className="details cols-3">
+                    <li>
+                      <i className="fa fa-map-marker"></i>
+                      <span>{normalizeWorkPlaces(post.WorkPlaces)}</span>
+                    </li>
+
+                    <li>
+                      <i className="fa fa-money"></i>
+                      {this.props.auth.isAuthenticated ? (
+                        <span>{post.salary_type}</span>
+                      ) : (
+                        <span>
+                          <h6>
+                            Bạn cần{" "}
+                            <Link to="/login" style={{ color: "red" }}>
+                              ĐĂNG NHẬP
+                            </Link>{" "}
+                            để đánh giá sản phẩm này
+                          </h6>
+                        </span>
+                      )}
+                    </li>
+
+                    {post.qualification ? (
+                      <li>
+                        <i className="fa fa-certificate"></i>
+                        <span>{post.qualification}</span>
+                      </li>
+                    ) : (
+                      <></>
+                    )}
+                  </ul>
+                </footer>
+              </a>
+            </div>
+          );
+        })
+      ) : (
+        <></>
+      );
 
     let pagination =
       resultPosts.totalItems && resultPosts.totalItems > 0 ? (
         <Pagination
           totalPages={resultPosts.totalPages}
           currentPage={resultPosts.currentPage}
-          searchData={searchData}
+          searchData={this.getSearchDataAd()}
           getChildState={this.getChildStatePagination}
         />
       ) : (
@@ -376,7 +389,18 @@ class AdvancedSearch extends Component {
                   {PostComp}
                 </div>
 
-                <nav className="text-center">{pagination}</nav>
+                <nav className="text-center">
+                  {resultPosts.totalItems && resultPosts.totalItems > 0 ? (
+                    <Pagination
+                      totalPages={resultPosts.totalPages}
+                      currentPage={resultPosts.currentPage}
+                      searchData={this.getSearchDataAd()}
+                      getChildState={this.getChildStatePagination}
+                    />
+                  ) : (
+                    <></>
+                  )}
+                </nav>
               </div>
             </section>
           </main>

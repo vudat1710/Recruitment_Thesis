@@ -67,7 +67,7 @@ class Recommend extends Component {
                 <ul className="details cols-3">
                   <li>
                     <i className="fa fa-map-marker"></i>
-                    <span>{normalizeWorkPlaces(post.post.WorkPlaces)}</span>
+                    <span>{normalizeWorkPlaces(post.post.WorkPlaces.split(", ").map(a => a.trim()))}</span>
                   </li>
 
                   <li>

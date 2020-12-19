@@ -1,9 +1,7 @@
 import pymysql
-import json, re
+import json, os
 from .constants import USER, PASSWORD, DATABASE, MAJOR_DICT_PATH, ADDRESS_DICT_PATH
-from .utils import get_field_data, get_post_to_check, merge_data
-from .normalize import PostNormalization
-import pandas as pd
+from .utils import get_field_data, get_post_to_check
 from collections import OrderedDict
 from .filtering import DuplicateFiltering
 from datetime import date
@@ -135,7 +133,7 @@ class DBPushing:
             posts_with_company = self.check_posts(self.merged_data[(CHUNK_SIZE*i):(CHUNK_SIZE*(i+1))], duplicate_filtering)
             print(len(posts_with_company))
             self.insert_to_db(posts_with_company)
-            if not duplicate_filtering:
+            if duplicate_filtering is not None:
                 duplicate_filtering.update(self.merged_data[(CHUNK_SIZE*i):(CHUNK_SIZE*(i+1))])
             else:
                 duplicate_filtering = self.get_filtered_data()
@@ -187,12 +185,13 @@ class DBPushing:
 if __name__ == "__main__":
     # posts = json.load(open('./crawler/data/topcv/post.json', 'r'))
     # companies = json.load(open('./crawler/data/topcv/company.json', 'r'))
-    merged_data = []
-    # post_normalization = PostNormalization()
-    merged = json.load(open('./crawler/data/topcv/norm_post.json', 'r'))
-    for post in merged:
-        if post:
-            merged_data.append(post)
-    dbp = DBPushing(merged_data)
-    dbp.push_chunks()
-    dbp.connection.close()
+    for folder_name in os.listdir("./crawler/data"):
+        merged_data = []
+        # post_normalization = PostNormalization()
+        merged = json.load(open('./crawler/data/{}/norm_post.json'.format(folder_name), 'r'))
+        for post in merged:
+            if post:
+                merged_data.append(post)
+        dbp = DBPushing(merged_data[:500])
+        dbp.push_chunks()
+        dbp.connection.close()
