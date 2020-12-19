@@ -112,6 +112,7 @@ class AdvancedSearch extends Component {
       ),
       salary_type: salaryType,
     };
+    
 
     searchData = getSearchData(searchData);
     searchData.size = 20;
@@ -149,12 +150,14 @@ class AdvancedSearch extends Component {
     e.preventDefault();
     let searchData = this.getSearchDataAd();
     searchData.page = 1;
+    
 
     await this.props.searchPosts(searchData);
     this.setState({
       ...this.state,
       resultPosts: this.props.posts.searchResults,
     });
+    
   }
 
   render() {
@@ -166,7 +169,6 @@ class AdvancedSearch extends Component {
       jobTypeSelect,
     } = this.state;
     let searchData = this.getSearchDataAd();
-    console.log("advanced", searchData);
     let PostComp =
       Object.keys(resultPosts).length !== 0 ? (
         resultPosts.posts.map((post) => {
@@ -240,7 +242,7 @@ class AdvancedSearch extends Component {
         <Pagination
           totalPages={resultPosts.totalPages}
           currentPage={resultPosts.currentPage}
-          searchData={this.getSearchDataAd()}
+          searchData={searchData} //dc lan dau thoi
           getChildState={this.getChildStatePagination}
         />
       ) : (
@@ -390,16 +392,7 @@ class AdvancedSearch extends Component {
                 </div>
 
                 <nav className="text-center">
-                  {resultPosts.totalItems && resultPosts.totalItems > 0 ? (
-                    <Pagination
-                      totalPages={resultPosts.totalPages}
-                      currentPage={resultPosts.currentPage}
-                      searchData={this.getSearchDataAd()}
-                      getChildState={this.getChildStatePagination}
-                    />
-                  ) : (
-                    <></>
-                  )}
+                  {pagination}
                 </nav>
               </div>
             </section>

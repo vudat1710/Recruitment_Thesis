@@ -134,6 +134,7 @@ class DBPushing:
             print(len(posts_with_company))
             self.insert_to_db(posts_with_company)
             if duplicate_filtering is not None:
+                
                 duplicate_filtering.update(self.merged_data[(CHUNK_SIZE*i):(CHUNK_SIZE*(i+1))])
             else:
                 duplicate_filtering = self.get_filtered_data()

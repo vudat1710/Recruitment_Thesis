@@ -25,10 +25,14 @@ class DuplicateFiltering:
     
     def update(self, update_data):
         temp_norm = []
+        update_data = [[x['title'], x['name'], x['workplace']] for x in update_data]
         for y in update_data:
             temp = []
             for i in range(self.num_fields_checked):
-                temp.append([word.lower() for word in re.compile("[\\w_]+").findall(word_tokenize(y[i], format="text"))])
+                try:
+                    temp.append([word.lower() for word in re.compile("[\\w_]+").findall(word_tokenize(y[i], format="text"))])
+                except:
+                    pass
             temp_norm.append(temp)    
         self.Y_norm.extend(temp_norm)
         for y in temp_norm:

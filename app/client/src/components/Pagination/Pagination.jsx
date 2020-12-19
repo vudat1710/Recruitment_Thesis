@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { searchPosts } from "../../actions/post.action";
 import { getPostByCompanyId } from "../../actions/company.action";
-import { searchPostsByTitle } from "../../actions/wishlist.action";
+import { removeFromWishList, searchPostsByTitle } from "../../actions/wishlist.action";
 
 function range(start, end) {
   return Array(end - start + 1)
@@ -33,6 +33,7 @@ class Pagination extends Component {
     } else if (type === "wishlist") {
       await this.props.searchPostsByTitle(searchData);
     } else {
+      console.log(searchData)
       await this.props.searchPosts(searchData);
     }
     if (type === "wishlist") {
@@ -58,6 +59,15 @@ class Pagination extends Component {
     }
   }
 
+  UNSAFE_componentWillReceiveProps(props) {
+    this.setState({
+      ...this.state,
+      searchData: props.searchData,
+      totalPages: props.totalPages,
+      currentPage: props.currentPage
+    })
+  }
+
   componentDidMount() {
     this.setState({
       ...this.state,
@@ -71,7 +81,6 @@ class Pagination extends Component {
   render() {
     const { totalPages, currentPage, searchData } = this.state;
     let element = [];
-    console.log(searchData)
 
     if (totalPages <= 5) {
       const newArr = range(1, totalPages);

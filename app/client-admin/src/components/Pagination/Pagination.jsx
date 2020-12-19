@@ -32,7 +32,7 @@ class Pagination extends Component {
     searchData.page = page;
     const { type } = this.state;
 
-    if (type === "search") {
+    if (type === "search" || type === undefined) {
       await this.props.searchPosts(searchData);
     } else if (type === "company") {
       await this.props.getPostByCompanyId(searchData);
@@ -47,7 +47,7 @@ class Pagination extends Component {
     } else if (type === "actions") {
       await this.props.getActionTypeByName(searchData);
     }
-    if (type === "search" || type === "company") {
+    if (type === "search" || type === "company" || type === undefined) {
       this.setState({
         ...this.state,
         currentPage: page,
@@ -110,6 +110,15 @@ class Pagination extends Component {
     }
   }
 
+  UNSAFE_componentWillReceiveProps(props) {
+    this.setState({
+      ...this.state,
+      searchData: props.searchData,
+      totalPages: props.totalPages,
+      currentPage: props.currentPage
+    })
+  }
+
   componentDidMount() {
     this.setState({
       ...this.state,
@@ -125,7 +134,7 @@ class Pagination extends Component {
     let element = [];
 
     if (totalPages <= 5) {
-      const newArr = range(1,totalPages);
+      const newArr = range(1, totalPages);
       newArr.map((page) => {
         if (page === currentPage) {
           element.push(

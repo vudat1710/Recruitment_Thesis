@@ -264,8 +264,6 @@ class ManagePost extends Component {
         </div>
       );
     } else {
-      console.log(this.state.experienceSelect)
-      console.log(this.state.dataAuto.experience)
       const prevSearchData = this.props.location.prev
         ? this.props.location.prev
         : { positionTypes: "", workplaces: "", majors: "" };
