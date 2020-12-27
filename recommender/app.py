@@ -7,6 +7,13 @@ from user_item import get_score_user
 from item_item import get_score_item
 from profile_update import auto_update_profile
 import json
+from datetime import datetime
+
+def compare_time(x, today):
+    if x >= today:
+        return True
+    else: return False
+today = datetime.today()
 
 APP_BIND_ADDRESS = '0.0.0.0'
 APP_BIND_PORT = 8000
@@ -17,22 +24,19 @@ cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 posts = json.load(open("/home/vudat1710/Downloads/Thesis/Recruitment_Thesis/all_posts.json", "r"))
 posts = [x for x in posts if x is not None]
 df = pd.DataFrame(posts)
-df['WorkPlaces'] = df['WorkPlaces'].apply(lambda l: ", ".join([x['name'] for x in l]))
-df['Majors'] = df['Majors'].apply(lambda l: ", ".join([x['name'] for x in l]))
+df["valid_through_bool"] = df["valid_through"].apply(lambda x: compare_time(datetime.strptime(x, "%Y-%m-%d"), today))
+df = df[df["valid_through_bool"] == True]
+df = df.rename(columns= {"workplace": "WorkPlaces", "majors": "Majors"})
+df["Majors"] = df["Majors"].apply(lambda x: ", ".join(x))
 df["experience"] = df["experience"].apply(lambda x: int(x))
 df = df.fillna("Không xác định")
 posts = df.to_dict('records')
 
 @app.route("/api2/recommender/getUserRecommend", methods=['GET','POST'])
 def get_result_user():
-    user_dict = json.load(open("user_item.json", "r"))
     user = json.loads(request.data.decode("utf-8"))
     user["Majors"] = ", ".join([x["name"] for x in user["Majors"]])
     user["WorkPlaces"] = ", ".join([x["name"] for x in user["WorkPlaces"]])
-
-    if (str(user["userId"]) in user_dict):
-        return_posts = [{"post": x} for x in df[df["postId"].isin(user_dict[str(user["userId"])])].to_dict('records')]
-        return json.dumps({"data": return_posts})
 
     res = []
     for post in posts:
@@ -44,13 +48,6 @@ def get_result_user():
     return_data = {
         "data": res,
     }
-
-    if str(user["userId"]) in user_dict:
-        user_dict[str(user["userId"])] = [x["post"]["postId"] for x in res]
-    else:
-        user_dict.update({user["userId"]: [x["post"]["postId"] for x in res]})
-
-    json.dump(user_dict, open("user_item.json", "w"))
 
     return json.dumps(return_data)
 

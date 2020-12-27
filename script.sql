@@ -1,5 +1,45 @@
 USE recruitment_test;
 
+CREATE TABLE `User` (
+  `userId` int NOT NULL AUTO_INCREMENT,
+  `user_name` varchar(100) NOT NULL,
+  `password` text NOT NULL,
+  `experience` varchar(50) DEFAULT NULL,
+  `qualification` varchar(70) DEFAULT NULL,
+  `year_of_birth` date NOT NULL,
+  `gender` varchar(20) NOT NULL,
+  `job_type` varchar(30) DEFAULT NULL,
+  `salary` varchar(30) DEFAULT NULL,
+  `is_lock` tinyint NOT NULL,
+  PRIMARY KEY (`userId`),
+  UNIQUE KEY `userId_UNIQUE` (`userId`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `Post` (
+  `postId` int NOT NULL AUTO_INCREMENT,
+  `title` varchar(150) NOT NULL,
+  `gender` varchar(20) DEFAULT NULL,
+  `extra_requirements` text NOT NULL,
+  `description` text NOT NULL,
+  `job_benefits` text NOT NULL,
+  `salary_type` varchar(30) NOT NULL,
+  `experience` varchar(50) NOT NULL,
+  `job_type` varchar(30) NOT NULL,
+  `num_hiring` int DEFAULT NULL,
+  `valid_through` date NOT NULL,
+  `address` varchar(300) DEFAULT NULL,
+  `post_url` varchar(250) DEFAULT NULL,
+  `qualification` varchar(70) NOT NULL,
+  `position` varchar(150) DEFAULT NULL,
+  `contact_name` varchar(100) DEFAULT NULL,
+  `min_value` int NOT NULL,
+  `max_value` int NOT NULL,
+  `createdAt` date NOT NULL,
+  `is_deleted` tinyint NOT NULL,
+  PRIMARY KEY (`postId`),
+  UNIQUE KEY `postId_UNIQUE` (`postId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 CREATE TABLE `ActionType` (
   `actionTypeId` int NOT NULL AUTO_INCREMENT,
   `name` varchar(20) NOT NULL,
@@ -42,6 +82,7 @@ CREATE TABLE `Company` (
   `address` varchar(300) NOT NULL,
   `description` text,
   `img_url` varchar(400) DEFAULT NULL,
+  `is_deleted` tinyint NOT NULL,
   PRIMARY KEY (`companyId`),
   UNIQUE KEY `companyId_UNIQUE` (`companyId`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5985 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -77,31 +118,6 @@ CREATE TABLE `MajorPost` (
   CONSTRAINT `postIdMajor` FOREIGN KEY (`postId`) REFERENCES `Post` (`postId`)
 ) ENGINE=InnoDB AUTO_INCREMENT=36192 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE `Post` (
-  `postId` int NOT NULL AUTO_INCREMENT,
-  `title` varchar(150) NOT NULL,
-  `gender` varchar(20) DEFAULT NULL,
-  `extra_requirements` text NOT NULL,
-  `description` text NOT NULL,
-  `job_benefits` text NOT NULL,
-  `salary_type` varchar(30) NOT NULL,
-  `experience` varchar(50) NOT NULL,
-  `job_type` varchar(30) NOT NULL,
-  `num_hiring` int DEFAULT NULL,
-  `valid_through` date NOT NULL,
-  `address` varchar(300) DEFAULT NULL,
-  `post_url` varchar(250) DEFAULT NULL,
-  `qualification` varchar(70) NOT NULL,
-  `position` varchar(150) DEFAULT NULL,
-  `contact_name` varchar(100) DEFAULT NULL,
-  `min_value` int NOT NULL,
-  `max_value` int NOT NULL,
-  `createdAt` date NOT NULL,
-  `is_deleted` tinyint NOT NULL,
-  PRIMARY KEY (`postId`),
-  UNIQUE KEY `postId_UNIQUE` (`postId`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
 CREATE TABLE `PostCompany` (
   `postId` int NOT NULL,
   `companyId` int NOT NULL,
@@ -124,21 +140,6 @@ CREATE TABLE `RatePost` (
   KEY `postIdRate_idx` (`postId`),
   CONSTRAINT `postIdRate` FOREIGN KEY (`postId`) REFERENCES `Post` (`postId`),
   CONSTRAINT `userIdRate` FOREIGN KEY (`userId`) REFERENCES `User` (`userId`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-CREATE TABLE `User` (
-  `userId` int NOT NULL AUTO_INCREMENT,
-  `user_name` varchar(100) NOT NULL,
-  `password` text NOT NULL,
-  `experience` varchar(50) DEFAULT NULL,
-  `qualification` varchar(70) DEFAULT NULL,
-  `year_of_birth` date NOT NULL,
-  `gender` varchar(20) NOT NULL,
-  `job_type` varchar(30) DEFAULT NULL,
-  `salary` varchar(30) DEFAULT NULL,
-  `is_lock` tinyint NOT NULL,
-  PRIMARY KEY (`userId`),
-  UNIQUE KEY `userId_UNIQUE` (`userId`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `WishList` (
@@ -192,3 +193,5 @@ ALTER TABLE recruitment_test.MajorPost AUTO_INCREMENT = 1;
 ALTER TABLE recruitment_test.WorkPlaceUser AUTO_INCREMENT = 1;
 ALTER TABLE recruitment_test.WorkPlacePost AUTO_INCREMENT = 1;
 ALTER TABLE recruitment_test.PostCompany AUTO_INCREMENT = 1;
+
+INSERT INTO `ActionType` (`actionTypeId`, `name`) VALUES ('1', 'CLICK_POST');

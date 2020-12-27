@@ -16,6 +16,7 @@ import {
 import PropTypes from "prop-types";
 import AutoCompleteText from "../HOC/AutoCompleteText";
 import Pagination from "../Pagination/Pagination";
+import TheJobs from "../../assets/img/logo2.png";
 
 function assign(obj, value) {
   obj[value] = !obj[value];
@@ -44,7 +45,9 @@ class AdvancedSearch extends Component {
   }
 
   async componentDidMount() {
-    await this.props.getDataAutoComplete();
+    if (this.props.posts.autoComplete === null) {
+      await this.props.getDataAutoComplete();
+    }
     let experienceSelect = {};
     let jobTypeSelect = {};
     for (let i = 0; i < this.props.posts.autoComplete.experience.length; i++) {
@@ -176,10 +179,10 @@ class AdvancedSearch extends Component {
             <div className="col-xs-12">
               <a className="item-block" href={`/post/${post.postId}`}>
                 <header>
-                  {post.Companies[0].img_url ? (
+                  {post.Companies[0].img_url || post.Companies[0].img_url !== "" ? (
                     <img src={post.Companies[0].img_url} alt="" />
                   ) : (
-                    <></>
+                    <img src={TheJobs} alt="" />
                   )}
                   <div className="hgroup">
                     <h4>{normalizeLongName(post.title)}</h4>

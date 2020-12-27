@@ -79,7 +79,13 @@ exports.getPostById = (req, res) => {
     include: [
       {
         model: Company,
-        attributes: ["name", "description", "img_url", "companyId"],
+        attributes: [
+          "name",
+          "description",
+          "img_url",
+          "companyId",
+          "is_deleted",
+        ],
       },
       { model: WorkPlace, attributes: ["name"] },
       { model: Major, attributes: ["name"] },
@@ -147,7 +153,7 @@ exports.getPostByMajorName = (req, res) => {
     {
       where: {
         postId: postId,
-        is_deleted: 0
+        is_deleted: 0,
       },
       include: [
         { model: Company, attributes: ["name", "companyId"] },
@@ -185,7 +191,8 @@ exports.searchPosts = (req, res) => {
       key !== "workplace" &&
       key !== "major" &&
       key !== "size" &&
-      key !== "page"
+      key !== "page" &&
+      key !== "name"
     ) {
       conditions.where[key] = req.body[key];
     }
@@ -195,14 +202,20 @@ exports.searchPosts = (req, res) => {
   conditions["order"] = [["createdAt", "DESC"]];
   conditions.where["is_deleted"] = 0;
 
-  conditions["include"] = [
-    {
+  conditions["include"] = [{ model: CommentPost }, { model: RatePost }];
+
+  if ("name" in req.body) {
+    conditions["include"].push({
       model: Company,
       attributes: ["name", "description", "img_url", "companyId"],
-    },
-    { model: CommentPost },
-    { model: RatePost },
-  ];
+      where: { name: req.body.name },
+    });
+  } else {
+    conditions["include"].push({
+      model: Company,
+      attributes: ["name", "description", "img_url", "companyId"],
+    });
+  }
 
   if ("workplace" in req.body) {
     conditions["include"].push({

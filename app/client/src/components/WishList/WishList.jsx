@@ -8,6 +8,7 @@ import Details2 from "../../assets/img/details2.jpg";
 import Details3 from "../../assets/img/details3.jpg";
 import { normalizeLongName } from "../../utils/utils";
 import Pagination from "../Pagination/Pagination";
+import TheJobs from "../../assets/img/logo2.png";
 
 let BgBanner;
 if (Math.floor(Math.random() * 3 + 1) === 1) {
@@ -125,15 +126,15 @@ class WishList extends Component {
           <div className="col-xs-12">
             <div className="item-block">
               <header>
-                <a href="company-detail.html">
-                  <img src={post.Companies[0].img_url} alt="" />
+                <a>
+                {post.Companies[0].img_url || post.Companies[0].img_url !== "" ? <img src={post.Companies[0].img_url} alt="" /> : <img src={TheJobs} alt="" />}
                 </a>
                 <div className="hgroup">
                   <h4>
                     {post.is_deleted === 0 ? <a href={`/post/${post.postId}`}>{normalizeLongName(post.title)}</a> : <a href={`/post/${post.postId}`}>{normalizeLongName(post.title)} (Đã xóa)</a>}
                   </h4>
                   <h5>
-                    <a href="company-detail.html">{normalizeLongName(post.Companies[0].name)}</a>
+                    <a>{normalizeLongName(post.Companies[0].name)}</a>
                   </h5>
                 </div>
                 <div className="header-meta">
@@ -204,12 +205,6 @@ class WishList extends Component {
             <section className="no-padding-top bg-alt">
               <div className="container">
                 <div className="row">
-                  {/* <div className="col-xs-12 text-right">
-                    <br />
-                    <a className="btn btn-primary btn-sm" href="job-add.html">
-                      Add new job
-                    </a>
-                  </div> */}
                   {PostContent}
                 </div>
                 <nav className="text-center">{pagination}</nav>

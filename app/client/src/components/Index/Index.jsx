@@ -12,6 +12,7 @@ import {
   getDataAutoComplete,
   getLikedPosts
 } from "../../actions/post.action";
+import TheJobs from "../../assets/img/logo2.png";
 import { Link } from "react-router-dom";
 import { getUserByUserId, autoUpdateUser } from "../../actions/user.action";
 import AutoCompleteText from "../HOC/AutoCompleteText";
@@ -23,6 +24,7 @@ class Index extends Component {
     this.state = {
       postsDisplay: [],
       recommendedPosts: [],
+      dataAuto: {},
       name: "",
       redirect: false,
     };
@@ -68,7 +70,10 @@ class Index extends Component {
   }
 
   async componentDidMount() {
-    await this.props.getDataAutoComplete();
+    if (this.props.posts.autoComplete === null) {
+      await this.props.getDataAutoComplete();
+    }
+
     if (this.props.auth.isAuthenticated) {
       await this.props.getUserByUserId(localStorage.userId);
       if (
@@ -100,6 +105,7 @@ class Index extends Component {
 
         this.setState({
           ...this.state,
+          dataAuto: this.props.posts.autoComplete,
           recommendedPosts: this.props.recommend.userRecommend,
         });
       }
@@ -136,7 +142,7 @@ class Index extends Component {
   };
 
   render() {
-    const { postsDisplay, recommendedPosts } = this.state;
+    const { postsDisplay, recommendedPosts, dataAuto } = this.state;
 
     let recentJobs =
       postsDisplay.length === 0 ? (
@@ -151,7 +157,7 @@ class Index extends Component {
             <div className="col-xs-12">
               <a className="item-block" href={`/post/${post.postId}`}>
                 <header>
-                  <img src={post.Companies[0].img_url} alt="" />
+                {post.Companies[0].img_url || post.Companies[0].img_url !== "" ? <img src={post.Companies[0].img_url} alt="" /> : <img src={TheJobs} alt="Logo" />}
                   <div className="hgroup">
                     <h4>{normalizeLongName(post.title)}</h4>
                     <h5>{normalizeLongName(post.Companies[0].name)}</h5>
@@ -198,14 +204,15 @@ class Index extends Component {
         </div>
       ) : (
         recommendedPosts.slice(0, 5).map((post) => {
+          console.log(post.post)
           return (
             <div className="col-xs-12">
               <a className="item-block" href={`/post/${post.post.postId}`}>
                 <header>
-                  <img src={post.post.Companies[0].img_url} alt="" />
+                {post.post.img || post.post.img !== "" ? <img src={post.post.img} alt="" /> : <img src={TheJobs} alt="logo" />}
                   <div className="hgroup">
                     <h4>{normalizeLongName(post.post.title)}</h4>
-                    <h5>{normalizeLongName(post.post.Companies[0].name)}</h5>
+                    <h5>{normalizeLongName(post.post.name)}</h5>
                   </div>
                   <div className="header-meta">
                     <span className="location">{post.post.WorkPlaces}</span>
@@ -265,7 +272,7 @@ class Index extends Component {
                       <div className="form-group col-xs-12 col-sm-10">
                         <AutoCompleteText
                           name="name"
-                          items={this.props.posts.autoComplete.majors}
+                          items={dataAuto.majors}
                           value={this.state.name}
                           getChildState={this.getChildState}
                           placeholder="Tên ngành nghề"

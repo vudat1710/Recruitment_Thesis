@@ -5,6 +5,7 @@ import Details1 from "../../assets/img/details1.jpg";
 import Details2 from "../../assets/img/details2.jpg";
 import Details3 from "../../assets/img/details3.jpg";
 import { normalizeLongName, normalizeWorkPlaces } from "../../utils/utils";
+import TheJobs from "../../assets/img/logo2.png";
 
 let BgBanner;
 if (Math.floor(Math.random() * 3 + 1) === 1) {
@@ -50,11 +51,11 @@ class Recommend extends Component {
           <div className="col-xs-12">
             <a className="item-block" href={`/post/${post.post.postId}`}>
               <header>
-                <img src={post.post.Companies[0].img_url} alt="" />
+              {post.post.img || post.post.img !== "" ? <img src={post.post.img} alt="" /> : <img src={TheJobs} alt="" />}
                 <div className="hgroup">
                   <h4>{normalizeLongName(post.post.title)}</h4>
                   <h5>
-                    {normalizeLongName(post.post.Companies[0].name)}{" "}
+                    {normalizeLongName(post.post.name)}{" "}
                     <span className="label label-success">{post.post.job_type}</span>
                   </h5>
                 </div>
@@ -67,7 +68,7 @@ class Recommend extends Component {
                 <ul className="details cols-3">
                   <li>
                     <i className="fa fa-map-marker"></i>
-                    <span>{normalizeWorkPlaces(post.post.WorkPlaces.split(", ").map(a => a.trim()))}</span>
+                    <span>{normalizeWorkPlaces(post.post.WorkPlaces.split(",").map(a => a.trim()))}</span>
                   </li>
 
                   <li>

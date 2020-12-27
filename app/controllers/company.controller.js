@@ -146,6 +146,33 @@ exports.updateCompany = (req, res) => {
     });
 };
 
+exports.deleteCompanyFlag = (req, res) => {
+  const { companyId } = req.body;
+  let conditions = { where: { companyId: companyId } };
+  Company.findOne(conditions)
+    .then((company) => {
+      const is_deleted = company.is_deleted;
+      if (is_deleted === 0) {
+        company.update({ is_deleted: 1 });
+        res.json({
+          success: true,
+          message: "Delete successful",
+        });
+      } else {
+        return res.json({
+          status: 400,
+          errors: {},
+        });
+      }
+    })
+    .catch((err) => {
+      res.send({
+        status: 400,
+        message: err.message,
+      });
+    });
+};
+
 exports.deleteCompany = (req, res) => {
   const { companyId } = req.body;
 
@@ -183,7 +210,7 @@ exports.deleteCompany = (req, res) => {
 };
 
 exports.searchCompanies = (req, res) => {
-  let conditions = { where: { name: { [Op.like]: `%${req.body.name}%` } } };
+  let conditions = { where: { name: { [Op.like]: `%${req.body.name}%` }, is_deleted: 0 } };
   const size = parseInt(req.body.size);
   const page = parseInt(req.body.page);
 

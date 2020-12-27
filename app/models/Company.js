@@ -24,6 +24,10 @@ module.exports = function(sequelize, DataTypes) {
     img_url: {
       type: DataTypes.STRING(400),
       allowNull: true
+    },
+    is_deleted: {
+      type: DataTypes.TINYINT,
+      allowNull: false
     }
   }, {
     sequelize,

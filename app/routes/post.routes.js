@@ -6,7 +6,7 @@ router.post("/searchPosts", posts.searchPosts);
 router.post("/getPostById", posts.getPostById);
 router.post("/getPostByCompanyId", posts.getPostByCompanyId)
 router.post("/addPostAdmin", posts.addPost);
-router.post("/deletePostAdmin", posts.deletePost);
+router.post("/deletePostAdmin", posts.deletePostFlag);
 router.post("/updatePostAdmin", posts.updatePost);
 router.post("/comment", passport.authenticate('jwt', { session: false }), posts.comment);
 router.post("/deleteComment", passport.authenticate('jwt', { session: false }), posts.deleteComment);

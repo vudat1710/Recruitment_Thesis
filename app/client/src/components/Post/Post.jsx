@@ -17,13 +17,14 @@ import {
 } from "../../actions/post.action";
 import { getRelatedItems } from "../../actions/recommend.action";
 import { getClickPostEvent } from "../../actions/user.action";
-import { experienceDict } from "../../utils/utils";
+import { experienceDict, normalizeWorkPlaces, normalizeLongName } from "../../utils/utils";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import "./Rating.scss";
 import Comment from "./Comment";
 import SweetAlert from "react-bootstrap-sweetalert";
 import Rating from "@material-ui/lab/Rating";
+import TheJobs from "../../assets/img/logo2.png";
 
 let BgBanner;
 if (Math.floor(Math.random() * 3 + 1) === 1) {
@@ -184,6 +185,7 @@ class PostDetails extends Component {
 
               <div className="row item-blocks-condensed">
                 {relatedPosts.map((post) => {
+                  console.log(post)
                   return (
                     <div className="col-xs-12">
                       <a
@@ -191,11 +193,16 @@ class PostDetails extends Component {
                         href={`/post/${post.post.postId}`}
                       >
                         <header>
-                          {post.post.Companies[0].img_url || post.post.Companies[0].img_url == "" ? <img src={post.post.Companies[0].img_url} alt="" /> : <></>}
+                          {post.post.img ||
+                          post.post.img !== "" ? (
+                            <img src={post.post.img} alt="" />
+                          ) : (
+                            <img src={TheJobs} alt="" />
+                          )}
                           <div className="hgroup">
-                            <h4>{post.post.title}</h4>
+                            <h4>{normalizeLongName(post.post.title)}</h4>
                             <h5>
-                              {post.post.Companies[0].name}{" "}
+                              {normalizeLongName(post.post.name)}{" "}
                               <span className="label label-success">
                                 {post.post.job_type}
                               </span>
@@ -210,7 +217,7 @@ class PostDetails extends Component {
                           <ul className="details cols-3">
                             <li>
                               <i className="fa fa-map-marker"></i>
-                              <span>{post.post.WorkPlaces}</span>
+                              <span>{normalizeWorkPlaces(post.post.WorkPlaces.split(",").map(a => a.trim()))}</span>
                             </li>
 
                             <li>
@@ -388,6 +395,8 @@ class PostDetails extends Component {
         (a) => !workplacesUser.includes(a)
       );
 
+      console.log(postDetails)
+
       return (
         <>
           {alertS}
@@ -407,9 +416,15 @@ class PostDetails extends Component {
                 <div className="hgroup">
                   <h1>{postDetails.title}</h1>
                   <h3>
-                    <a href={`/company/${postDetails.Companies[0].companyId}`}>
-                      {postDetails.Companies[0].name}
-                    </a>
+                    {postDetails.Companies[0].is_deleted !== 0 ? (
+                      <a
+                        href={`/company/${postDetails.Companies[0].companyId}`}
+                      >
+                        {postDetails.Companies[0].name} (Đã xóa)
+                      </a>
+                    ) : (
+                      <a>{postDetails.Companies[0].name}</a>
+                    )}
                   </h3>
                   <div>
                     <Rating name="read-only" value={avgRate} readOnly />

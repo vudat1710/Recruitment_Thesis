@@ -91,6 +91,7 @@ class EditableCompany extends Component {
         companyUpdate: this.props.company.companyUpdate,
       });
     } else {
+      newInfo["is_deleted"] = 0;
       await this.props.addCompany(newInfo);
       this.setState({
         ...this.state,

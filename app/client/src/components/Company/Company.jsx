@@ -7,10 +7,10 @@ import {
   getCompanyById,
   getPostByCompanyId,
 } from "../../actions/company.action";
-import { experienceDict } from "../../utils/utils";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import Pagination from "../Pagination/Pagination";
+import TheJobs from "../../assets/img/logo2.png";
 
 let BgBanner;
 if (Math.floor(Math.random() * 3 + 1) === 1) {
@@ -121,7 +121,7 @@ class CompanyDetails extends Component {
             <div className="col-xs-12">
               <a className="item-block" href={`/post/${post.post_url}`}>
                 <header>
-                  <img src={post.Companies[0].img_url} alt="" />
+                {post.Companies[0].img_url || post.Companies[0].img_url !== "" ? <img src={post.Companies[0].img_url} alt="" /> : <img src={TheJobs} alt="" />}
                   <div className="hgroup">
                     <h4>{post.position}</h4>
                     <h5>

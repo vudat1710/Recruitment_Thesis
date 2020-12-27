@@ -14,10 +14,7 @@ def experience_attr(u, x):
     if x == 99:
         return 1 - u / 8
     else:
-        if u > x:
-            return 0.1
-        else:
-            return (1 - (x - u) / 5)
+        return (1 - abs(x - u) / 5)
 
 def gender_attr(u, x):
     if x == "Không yêu cầu":

@@ -38,10 +38,18 @@ export const normalizeLongName = (text) => {
 };
 
 export const normalizeWorkPlaces = (workplaces) => {
-  const workplaces2 = workplaces.map(a => a.name);
-  let workplace =
-    workplaces2.length > 3
-      ? workplaces2.slice(0, 3).join(", ") + ", ..."
-      : workplaces2.join(", ");
-  return workplace;
+  if (workplaces.length !== 0) {
+    let workplaces2;
+    if (typeof workplaces[0] === "object") {
+      workplaces2 = workplaces.map((a) => a.name);
+    } else {
+      workplaces2 = workplaces;
+    }
+    let workplace =
+      workplaces2.length > 3
+        ? workplaces2.slice(0, 3).join(", ") + ", ..."
+        : workplaces2.join(", ");
+    return workplace;
+  }
+  return workplaces;
 };

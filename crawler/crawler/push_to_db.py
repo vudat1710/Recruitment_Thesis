@@ -26,6 +26,7 @@ class DBPushing:
         self.major_dict = self.get_all_data_from_table("Major", "name", "majorId")
         self.num_duplicated = 0
         self.merged_data = merged_data
+        self.all_posts = json.load(open('/home/vudat1710/Downloads/Thesis/Recruitment_Thesis/all_posts.json', 'r'))
 
     def insert_table(self, table_name, items):
         for item in items:
@@ -97,6 +98,8 @@ class DBPushing:
             self.connection.commit()
             self.cursor.execute("SELECT * FROM Post ORDER BY postId DESC LIMIT 1")
             last_inserted = self.cursor.fetchone()["postId"]
+            post["postId"] = last_inserted
+            self.all_posts.append(post)
             workplace_ids = [self.wp_dict[wp] for wp in workplaces]
             for workplace_id in workplace_ids:
                 self.cursor.execute("INSERT INTO `WorkPlacePost` (`postId`, `workPlaceId`) VALUES ({}, {})".format(last_inserted, workplace_id))
@@ -112,7 +115,7 @@ class DBPushing:
                 else:
                     company_address = address[1:-1]
                 company_desc = post["company_description"]
-                company_query = "INSERT INTO `Company` (`name`, `address`, `description`, `img_url`) VALUES ('{}', '{}', '{}', '{}')".format(company_name, company_address, company_desc, img)
+                company_query = "INSERT INTO `Company` (`name`, `address`, `description`, `img_url`, `is_deleted`) VALUES ('{}', '{}', '{}', '{}', {})".format(company_name, company_address, company_desc, img, 0)
                 self.cursor.execute(company_query)
                 self.connection.commit()
                 self.cursor.execute("SELECT * FROM Company ORDER BY companyId DESC LIMIT 1")
@@ -133,11 +136,10 @@ class DBPushing:
             posts_with_company = self.check_posts(self.merged_data[(CHUNK_SIZE*i):(CHUNK_SIZE*(i+1))], duplicate_filtering)
             print(len(posts_with_company))
             self.insert_to_db(posts_with_company)
-            if duplicate_filtering is not None:
-                
-                duplicate_filtering.update(self.merged_data[(CHUNK_SIZE*i):(CHUNK_SIZE*(i+1))])
-            else:
-                duplicate_filtering = self.get_filtered_data()
+            # if duplicate_filtering is not None:
+            #     duplicate_filtering.update(self.merged_data[(CHUNK_SIZE*i):(CHUNK_SIZE*(i+1))])
+            # else:
+            duplicate_filtering = self.get_filtered_data()
 
     def get_table_ids(self, item_list, table_name, id_field):
         query = "SELECT * FROM {} WHERE `name` IN (".format(table_name)
@@ -187,12 +189,15 @@ if __name__ == "__main__":
     # posts = json.load(open('./crawler/data/topcv/post.json', 'r'))
     # companies = json.load(open('./crawler/data/topcv/company.json', 'r'))
     # for folder_name in os.listdir("./crawler/data"):
-    merged_data = []
     # post_normalization = PostNormalization()
-    merged = json.load(open('./crawler/data/mywork/norm_post.json'.format(), 'r'))
-    for post in merged:
-        if post:
-            merged_data.append(post)
-    dbp = DBPushing(merged_data[:1000])
-    dbp.push_chunks()
-    dbp.connection.close()
+    for folder_name in os.listdir('./crawler/data'):
+        merged_data = []
+        print(folder_name)
+        merged = json.load(open('./crawler/data/{}/norm_post.json'.format(folder_name), 'r'))
+        for post in merged:
+            if post:
+                merged_data.append(post)
+        dbp = DBPushing(merged_data[:300])
+        dbp.push_chunks()
+        json.dump(dbp.all_posts, open('/home/vudat1710/Downloads/Thesis/Recruitment_Thesis/all_posts.json', 'w'))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+        dbp.connection.close()
