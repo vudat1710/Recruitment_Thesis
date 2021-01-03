@@ -17,7 +17,11 @@ import {
 } from "../../actions/post.action";
 import { getRelatedItems } from "../../actions/recommend.action";
 import { getClickPostEvent } from "../../actions/user.action";
-import { experienceDict, normalizeWorkPlaces, normalizeLongName } from "../../utils/utils";
+import {
+  experienceDict,
+  normalizeWorkPlaces,
+  normalizeLongName,
+} from "../../utils/utils";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import "./Rating.scss";
@@ -187,7 +191,7 @@ class PostDetails extends Component {
 
               <div className="row item-blocks-condensed">
                 {relatedPosts.map((post) => {
-                  console.log(post)
+                  console.log(post);
                   return (
                     <div className="col-xs-12">
                       <a
@@ -195,8 +199,7 @@ class PostDetails extends Component {
                         href={`/post/${post.post.postId}`}
                       >
                         <header>
-                          {post.post.img ||
-                          post.post.img !== "" ? (
+                          {post.post.img || post.post.img !== "" ? (
                             <img src={post.post.img} alt="" />
                           ) : (
                             <img src={TheJobs} alt="" />
@@ -219,7 +222,13 @@ class PostDetails extends Component {
                           <ul className="details cols-3">
                             <li>
                               <i className="fa fa-map-marker"></i>
-                              <span>{normalizeWorkPlaces(post.post.WorkPlaces.split(",").map(a => a.trim()))}</span>
+                              <span>
+                                {normalizeWorkPlaces(
+                                  post.post.WorkPlaces.split(",").map((a) =>
+                                    a.trim()
+                                  )
+                                )}
+                              </span>
                             </li>
 
                             <li>
@@ -230,8 +239,14 @@ class PostDetails extends Component {
                                 <span>
                                   <h6>
                                     Bạn cần{" "}
-                                    <Link to={{pathname: `/login`, postId: this.props.match.params.id}} style={{ color: "red" }}>
-                                    {/* <Link to="/login" style={{ color: "red" }}> */}
+                                    <Link
+                                      to={{
+                                        pathname: `/login`,
+                                        postId: this.props.match.params.id,
+                                      }}
+                                      style={{ color: "red" }}
+                                    >
+                                      {/* <Link to="/login" style={{ color: "red" }}> */}
                                       ĐĂNG NHẬP
                                     </Link>{" "}
                                     để xem được mức lương
@@ -284,8 +299,14 @@ class PostDetails extends Component {
       let addToWishListButton =
         isAuthenticated === false ? (
           <h6>
-            Bạn cần <strong style={{ color: "red" }}>ĐĂNG NHẬP</strong> để thêm
-            sản phẩm này vào danh sách yêu thích
+            Bạn cần{" "}
+            <Link
+              to={{ pathname: `/login`, postId: this.props.match.params.id }}
+              style={{ color: "red", all: "initial", fontFamily: "Helvetica Neue,Helvetica,Arial,sans-serif", fontSize: "14px" }}
+            >
+              ĐĂNG NHẬP
+            </Link>{" "}
+            để thêm sản phẩm này vào danh sách yêu thích
           </h6>
         ) : (
           addToWishList
@@ -329,8 +350,11 @@ class PostDetails extends Component {
         <span>
           <h6>
             Bạn cần{" "}
-            <Link to={{pathname: `/login`, postId: this.props.match.params.id}} style={{color: "red"}}>
-            {/* <Link to="/login" style={{ color: "red" }}> */}
+            <Link
+              to={{ pathname: `/login`, postId: this.props.match.params.id }}
+              style={{ color: "red" }}
+            >
+              {/* <Link to="/login" style={{ color: "red" }}> */}
               ĐĂNG NHẬP
             </Link>{" "}
             để đánh giá sản phẩm này
@@ -387,8 +411,12 @@ class PostDetails extends Component {
       } else {
         alertS = <></>;
       }
-      const majorsUser = isAuthenticated ? this.props.user.user.Majors.map((a) => a.name) : [];
-      const workplacesUser = isAuthenticated ? this.props.user.user.WorkPlaces.map((a) => a.name) : [];
+      const majorsUser = isAuthenticated
+        ? this.props.user.user.Majors.map((a) => a.name)
+        : [];
+      const workplacesUser = isAuthenticated
+        ? this.props.user.user.WorkPlaces.map((a) => a.name)
+        : [];
 
       const majors = postDetails.Majors.map((a) => a.name);
       const majorDup = majors.filter((a) => majorsUser.includes(a));
@@ -477,8 +505,14 @@ class PostDetails extends Component {
                     ) : (
                       <span>
                         Bạn cần{" "}
-                        <Link to={{pathname: `/login`, postId: this.props.match.params.id}} style={{color: "red"}}>
-                        {/* <Link to="/login" style={{ color: "red" }}> */}
+                        <Link
+                          to={{
+                            pathname: `/login`,
+                            postId: this.props.match.params.id,
+                          }}
+                          style={{ color: "red" }}
+                        >
+                          {/* <Link to="/login" style={{ color: "red" }}> */}
                           ĐĂNG NHẬP
                         </Link>{" "}
                         để xem được mức lương
