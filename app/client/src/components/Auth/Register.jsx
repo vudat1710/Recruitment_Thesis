@@ -188,7 +188,7 @@ class Register extends Component {
                 Đăng ký
               </button>
 
-              <div className="login-footer">
+              {/* <div className="login-footer">
                 <h6>Hoặc đăng ký bằng</h6>
                 <ul className="social-icons">
                   <li>
@@ -197,7 +197,7 @@ class Register extends Component {
                     </a>
                   </li>
                 </ul>
-              </div>
+              </div> */}
             </form>
           </div>
 

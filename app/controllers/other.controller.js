@@ -38,7 +38,16 @@ exports.getDataAutoComplete = (req, res) => {
 
   const majors = Major.findAll({ attributes: ["name"] });
   const workplaces = WorkPlace.findAll({ attributes: ["name"] });
-  const num_posts = Post.count({where: {is_deleted: 0}});
+
+  const today = new Date();
+  const num_posts = Post.count({
+    where: {
+      [Op.and]: [
+        db.sequelize.where(db.sequelize.col("valid_through"), ">", today),
+      ],
+      is_deleted: 0,
+    },
+  });
   const num_companies = Company.count();
 
   const qualifications = Post.findAll({
@@ -70,7 +79,7 @@ exports.getDataAutoComplete = (req, res) => {
       returnData["workplaces"] = responses[5].map((a) => a.name);
       returnData["num_posts"] = responses[6];
       let a = [];
-      responses[7] = responses[7].map(a => a.qualification);
+      responses[7] = responses[7].map((a) => a.qualification);
       for (let i = 0; i < responses[7].length; i++) {
         const temp = responses[7][i].split(",");
         for (let j = 0; j < temp.length; j++) {

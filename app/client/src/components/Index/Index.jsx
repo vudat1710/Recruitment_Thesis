@@ -10,7 +10,7 @@ import {
   getPostById,
   searchPosts,
   getDataAutoComplete,
-  getLikedPosts
+  getLikedPosts,
 } from "../../actions/post.action";
 import TheJobs from "../../assets/img/logo2.png";
 import { Link } from "react-router-dom";
@@ -27,6 +27,7 @@ class Index extends Component {
       dataAuto: {},
       name: "",
       redirect: false,
+      redirectPost: false,
     };
   }
 
@@ -82,7 +83,14 @@ class Index extends Component {
         this.props.user.user.Majors.length === 0 ||
         this.props.user.user.WorkPlaces.length === 0
       ) {
-        this.props.history.push("/updateUser");
+        if (this.props.location.postId) {
+          this.setState({
+            ...this.state,
+            redirectPost: true,
+          });
+        } else {
+          this.props.history.push("/updateUser");
+        }
       } else {
         if (this.props.recommend.userRecommend.length === 0) {
           await this.props.getLikedPosts();
@@ -97,10 +105,12 @@ class Index extends Component {
             qualification: this.props.user.user.qualification,
             salary: this.props.user.user.salary,
             year_of_birth: this.props.user.user.year_of_birth,
-            likedPosts: likedPosts,
           });
 
-          await this.props.autoUpdateUser({user: this.props.user.user, posts: likedPosts})
+          await this.props.autoUpdateUser({
+            user: this.props.user.user,
+            posts: likedPosts,
+          });
         }
 
         this.setState({
@@ -157,7 +167,12 @@ class Index extends Component {
             <div className="col-xs-12">
               <a className="item-block" href={`/post/${post.postId}`}>
                 <header>
-                {post.Companies[0].img_url || post.Companies[0].img_url !== "" ? <img src={post.Companies[0].img_url} alt="" /> : <img src={TheJobs} alt="Logo" />}
+                  {post.Companies[0].img_url ||
+                  post.Companies[0].img_url !== "" ? (
+                    <img src={post.Companies[0].img_url} alt="" />
+                  ) : (
+                    <img src={TheJobs} alt="Logo" />
+                  )}
                   <div className="hgroup">
                     <h4>{normalizeLongName(post.title)}</h4>
                     <h5>{normalizeLongName(post.Companies[0].name)}</h5>
@@ -204,18 +219,21 @@ class Index extends Component {
         </div>
       ) : (
         recommendedPosts.slice(0, 5).map((post) => {
-          console.log(post.post)
           return (
             <div className="col-xs-12">
               <a className="item-block" href={`/post/${post.post.postId}`}>
                 <header>
-                {post.post.img || post.post.img !== "" ? <img src={post.post.img} alt="" /> : <img src={TheJobs} alt="logo" />}
+                  {post.post.img || post.post.img !== "" ? (
+                    <img src={post.post.img} alt="" />
+                  ) : (
+                    <img src={TheJobs} alt="logo" />
+                  )}
                   <div className="hgroup">
                     <h4>{normalizeLongName(post.post.title)}</h4>
                     <h5>{normalizeLongName(post.post.name)}</h5>
                   </div>
                   <div className="header-meta">
-                    <span className="location">{post.post.WorkPlaces}</span>
+                    <span className="location">{normalizeWorkPlaces(post.post.WorkPlaces.split(","))}</span>
                     <span className="label label-success">
                       {post.post.salary_type}
                     </span>
@@ -230,6 +248,13 @@ class Index extends Component {
     return (
       <>
         {this.renderRedirect()}
+        {this.state.redirectPost ? (
+          <Redirect
+            to={{ pathname: `/updateUser`, postId: this.props.location.postId }}
+          />
+        ) : (
+          <></>
+        )}
         <Search />
         <main>
           {this.props.auth.isAuthenticated ? (
@@ -293,7 +318,9 @@ class Index extends Component {
               <br />
               <br />
               <p className="text-center">
-                <a className="btn btn-primary" onClick={(e) => this.onClick(e)}>Xem thêm</a>
+                <a className="btn btn-primary" onClick={(e) => this.onClick(e)}>
+                  Xem thêm
+                </a>
               </p>
             </div>
           </section>
@@ -358,20 +385,17 @@ class Index extends Component {
             </div>
           </section> */}
 
-          <section
+          {/* <section
             className="bg-img text-center"
             style={{
               backgroundImage: `url(${BGFact})`,
             }}
           >
-            {/* <section className="bg-img text-center"> */}
             <div className="container">
               <h2>
                 <strong>Đăng ký</strong>
               </h2>
-              {/* <h6 className="font-alt">
-                Get weekly top new jobs delivered to your inbox
-              </h6> */}
+
               <br />
               <br />
               <form className="form-subscribe" action="#">
@@ -389,7 +413,7 @@ class Index extends Component {
                 </div>
               </form>
             </div>
-          </section>
+          </section> */}
         </main>
       </>
     );
@@ -407,7 +431,7 @@ Index.propTypes = {
   getLikedPosts: PropTypes.func.isRequired,
   searchPosts: PropTypes.func.isRequired,
   getDataAutoComplete: PropTypes.func.isRequired,
-  autoUpdateUser: PropTypes.func.isRequired
+  autoUpdateUser: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -426,7 +450,7 @@ const mapDispatchToProps = {
   getLikedPosts,
   searchPosts,
   getDataAutoComplete,
-  autoUpdateUser
+  autoUpdateUser,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Index);

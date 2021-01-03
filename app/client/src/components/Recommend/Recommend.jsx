@@ -5,7 +5,11 @@ import Details1 from "../../assets/img/details1.jpg";
 import Details2 from "../../assets/img/details2.jpg";
 import Details3 from "../../assets/img/details3.jpg";
 import { normalizeLongName, normalizeWorkPlaces } from "../../utils/utils";
+import { getUserRecommend } from "../../actions/recommend.action";
 import TheJobs from "../../assets/img/logo2.png";
+import {
+  getLikedPosts,
+} from "../../actions/post.action";
 
 let BgBanner;
 if (Math.floor(Math.random() * 3 + 1) === 1) {
@@ -28,6 +32,22 @@ class Recommend extends Component {
   }
 
   async componentDidMount() {
+    if (this.props.recommend.userRecommend.length === 0) {
+      await this.props.getLikedPosts();
+      let likedPosts = this.props.posts.likedPosts;
+      await this.props.getUserRecommend({
+        userId: this.props.user.user.userId,
+        Majors: this.props.user.user.Majors,
+        WorkPlaces: this.props.user.user.WorkPlaces,
+        experience: this.props.user.user.experience,
+        gender: this.props.user.user.gender,
+        job_type: this.props.user.user.job_type,
+        qualification: this.props.user.user.qualification,
+        salary: this.props.user.user.salary,
+        year_of_birth: this.props.user.user.year_of_birth,
+        likedPosts: likedPosts,
+      });
+    }
     this.setState({
       ...this.state,
       posts: this.props.recommend.userRecommend,
@@ -121,10 +141,13 @@ class Recommend extends Component {
 
 Recommend.propTypes = {
   recommend: PropTypes.object.isRequired,
+  // posts: PropTypes.object.isRequired,
+  // getUserRecommend: PropTypes.func.isRequired,
+  // getLikedPosts: PropTypes.func.isRequired
 };
 
-const mapStateToProps = (state) => ({ recommend: state.recommend });
+const mapStateToProps = (state) => ({ recommend: state.recommend, posts: state.posts, user: state.user });
 
-const mapDispatchToProps = {};
+const mapDispatchToProps = { getUserRecommend, getLikedPosts };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Recommend);

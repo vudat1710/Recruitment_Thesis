@@ -39,8 +39,11 @@ exports.register = (req, res, next) => {
 
   User.findOne({ where: { user_name: req.body.user_name } }).then((user) => {
     if (user) {
-      errors.user_name = "Username already exists";
-      return res.status(400).json(errors);
+      errors.user_name = "Tài khoản đã tồn tại";
+      return res.json({
+        status: 400,
+        errors,
+      });
     }
 
     const genderDict = { nam: "Nam", nữ: "Nữ" };

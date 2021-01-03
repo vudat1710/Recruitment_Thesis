@@ -1,10 +1,11 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
-import { Link } from "react-router-dom";
-import TextInputAuth from '../HOC/TextInputAuth';
-import Logo from '../../assets/img/logo.png';
+import { Link, Redirect } from "react-router-dom";
+import TextInputAuth from "../HOC/TextInputAuth";
+import Logo from "../../assets/img/logo.png";
 import { loginUser } from "../../actions/auth.action";
+import { getUserByUserId } from "../../actions/user.action";
 
 class Login extends Component {
   static propTypes = {
@@ -19,12 +20,33 @@ class Login extends Component {
       email: "",
       password: "",
       errors: {},
+      redirectPost: false,
+      redirectUpdate: false
     };
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
+  async UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.auth.isAuthenticated) {
-      this.props.history.push("/");
+      await this.props.getUserByUserId(localStorage.userId);
+      if (
+        this.props.user.user.qualification === null ||
+        this.props.user.user.salary === null ||
+        this.props.user.user.Majors.length === 0 ||
+        this.props.user.user.WorkPlaces.length === 0
+      ) {
+        this.setState({
+          ...this.state,
+          redirectUpdate: true,
+        });
+      }
+      if (this.props.location.postId) {
+        this.setState({
+          ...this.state,
+          redirectPost: true,
+        });
+      } else {
+        this.props.history.push("/");
+      }
     }
     if (nextProps.errors) {
       this.setState({ errors: nextProps.errors });
@@ -56,32 +78,42 @@ class Login extends Component {
     const { user_name, password, errors } = this.state;
     return (
       <div className="login-page">
+        {this.state.redirectPost ? (
+          <Redirect to={{ pathname: `/post/${this.props.location.postId}` }} />
+        ) : (
+          <></>
+        )}
+        {this.state.redirectUpdate ? (
+          <Redirect to={{ pathname: `/updateUser`, postId: this.props.location.postId }} />
+        ) : (
+          <></>
+        )}
         <main>
           <div className="login-block">
             <img src={Logo} alt="" />
             <h1>Đăng nhập</h1>
-            {errors.login && <div className="invalid-feedback" style={{color: "red"}}>{errors.login}</div>}
-            <form 
-                id="loginForm"
-                noValidate
-                onSubmit={e => this.onSubmit(e)}
-            >
+            {errors.login && (
+              <div className="invalid-feedback" style={{ color: "red" }}>
+                {errors.login}
+              </div>
+            )}
+            <form id="loginForm" noValidate onSubmit={(e) => this.onSubmit(e)}>
               <div className="form-group">
                 <div className="input-group">
                   <span className="input-group-addon">
                     <i className="ti-email"></i>
                   </span>
                   <TextInputAuth
-                      id="user_name"
-                      name="user_name"
-                      className="form-control"
-                      placeholder="Nhập tên đăng nhập"
-                      title="Nhập tên đăng nhập"
-                      type="input"
-                      onChange={e => this.onChange(e)}
-                      value={user_name}
-                      error={errors.user_name}
-                    />
+                    id="user_name"
+                    name="user_name"
+                    className="form-control"
+                    placeholder="Nhập tên đăng nhập"
+                    title="Nhập tên đăng nhập"
+                    type="input"
+                    onChange={(e) => this.onChange(e)}
+                    value={user_name}
+                    error={errors.user_name}
+                  />
                 </div>
               </div>
 
@@ -93,16 +125,16 @@ class Login extends Component {
                     <i className="ti-unlock"></i>
                   </span>
                   <TextInputAuth
-                      id="password"
-                      name="password"
-                      className="form-control form-control-lg fs-13 px-3 rounded"
-                      placeholder="Nhập mật khẩu"
-                      title="Nhập mật khẩu"
-                      type="password"
-                      onChange={e => this.onChange(e)}
-                      value={password}
-                      error={errors.password}
-                    />
+                    id="password"
+                    name="password"
+                    className="form-control form-control-lg fs-13 px-3 rounded"
+                    placeholder="Nhập mật khẩu"
+                    title="Nhập mật khẩu"
+                    type="password"
+                    onChange={(e) => this.onChange(e)}
+                    value={password}
+                    error={errors.password}
+                  />
                 </div>
               </div>
 
@@ -110,7 +142,7 @@ class Login extends Component {
                 Đăng nhập
               </button>
 
-              <div className="login-footer">
+              {/* <div className="login-footer">
                 <h6>Đăng nhập bằng</h6>
                 <ul className="social-icons">
                   <li>
@@ -118,19 +150,19 @@ class Login extends Component {
                       <i className="fa fa-facebook"></i>
                     </a>
                   </li>
-                  {/* <li><a className="twitter" href="#"><i className="fa fa-twitter"></i></a></li>
-                  <li><a className="linkedin" href="#"><i className="fa fa-linkedin"></i></a></li> */}
+                  <li><a className="twitter" href="#"><i className="fa fa-twitter"></i></a></li>
+                  <li><a className="linkedin" href="#"><i className="fa fa-linkedin"></i></a></li>
                 </ul>
-              </div>
+              </div> */}
             </form>
           </div>
 
           <div className="login-links">
             <Link className="pull-left" to="/forgotPassword">
-                Quên mật khẩu?
+              Quên mật khẩu?
             </Link>
             <Link className="pull-right" to="/register">
-                Đăng ký tài khoản mới
+              Đăng ký tài khoản mới
             </Link>
           </div>
         </main>
@@ -142,8 +174,9 @@ class Login extends Component {
 const mapStateToProps = (state) => ({
   auth: state.auth,
   errors: state.errors,
+  user: state.user
 });
 
-const mapDispatchToProps = { loginUser };
+const mapDispatchToProps = { loginUser, getUserByUserId };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Login);

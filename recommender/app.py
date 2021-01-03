@@ -34,10 +34,15 @@ posts = df.to_dict('records')
 
 @app.route("/api2/recommender/getUserRecommend", methods=['GET','POST'])
 def get_result_user():
+    user_dict = json.load(open("user_item.json", "r"))
     user = json.loads(request.data.decode("utf-8"))
     user["Majors"] = ", ".join([x["name"] for x in user["Majors"]])
     user["WorkPlaces"] = ", ".join([x["name"] for x in user["WorkPlaces"]])
-
+    if (str(user["userId"]) in user_dict):
+        if user == user_dict[str(user["userId"])]["user"] and len(posts) == user_dict[str(user["userId"])]["posts"][-1]:
+            return_posts = [{"post": x} for x in df[df["postId"].isin(user_dict[str(user["userId"])]["posts"][:-1])].to_dict('records')]
+            return json.dumps({"data": return_posts})
+    
     res = []
     for post in posts:
         score = get_score_user(user, post)
@@ -48,6 +53,15 @@ def get_result_user():
     return_data = {
         "data": res,
     }
+    update_res = [x["post"]["postId"] for x in res]
+    update_res.append(len(posts))
+
+    if (str(user["userId"]) in user_dict):
+        user_dict.update({user["userId"]: {"posts": update_res, "user": user}})
+    else:
+        user_dict[user["userId"]] = {"posts": update_res, "user": user}
+
+    json.dump(user_dict, open("user_item.json", "w"))
 
     return json.dumps(return_data)
 
@@ -58,26 +72,34 @@ def get_result_item():
     source = json.loads(request.data.decode("utf-8"))
 
     if (str(source["postId"]) in item_dict):
-        return_posts = [{"post": x} for x in df[df["postId"].isin(item_dict[str(source["postId"])])].to_dict('records')]
-        return json.dumps({"data": return_posts})
+        if len(posts) == item_dict[str(source["postId"])][-1]:
+            return_posts = [{"post": x} for x in df[df["postId"].isin(item_dict[str(source["postId"])][:-1])].to_dict('records')]
+            return json.dumps({"data": return_posts})
+    
+    source["Majors"] = ", ".join([x["name"] for x in source["Majors"]])
+    source["WorkPlaces"] = ", ".join([x["name"] for x in source["WorkPlaces"]])
+    res = []
+    for post in posts:
+        score = get_score_item(source, post)
+        res.append({"post": post, "score": score})
+    
+    res = sorted(res, key=lambda x: x["score"], reverse=True)[1:11]
+
+    return_data = {
+        "data": res,
+    }
+
+    update_res = [x["post"]["postId"] for x in res]
+    update_res.append(len(posts))
+
+    if (str(source["postId"]) in item_dict):
+        item_dict.update({source["postId"]: update_res})
     else:
-        source["Majors"] = ", ".join([x["name"] for x in source["Majors"]])
-        source["WorkPlaces"] = ", ".join([x["name"] for x in source["WorkPlaces"]])
-        res = []
-        for post in posts:
-            score = get_score_item(source, post)
-            res.append({"post": post, "score": score})
-        
-        res = sorted(res, key=lambda x: x["score"], reverse=True)[1:11]
+        item_dict[source["postId"]] = update_res
 
-        return_data = {
-            "data": res,
-        }
+    json.dump(item_dict, open("item_item.json", "w"))
 
-        item_dict.update({source["postId"]: [x["post"]["postId"] for x in res]})
-        json.dump(item_dict, open("item_item.json", "w"))
-
-        return json.dumps(return_data)
+    return json.dumps(return_data)
 
 @app.route("/api2/recommender/autoUpdateProfile", methods=['GET','POST'])
 def updateProfile():

@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
+import { Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 import { updateUser, getUserByUserId } from "../../actions/user.action";
 import { getDataAutoComplete } from "../../actions/post.action";
@@ -26,6 +27,7 @@ class UpdateInfo extends Component {
       isLoading: true,
       dataAuto: null,
       errors: {},
+      redirect: false,
     };
   }
   async componentDidMount() {
@@ -35,12 +37,20 @@ class UpdateInfo extends Component {
     this.setState({
       ...this.state,
       dataAuto: this.props.posts.autoComplete,
-      experience: this.props.user.user.experience ? this.props.user.user.experience : "1",
-      qualification: this.props.user.user.qualification ? this.props.user.user.qualification : "Đại học",
+      experience: this.props.user.user.experience
+        ? this.props.user.user.experience
+        : "1",
+      qualification: this.props.user.user.qualification
+        ? this.props.user.user.qualification
+        : "Đại học",
       yearOfBirth: this.props.user.user.year_of_birth,
       gender: this.props.user.user.gender,
-      jobType: this.props.user.user.job_type ? this.props.user.user.job_type : "Toàn thời gian",
-      salary: this.props.user.user.salary ? this.props.user.user.salary : "5-7 triệu",
+      jobType: this.props.user.user.job_type
+        ? this.props.user.user.job_type
+        : "Toàn thời gian",
+      salary: this.props.user.user.salary
+        ? this.props.user.user.salary
+        : "5-7 triệu",
       workplaces: this.props.user.user.WorkPlaces.map((a) => a.name),
       majors: this.props.user.user.Majors.map((a) => a.name),
       isLoading: false,
@@ -103,10 +113,19 @@ class UpdateInfo extends Component {
   }
 
   onConfirm() {
-    this.setState({
-      ...this.state,
-      success: false,
-    });
+    console.log(this.props.location.postId)
+    if (this.props.location.postId) {
+      this.setState({
+        ...this.state,
+        success: false,
+        redirect: true,
+      });
+    } else {
+      this.setState({
+        ...this.state,
+        success: false,
+      });
+    }
   }
 
   render() {
@@ -159,6 +178,15 @@ class UpdateInfo extends Component {
         parseInt(this.state.yearOfBirth.split("-")[0]);
       return (
         <form action="#" onSubmit={(e) => this.onSubmit(e)}>
+          {this.state.redirect ? (
+            <Redirect
+              to={{
+                pathname: `/post/${this.props.location.postId}`,
+              }}
+            />
+          ) : (
+            <></>
+          )}
           {alertSucc}
           <header className="page-header">
             <div className="container page-name">
@@ -311,7 +339,10 @@ class UpdateInfo extends Component {
                         >
                           <option defaultValue>{qualification}</option>
                           {dataAuto.qualifications.map((qual) => {
-                            if (qual !== qualification && qual !== "Không yêu cầu")
+                            if (
+                              qual !== qualification &&
+                              qual !== "Không yêu cầu"
+                            )
                               return <option value={qual}>{qual}</option>;
                           })}
                         </select>

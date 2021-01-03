@@ -73,7 +73,9 @@ class PostDetails extends Component {
           isAdded: true,
         });
       }
-      await this.props.getUserByUserId(localStorage.userId);
+      if (this.props.user == {}) {
+        await this.props.getUserByUserId(localStorage.userId);
+      }
       if (this.state.isAdded) {
         await this.props.getRelatedItems(this.props.posts.postDetails);
       }
@@ -228,7 +230,8 @@ class PostDetails extends Component {
                                 <span>
                                   <h6>
                                     Bạn cần{" "}
-                                    <Link to="/login" style={{ color: "red" }}>
+                                    <Link to={{pathname: `/login`, postId: this.props.match.params.id}} style={{ color: "red" }}>
+                                    {/* <Link to="/login" style={{ color: "red" }}> */}
                                       ĐĂNG NHẬP
                                     </Link>{" "}
                                     để xem được mức lương
@@ -326,7 +329,8 @@ class PostDetails extends Component {
         <span>
           <h6>
             Bạn cần{" "}
-            <Link to="/login" style={{ color: "red" }}>
+            <Link to={{pathname: `/login`, postId: this.props.match.params.id}} style={{color: "red"}}>
+            {/* <Link to="/login" style={{ color: "red" }}> */}
               ĐĂNG NHẬP
             </Link>{" "}
             để đánh giá sản phẩm này
@@ -383,8 +387,8 @@ class PostDetails extends Component {
       } else {
         alertS = <></>;
       }
-      const majorsUser = this.props.user.user.Majors.map((a) => a.name);
-      const workplacesUser = this.props.user.user.WorkPlaces.map((a) => a.name);
+      const majorsUser = isAuthenticated ? this.props.user.user.Majors.map((a) => a.name) : [];
+      const workplacesUser = isAuthenticated ? this.props.user.user.WorkPlaces.map((a) => a.name) : [];
 
       const majors = postDetails.Majors.map((a) => a.name);
       const majorDup = majors.filter((a) => majorsUser.includes(a));
@@ -394,8 +398,6 @@ class PostDetails extends Component {
       const workplaceNotDup = workplaces.filter(
         (a) => !workplacesUser.includes(a)
       );
-
-      console.log(postDetails)
 
       return (
         <>
@@ -475,7 +477,8 @@ class PostDetails extends Component {
                     ) : (
                       <span>
                         Bạn cần{" "}
-                        <Link to="/login" style={{ color: "red" }}>
+                        <Link to={{pathname: `/login`, postId: this.props.match.params.id}} style={{color: "red"}}>
+                        {/* <Link to="/login" style={{ color: "red" }}> */}
                           ĐĂNG NHẬP
                         </Link>{" "}
                         để xem được mức lương
