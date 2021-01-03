@@ -3,10 +3,14 @@ import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import Banner from "../../assets/img/banner_details.jpg";
 import { getDataAutoComplete } from "../../actions/post.action";
-import { getWorkPlaceByName, deleteWorkPlace } from "../../actions/workplace.action";
+import {
+  getWorkPlaceByName,
+  deleteWorkPlace,
+} from "../../actions/workplace.action";
 import PropTypes from "prop-types";
 import AutoCompleteText from "../HOC/AutoCompleteText";
 import Pagination from "../Pagination/Pagination";
+import { workPlaces } from "../../utils/utils";
 // import classnames from "classnames";
 
 class ManageWorkPlace extends Component {
@@ -71,7 +75,9 @@ class ManageWorkPlace extends Component {
     await this.props.deleteWorkPlace({ workPlaceId: workPlaceId });
     this.setState({
       ...this.state,
-      workPlaces: this.state.workPlaces.filter((a) => a.workPlaceId !== workPlaceId),
+      workPlaces: this.state.workPlaces.filter(
+        (a) => a.workPlaceId !== workPlaceId
+      ),
     });
   }
 
@@ -114,12 +120,18 @@ class ManageWorkPlace extends Component {
                     >
                       Edit
                     </a>
-                    <a
-                      class="btn btn-xs btn-danger"
-                      onClick={() => this.onDeleteClick(workPlace.workPlaceId)}
-                    >
-                      Delete
-                    </a>
+                    {workPlaces.includes(workPlace.name) ? (
+                      <></>
+                    ) : (
+                      <a
+                        class="btn btn-xs btn-danger"
+                        onClick={() =>
+                          this.onDeleteClick(workPlace.workPlaceId)
+                        }
+                      >
+                        Delete
+                      </a>
+                    )}
                   </div>
                 </ul>
               </footer>
@@ -169,7 +181,9 @@ class ManageWorkPlace extends Component {
             style={{ backgroundImage: `url(${Banner})` }}
           >
             <div className="container page-name">
-              <h1 className="text-center">Quản lý các địa điểm làm việc trên hệ thống</h1>
+              <h1 className="text-center">
+                Quản lý các địa điểm làm việc trên hệ thống
+              </h1>
               <p className="lead text-center">
                 Lựa chọn các tiêu chí dưới đây để tìm địa điểm làm việc
               </p>

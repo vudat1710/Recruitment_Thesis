@@ -7,6 +7,7 @@ import { getMajorByName, deleteMajor } from "../../actions/major.action";
 import PropTypes from "prop-types";
 import AutoCompleteText from "../HOC/AutoCompleteText";
 import Pagination from "../Pagination/Pagination";
+import { majors } from "../../utils/utils";
 // import classnames from "classnames";
 
 class ManageMajor extends Component {
@@ -114,12 +115,16 @@ class ManageMajor extends Component {
                     >
                       Edit
                     </a>
-                    <a
-                      class="btn btn-xs btn-danger"
-                      onClick={() => this.onDeleteClick(major.majorId)}
-                    >
-                      Delete
-                    </a>
+                    {majors.includes(major.name) ? (
+                      <></>
+                    ) : (
+                      <a
+                        class="btn btn-xs btn-danger"
+                        onClick={() => this.onDeleteClick(major.majorId)}
+                      >
+                        Delete
+                      </a>
+                    )}
                   </div>
                 </ul>
               </footer>
@@ -146,9 +151,9 @@ class ManageMajor extends Component {
 
     let extraComp = resultMajors.currentPage ? (
       <h5>
-        Hệ thống đã tìm thấy <strong>{resultMajors.totalItems}</strong> kết
-        quả, bạn đang xem trang thứ <i>{resultMajors.currentPage}</i> trong
-        tổng số <i>{resultMajors.totalPages} trang</i>
+        Hệ thống đã tìm thấy <strong>{resultMajors.totalItems}</strong> kết quả,
+        bạn đang xem trang thứ <i>{resultMajors.currentPage}</i> trong tổng số{" "}
+        <i>{resultMajors.totalPages} trang</i>
       </h5>
     ) : (
       <></>
@@ -169,7 +174,9 @@ class ManageMajor extends Component {
             style={{ backgroundImage: `url(${Banner})` }}
           >
             <div className="container page-name">
-              <h1 className="text-center">Quản lý các ngành nghề trên hệ thống</h1>
+              <h1 className="text-center">
+                Quản lý các ngành nghề trên hệ thống
+              </h1>
               <p className="lead text-center">
                 Lựa chọn các tiêu chí dưới đây để tìm ngành nghề
               </p>
