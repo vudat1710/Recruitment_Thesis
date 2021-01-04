@@ -183,7 +183,7 @@ class ManagePost extends Component {
           <div className="col-xs-12">
             <a className="item-block">
               <header>
-                <img src={post.Companies[0].img_url} alt="" />
+                {post.Companies[0].img_url !== undefined? <img src={post.Companies[0].img_url} alt="" /> : <></>}
                 <div className="hgroup">
                   <h4><a href={`/post/${post.postId}`}>{post.title}</a></h4>
                   <h5>

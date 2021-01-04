@@ -59,7 +59,7 @@ class Index extends Component {
     const name = this.state.name;
     let searchData = {
       major: [name],
-      size: 5,
+      size: 20,
       page: 1,
     };
 
@@ -156,13 +156,13 @@ class Index extends Component {
 
     let recentJobs =
       postsDisplay.length === 0 ? (
-        <div className="spinner">
-          <span className="dot1"></span>
-          <span className="dot2"></span>
-          <span className="dot3"></span>
+        <div className="d-flex justify-content-center" style={{textAlign: "center"}}>
+          <h4>
+            0 có <i>kết quả trả về</i>
+          </h4>
         </div>
       ) : (
-        postsDisplay.map((post) => {
+        postsDisplay.slice(0, 5).map((post) => {
           return (
             <div className="col-xs-12">
               <a className="item-block" href={`/post/${post.postId}`}>
@@ -233,7 +233,9 @@ class Index extends Component {
                     <h5>{normalizeLongName(post.post.name)}</h5>
                   </div>
                   <div className="header-meta">
-                    <span className="location">{normalizeWorkPlaces(post.post.WorkPlaces.split(","))}</span>
+                    <span className="location">
+                      {normalizeWorkPlaces(post.post.WorkPlaces.split(","))}
+                    </span>
                     <span className="label label-success">
                       {post.post.salary_type}
                     </span>

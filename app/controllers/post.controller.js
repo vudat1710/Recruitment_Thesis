@@ -566,7 +566,9 @@ exports.addPost = (req, res) => {
     } else {
       if (key === "company_description") key = "description";
       if (key === "company_address") key = "address";
-      conditions.Companies[0][key] = req.body[key];
+      if (key !== "majors" && key !== "workplaces") {
+        conditions.Companies[0][key] = req.body[key];
+      }
     }
   }
 
@@ -582,10 +584,15 @@ exports.addPost = (req, res) => {
     )
       otherConditions[key] = req.body[key];
   }
+  const today = new Date();
+  const x = today.toLocaleDateString("en-US").split("/");
+  conditions["createdAt"] = x[2] + "-" + x[0] + "-" + x[1];
+  conditions.Companies[0]["is_deleted"] = 0;
+  otherConditions["createdAt"] = x[2] + "-" + x[0] + "-" + x[1];
 
   Company.findOne({ where: { name: req.body.name } }).then((company) => {
-    if (!company) {
-      Post.create(conditions, { include: [Company] })
+    if (company === null) { 
+      Post.create(conditions, { include: Company })
         .then((x) => {
           const postId = x.postId;
           const a = Major.findAll({
