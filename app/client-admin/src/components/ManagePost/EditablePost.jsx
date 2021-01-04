@@ -168,6 +168,7 @@ class EditablePost extends Component {
       company_address: address
     };
     if (type !== "/addPost") {
+      newInfo["postId"] = this.props.match.params.id;
       await this.props.updatePost(newInfo);
       this.setState({
         ...this.state,

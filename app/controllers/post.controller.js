@@ -846,14 +846,14 @@ exports.updatePost = (req, res) => {
 
       const majorIds = Major.findAll({
         where: {
-          name: majors,
+          name: majors.split(",").map(a => a.trim()),
         },
         attributes: ["majorId"],
       });
 
       const workPlaceIds = WorkPlace.findAll({
         where: {
-          name: workplaces,
+          name: workplaces.split(",").map(a => a.trim()),
         },
         attributes: ["workPlaceId"],
       });
@@ -867,8 +867,9 @@ exports.updatePost = (req, res) => {
         const addMajorIds = newMajorIds.filter(
           (e) => !majorIdsExist.includes(e)
         );
+
         const a = MajorPost.bulkCreate(
-          convertToObject(addMajorIds, "userId", post.postId, "majorId")
+          convertToObject(addMajorIds, "postId", post.postId, "majorId")
         );
 
         const b = MajorPost.destroy({
@@ -885,7 +886,7 @@ exports.updatePost = (req, res) => {
           (e) => !workPlaceIdsExist.includes(e)
         );
         const c = WorkPlacePost.bulkCreate(
-          convertToObject(addWorkPlaceIds, "userId", post.postId, "workPlaceId")
+          convertToObject(addWorkPlaceIds, "postId", post.postId, "workPlaceId")
         );
 
         const d = WorkPlacePost.destroy({
