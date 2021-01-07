@@ -19,8 +19,9 @@ class MyWorkCrawler(CrawlSpider):
     start_urls = []
     major_list = {}
     
-    def __init__(self, **kwargs):
+    def __init__(self, term=None, **kwargs):
         self.count = 0
+        self.term = term
         self.company_url_list = []
         self.post_urls = []
         CrawlSpider.__init__(self, **kwargs)
@@ -85,9 +86,15 @@ class MyWorkCrawler(CrawlSpider):
 
     def get_item(self, response):
         item = MyWorkItem()
-        # string = response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
-        # datePosted = json.loads(string)["datePosted"]
-        # if today <= datetime.datetime.strptime(datePosted, "%d/%m/%Y"):
+        if self.term == "daily":
+            string = response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
+            datePosted = json.loads(string)["datePosted"]
+            if today <= datetime.datetime.strptime(datePosted, "%d/%m/%Y"):
+                self.item_crawl(item, response)
+        else:
+            self.item_crawl(item, response)
+    
+    def item_crawl(self, item, response):
         item["valid_through"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-clock")]]/span/span[2]/text()').extract_first().strip()
         item["title"] = ' '.join([x for x in response.xpath('//h1[@class="main-title"]/span/text()').extract() if x not in ['hot', '\xa0']])
         item["company_title"] = response.xpath('//h4[contains(@class, "desc-for-title")]/span/text()').extract_first().strip()
@@ -115,7 +122,7 @@ class MyWorkCrawler(CrawlSpider):
         if company_url not in self.company_url_list:
             self.company_url_list.append(company_url)
             yield Request(url=company_url, callback=self.get_company, dont_filter=True)
-    
+
     def get_company(self, response):
         item = MyWorkCompanyItem()
         item["name"] = response.xpath('//div[contains(@class, j_company)]/div/h1/text()').extract_first()

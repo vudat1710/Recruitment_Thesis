@@ -1,9 +1,9 @@
 cd .
 wait
-cd /home/vudat1710/Downloads/Thesis/Recruitment_Thesis/crawler
+cd $2/crawler
 wait
-python -m crawler.spiders.crawl
+python -m crawler.spiders.crawl $1
 wait
 python -m crawler.test
 wait
-python -m crawler.push_to_db
+python -m crawler.push_to_db $2

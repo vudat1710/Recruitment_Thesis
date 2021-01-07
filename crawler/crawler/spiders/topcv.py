@@ -20,8 +20,9 @@ class TopCVCrawler(CrawlSpider):
     allowed_domains = ["www.topcv.vn"]
     start_urls = []
     
-    def __init__(self, **kwargs):
+    def __init__(self, term=None, **kwargs):
         self.count = 0
+        self.term = term
         self.company_url_list = []
         self.post_urls = []
         CrawlSpider.__init__(self, **kwargs)
@@ -90,11 +91,8 @@ class TopCVCrawler(CrawlSpider):
                 return
     
     def get_item(self, response):
-        # string = response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
-        # datePosted = json.loads(string)["datePosted"]
-
         item = TopCVItem()
-        company_url = ""
+        # company_url = ""
         if "/brand/" in response.url:
             # title_list = response.xpath('//h2[@class="job-name text-premium"]/text()').extract()
             # title_extra = response.xpath('//h2[@class="job-name text-premium"]/a/text()').extract_first()
@@ -128,35 +126,43 @@ class TopCVCrawler(CrawlSpider):
             # yield item
             pass
         else:
-            # if today <= datetime.datetime.strptime(datePosted, "%Y-%m-%d"):
-            item["valid_through"] = [x.strip() for x in response.xpath('//div[@class=" text-dark-gray  job-deadline"]/text()').extract() if x != '\n'][0]
-            title_list = response.xpath('//h1[@class="job-title text-highlight bold text-uppercase"]/text()').extract()
-            title_extra = response.xpath('//h1[@class="job-title text-highlight bold text-uppercase"]/a/text()').extract_first()
-            if title_extra:
-                item["title"] = title_list[0] + title_extra + ' '.join(title_list[1:])
-            else: item["title"] = ' '.join(title_list)
-            item["company_title"] = response.xpath('//div[@class="company-title"]/span/a/text()').extract_first()
-            item["address"] = [x.strip() for x in response.xpath('//div[@class="text-dark-gray"]/text()').extract() if x != '\n'][0]
-            recuit_info = [x.strip() for x in response.xpath('//div[@class="job-info-item"]/span/text()').extract() if x.strip() != '']
-            item["salary"] = recuit_info[0]
-            item["job_type"] = recuit_info[1]
-            item["num_hiring"] = recuit_info[2]
-            item["position"] = recuit_info[3]
-            item["experience"] = recuit_info[4]
-            item["gender"] = recuit_info[5]           
-            item["workplace"] = ', '.join(response.xpath('//div[@class="job-info-item"]/span/a/text()').extract())
-            item["img"] = response.xpath('//img[@class="company-logo"]/@src').extract_first()
-            content = response.xpath('//div[@class="content-tab"]')
-            item["description"] = '\n'.join([x.replace("\n", " ") for x in content[0].xpath('.//text()').extract() if x != "\n" and x != ""])
-            item["extra_requirements"] = '\n'.join([x.replace("\n", " ") for x in content[1].xpath('.//text()').extract() if x != "\n" and x != ""])
-            item["job_benefits"] = '\n'.join([x.replace("\n", " ") for x in content[2].xpath('.//text()').extract() if x != "\n" and x != ""])
-            item["majors"] = response.xpath('//div[@id="col-job-left"]/div[6]/span/a/text()').extract()
-            company_url = response.xpath('//div[@class="company-title"]/span/a/@href').extract_first()
-            item["company_url"] = company_url.replace("www.", "")
-            item["post_url"] = response.url.replace("www.", "")
-            item["qualification"] = ""
+            if self.term == "daily":
+                string = response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
+                datePosted = json.loads(string)["datePosted"]
+                if today <= datetime.datetime.strptime(datePosted, "%Y-%m-%d"):
+                    self.item_crawl(item, response)
+            else:
+                self.item_crawl(item, response)
+        
+    def item_crawl(self, item, response):
+        item["valid_through"] = [x.strip() for x in response.xpath('//div[@class=" text-dark-gray  job-deadline"]/text()').extract() if x != '\n'][0]
+        title_list = response.xpath('//h1[@class="job-title text-highlight bold text-uppercase"]/text()').extract()
+        title_extra = response.xpath('//h1[@class="job-title text-highlight bold text-uppercase"]/a/text()').extract_first()
+        if title_extra:
+            item["title"] = title_list[0] + title_extra + ' '.join(title_list[1:])
+        else: item["title"] = ' '.join(title_list)
+        item["company_title"] = response.xpath('//div[@class="company-title"]/span/a/text()').extract_first()
+        item["address"] = [x.strip() for x in response.xpath('//div[@class="text-dark-gray"]/text()').extract() if x != '\n'][0]
+        recuit_info = [x.strip() for x in response.xpath('//div[@class="job-info-item"]/span/text()').extract() if x.strip() != '']
+        item["salary"] = recuit_info[0]
+        item["job_type"] = recuit_info[1]
+        item["num_hiring"] = recuit_info[2]
+        item["position"] = recuit_info[3]
+        item["experience"] = recuit_info[4]
+        item["gender"] = recuit_info[5]           
+        item["workplace"] = ', '.join(response.xpath('//div[@class="job-info-item"]/span/a/text()').extract())
+        item["img"] = response.xpath('//img[@class="company-logo"]/@src').extract_first()
+        content = response.xpath('//div[@class="content-tab"]')
+        item["description"] = '\n'.join([x.replace("\n", " ") for x in content[0].xpath('.//text()').extract() if x != "\n" and x != ""])
+        item["extra_requirements"] = '\n'.join([x.replace("\n", " ") for x in content[1].xpath('.//text()').extract() if x != "\n" and x != ""])
+        item["job_benefits"] = '\n'.join([x.replace("\n", " ") for x in content[2].xpath('.//text()').extract() if x != "\n" and x != ""])
+        item["majors"] = response.xpath('//div[@id="col-job-left"]/div[6]/span/a/text()').extract()
+        company_url = response.xpath('//div[@class="company-title"]/span/a/@href').extract_first()
+        item["company_url"] = company_url.replace("www.", "")
+        item["post_url"] = response.url.replace("www.", "")
+        item["qualification"] = ""
 
-            yield item
+        yield item
 
         if company_url not in self.company_url_list:
             self.company_url_list.append(company_url)

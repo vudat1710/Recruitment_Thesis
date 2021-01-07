@@ -16,11 +16,11 @@ settings = get_project_settings()
 runner = CrawlerRunner(settings)
 
 @defer.inlineCallbacks
-def crawl():  
-    yield runner.crawl(MyWorkCrawler)
-    yield runner.crawl(TVNCrawler)
-    yield runner.crawl(TopCVCrawler)
-    yield runner.crawl(VTNCrawler)
+def crawl(term):  
+    yield runner.crawl(MyWorkCrawler, term=term)
+    yield runner.crawl(TVNCrawler, term=term)
+    yield runner.crawl(TopCVCrawler, term=term)
+    yield runner.crawl(VTNCrawler, term=term)
     reactor.stop()
 
 def push_to_db():
@@ -34,7 +34,7 @@ def push_to_db():
         dbp.connection.close()
 
 
-crawl()
+crawl(sys.argv[1])
 reactor.run()
 time.sleep(5)
 # push_to_db()

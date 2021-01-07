@@ -1,5 +1,5 @@
 import pymysql
-import json, os
+import json, os, sys
 from .constants import USER, PASSWORD, DATABASE, MAJOR_DICT_PATH, ADDRESS_DICT_PATH
 from .utils import get_field_data, get_post_to_check
 from collections import OrderedDict
@@ -9,7 +9,7 @@ from datetime import date
 CHUNK_SIZE = 100
 
 class DBPushing:
-    def __init__(self, merged_data):
+    def __init__(self, merged_data, path_name):
         self.connection = pymysql.connect(
             host='localhost',
             user=USER,
@@ -26,7 +26,7 @@ class DBPushing:
         self.major_dict = self.get_all_data_from_table("Major", "name", "majorId")
         self.num_duplicated = 0
         self.merged_data = merged_data
-        self.all_posts = json.load(open('/home/vudat1710/Downloads/Thesis/Recruitment_Thesis/all_posts.json', 'r'))
+        self.all_posts = json.load(open('{}/all_posts.json'.format(path_name), 'r'))
 
     def insert_table(self, table_name, items):
         for item in items:
@@ -197,7 +197,7 @@ if __name__ == "__main__":
         for post in merged:
             if post:
                 merged_data.append(post)
-        dbp = DBPushing(merged_data[300:500])
+        dbp = DBPushing(merged_data[300:500], sys.argv[1])
         dbp.push_chunks()
-        json.dump(dbp.all_posts, open('/home/vudat1710/Downloads/Thesis/Recruitment_Thesis/all_posts.json', 'w'))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+        json.dump(dbp.all_posts, open('{}/all_posts.json'.format(sys.argv[1]), 'w'))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
         dbp.connection.close()

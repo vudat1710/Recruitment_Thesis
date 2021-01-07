@@ -18,8 +18,9 @@ class VTNCrawler(CrawlSpider):
     allowed_domains = ["www.viectotnhat.com"]
     start_urls = []
     
-    def __init__(self, **kwargs):
+    def __init__(self, term=None, **kwargs):
         self.count = 0
+        self.term = term
         self.company_url_list = []
         self.post_urls = []
         CrawlSpider.__init__(self, **kwargs)
@@ -79,9 +80,15 @@ class VTNCrawler(CrawlSpider):
     
     def get_item(self, response):
         item = VTNItem()
-        # string = response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
-        # datePosted = json.loads(string.replace("\n", "").replace("\t", "")[:-1])["datePosted"]
-        # if today <= datetime.datetime.strptime(datePosted, "%Y-%m-%d"):
+        if self.term == "daily":
+            string = response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
+            datePosted = json.loads(string.replace("\n", "").replace("\t", "")[:-1])["datePosted"]
+            if today <= datetime.datetime.strptime(datePosted, "%Y-%m-%d"):
+                self.item_crawl(item, response)
+        else:
+            self.item_crawl(item, response)
+        
+    def item_crawl(self, item, response):
         item["valid_through"] = response.xpath('//span[contains(@class,"color-orange2")]/text()').extract_first().strip()
         item["title"] = response.xpath('//h1[contains(@class, "title-job")]/text()').extract_first().strip()
         item["company_title"] = response.xpath('//div[contains(@class, "chi-tiet-vl")]/div[4]/div[1]/a/h2/text()').extract_first().strip()
