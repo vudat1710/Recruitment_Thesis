@@ -3,8 +3,16 @@
 ### Setup environment and data
 
 - Python 3, npm, MySQL and MySQL Workbench installed in your server machine.
-- Move to outer directory then run `pip install -r requirements.txt` to setup python environment for crawler and recommender modules (these modules written in Python).
-- From outer directory, move to app directory then run `npm install` in the current folder, `client`, and `client-admin` to install packages required.
+- Move to outer directory then run
+```sh
+$ pip install -r requirements.txt
+``` 
+to setup python environment for crawler and recommender modules (these modules written in Python).
+- From outer directory, move to app directory then run 
+```sh
+$ npm install
+``` 
+in the current folder, `client`, and `client-admin` to install packages required.
 - Open MySQL Workbench, select your MySQL Connection and run the SQL script `script.sql` provided in the outer directory.
 - Change all database related constant variables in `constants.py` provided in `path_to_recruitment_thesis_dir/crawler/crawler` directory.
 - In order to get data for our application, do the following steps:
