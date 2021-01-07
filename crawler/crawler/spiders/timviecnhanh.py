@@ -83,39 +83,62 @@ class TVNCrawler(CrawlSpider):
             datePosted = json.loads(string.replace("\n", "").replace("\t", ""))["datePosted"]
             datePosted = re.search(r"\d{4}[-/]\d{2}[-/]\d{2}", datePosted).group(0)
             if today <= datetime.datetime.strptime(datePosted, "%Y-%m-%d"):
-                self.item_crawl(item, response)
+                item["valid_through"] = response.xpath('//td/b[@class="text-danger"]/text()').extract_first().strip()
+                item["title"] = response.xpath('//header[@class="block-title"]/h1/span/text()').extract_first().strip()
+                item["company_title"] = response.xpath('//article[@class="block-content"]/div[2]/h3/a/text()').extract_first()
+                item["address"] = response.xpath('//article[@class="block-content"]/div[2]/span/text()').extract_first().strip()[9:]
+                item["salary"] = ''.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[1]/ul/li[1]/text()').extract() if x.strip() != ""]).strip()
+                item["job_type"] = ''.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[2]/ul/li[4]/text()').extract() if x.strip() != ""]).strip()
+                item["num_hiring"] = ''.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[2]/ul/li[1]/text()').extract() if x.strip() != ""]).strip()
+                item["position"] = response.xpath('//header[@class="block-title"]/h1/span/text()').extract_first().strip()
+                item["experience"] = ''.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[1]/ul/li[2]/text()').extract() if x.strip() != ""]).strip()
+                item["gender"] = ''.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[2]/ul/li[2]/text()').extract() if x.strip() != ""]).strip()          
+                item["workplace"] = ', '.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[1]/ul/li[4]/a/text()').extract() if x.strip() != ""]).strip()
+                item["img"] = response.xpath('//div[@class="block-sidebar"]/div/div/div/img/@src').extract_first()
+                item["description"] = '\n'.join(normalize_long_text(response.xpath('//article[@class="block-content"]/table/tbody/tr[1]/td[2]/p//text()').extract())).strip()
+                item["job_benefits"] = '\n'.join(normalize_long_text(response.xpath('//article[@class="block-content"]/table/tbody/tr[3]/td[2]/p//text()').extract())).strip()
+                item["extra_requirements"] = '\n'.join(normalize_long_text(response.xpath('//article[@class="block-content"]/table/tbody/tr[2]/td[2]/p//text()').extract())).strip()
+                item["majors"] = response.xpath('//article[@class="block-content"]/div[5]/div[1]/ul/li[5]/a/text()').extract()
+                item["qualification"] = ''.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[1]/ul/li[3]/text()').extract() if x.strip() != ""]).strip()
+                company_url = response.xpath('//article[@class="block-content"]/div[2]/h3/a/@href').extract_first()
+                item["company_url"] = company_url.replace("www.", "")
+                item["post_url"] = response.url.replace("www.", "")
+                item["contact_name"] = response.xpath('//div[@class="block-info-company"]/div/table/tr[1]/td[2]/p/text()').extract_first().strip()
+
+                yield item
+
+                if company_url not in self.company_url_list:
+                    self.company_url_list.append(company_url)
+                    yield Request(url=company_url, callback=self.get_company, dont_filter=True)
         else:
-            self.item_crawl(item, response)
+            item["valid_through"] = response.xpath('//td/b[@class="text-danger"]/text()').extract_first().strip()
+            item["title"] = response.xpath('//header[@class="block-title"]/h1/span/text()').extract_first().strip()
+            item["company_title"] = response.xpath('//article[@class="block-content"]/div[2]/h3/a/text()').extract_first()
+            item["address"] = response.xpath('//article[@class="block-content"]/div[2]/span/text()').extract_first().strip()[9:]
+            item["salary"] = ''.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[1]/ul/li[1]/text()').extract() if x.strip() != ""]).strip()
+            item["job_type"] = ''.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[2]/ul/li[4]/text()').extract() if x.strip() != ""]).strip()
+            item["num_hiring"] = ''.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[2]/ul/li[1]/text()').extract() if x.strip() != ""]).strip()
+            item["position"] = response.xpath('//header[@class="block-title"]/h1/span/text()').extract_first().strip()
+            item["experience"] = ''.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[1]/ul/li[2]/text()').extract() if x.strip() != ""]).strip()
+            item["gender"] = ''.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[2]/ul/li[2]/text()').extract() if x.strip() != ""]).strip()          
+            item["workplace"] = ', '.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[1]/ul/li[4]/a/text()').extract() if x.strip() != ""]).strip()
+            item["img"] = response.xpath('//div[@class="block-sidebar"]/div/div/div/img/@src').extract_first()
+            item["description"] = '\n'.join(normalize_long_text(response.xpath('//article[@class="block-content"]/table/tbody/tr[1]/td[2]/p//text()').extract())).strip()
+            item["job_benefits"] = '\n'.join(normalize_long_text(response.xpath('//article[@class="block-content"]/table/tbody/tr[3]/td[2]/p//text()').extract())).strip()
+            item["extra_requirements"] = '\n'.join(normalize_long_text(response.xpath('//article[@class="block-content"]/table/tbody/tr[2]/td[2]/p//text()').extract())).strip()
+            item["majors"] = response.xpath('//article[@class="block-content"]/div[5]/div[1]/ul/li[5]/a/text()').extract()
+            item["qualification"] = ''.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[1]/ul/li[3]/text()').extract() if x.strip() != ""]).strip()
+            company_url = response.xpath('//article[@class="block-content"]/div[2]/h3/a/@href').extract_first()
+            item["company_url"] = company_url.replace("www.", "")
+            item["post_url"] = response.url.replace("www.", "")
+            item["contact_name"] = response.xpath('//div[@class="block-info-company"]/div/table/tr[1]/td[2]/p/text()').extract_first().strip()
+
+            yield item
+
+            if company_url not in self.company_url_list:
+                self.company_url_list.append(company_url)
+                yield Request(url=company_url, callback=self.get_company, dont_filter=True)
         
-
-    def item_crawl(self, item, response):
-        item["valid_through"] = response.xpath('//td/b[@class="text-danger"]/text()').extract_first().strip()
-        item["title"] = response.xpath('//header[@class="block-title"]/h1/span/text()').extract_first().strip()
-        item["company_title"] = response.xpath('//article[@class="block-content"]/div[2]/h3/a/text()').extract_first()
-        item["address"] = response.xpath('//article[@class="block-content"]/div[2]/span/text()').extract_first().strip()[9:]
-        item["salary"] = ''.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[1]/ul/li[1]/text()').extract() if x.strip() != ""]).strip()
-        item["job_type"] = ''.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[2]/ul/li[4]/text()').extract() if x.strip() != ""]).strip()
-        item["num_hiring"] = ''.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[2]/ul/li[1]/text()').extract() if x.strip() != ""]).strip()
-        item["position"] = response.xpath('//header[@class="block-title"]/h1/span/text()').extract_first().strip()
-        item["experience"] = ''.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[1]/ul/li[2]/text()').extract() if x.strip() != ""]).strip()
-        item["gender"] = ''.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[2]/ul/li[2]/text()').extract() if x.strip() != ""]).strip()          
-        item["workplace"] = ', '.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[1]/ul/li[4]/a/text()').extract() if x.strip() != ""]).strip()
-        item["img"] = response.xpath('//div[@class="block-sidebar"]/div/div/div/img/@src').extract_first()
-        item["description"] = '\n'.join(normalize_long_text(response.xpath('//article[@class="block-content"]/table/tbody/tr[1]/td[2]/p//text()').extract())).strip()
-        item["job_benefits"] = '\n'.join(normalize_long_text(response.xpath('//article[@class="block-content"]/table/tbody/tr[3]/td[2]/p//text()').extract())).strip()
-        item["extra_requirements"] = '\n'.join(normalize_long_text(response.xpath('//article[@class="block-content"]/table/tbody/tr[2]/td[2]/p//text()').extract())).strip()
-        item["majors"] = response.xpath('//article[@class="block-content"]/div[5]/div[1]/ul/li[5]/a/text()').extract()
-        item["qualification"] = ''.join([x for x in response.xpath('//article[@class="block-content"]/div[5]/div[1]/ul/li[3]/text()').extract() if x.strip() != ""]).strip()
-        company_url = response.xpath('//article[@class="block-content"]/div[2]/h3/a/@href').extract_first()
-        item["company_url"] = company_url.replace("www.", "")
-        item["post_url"] = response.url.replace("www.", "")
-        item["contact_name"] = response.xpath('//div[@class="block-info-company"]/div/table/tr[1]/td[2]/p/text()').extract_first().strip()
-
-        yield item
-
-        if company_url not in self.company_url_list:
-            self.company_url_list.append(company_url)
-            yield Request(url=company_url, callback=self.get_company, dont_filter=True)
     
     def get_company(self, response):
         item = TVNCompanyItem()

@@ -90,38 +90,62 @@ class MyWorkCrawler(CrawlSpider):
             string = response.xpath('//script[@type="application/ld+json"]/text()').extract_first()
             datePosted = json.loads(string)["datePosted"]
             if today <= datetime.datetime.strptime(datePosted, "%d/%m/%Y"):
-                self.item_crawl(item, response)
-        else:
-            self.item_crawl(item, response)
-    
-    def item_crawl(self, item, response):
-        item["valid_through"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-clock")]]/span/span[2]/text()').extract_first().strip()
-        item["title"] = ' '.join([x for x in response.xpath('//h1[@class="main-title"]/span/text()').extract() if x not in ['hot', '\xa0']])
-        item["company_title"] = response.xpath('//h4[contains(@class, "desc-for-title")]/span/text()').extract_first().strip()
-        item["address"] = response.xpath('//*[@id="footer"]/div/div/div[3]/div[2]/span/text()').extract_first().strip()
-        item["salary"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-cash-dollar")]]/span/text()').extract_first().strip()
-        item["job_type"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-store")]]/span/text()').extract_first().strip()
-        item["num_hiring"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-users")]]/span/text()').extract_first().strip()
-        item["position"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-clipboard-user")]]/span/text()').extract_first().strip()
-        item["experience"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-briefcase")]]/span/text()').extract_first().strip()
-        item["gender"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-man-woman")]]/span/text()').extract_first().strip()     
-        item["workplace"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-map-marker")]]/span/div/text()').extract_first().strip()
-        item["img"] = ""
-        content = response.xpath('//div[@class="mw-box-item"]')
-        item["description"] = '\n'.join([x.replace("\n", " ") for x in content[0].xpath('.//text()').extract() if x != "\n" and x != ""])
-        item["job_benefits"] = '\n'.join([x.replace("\n", " ") for x in content[1].xpath('.//text()').extract() if x != "\n" and x != ""])
-        item["extra_requirements"] = '\n'.join([x.replace("\n", " ") for x in content[2].xpath('.//text()').extract() if x != "\n" and x != ""])
-        item["majors"] = [x.strip() for x in response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-hammer-wrench")]]/span//div/text()').extract_first().strip().split(',')]
-        item["qualification"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-library2")]]/span/text()').extract_first().strip()
-        company_url = BASE_URL + response.xpath('//*[@id="box_info_job_detail"]/div/div[1]/a/@href').extract_first()
-        item["company_url"] = company_url.replace("www.", "")
-        item["post_url"] = response.url.replace("www.", "")
-        item["contact_name"] = response.xpath('//*[@id="footer"]/div/div/div[2]/div[2]/span/text()').extract_first().strip()
+                item["valid_through"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-clock")]]/span/span[2]/text()').extract_first().strip()
+                item["title"] = ' '.join([x for x in response.xpath('//h1[@class="main-title"]/span/text()').extract() if x not in ['hot', '\xa0']])
+                item["company_title"] = response.xpath('//h4[contains(@class, "desc-for-title")]/span/text()').extract_first().strip()
+                item["address"] = response.xpath('//*[@id="footer"]/div/div/div[3]/div[2]/span/text()').extract_first().strip()
+                item["salary"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-cash-dollar")]]/span/text()').extract_first().strip()
+                item["job_type"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-store")]]/span/text()').extract_first().strip()
+                item["num_hiring"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-users")]]/span/text()').extract_first().strip()
+                item["position"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-clipboard-user")]]/span/text()').extract_first().strip()
+                item["experience"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-briefcase")]]/span/text()').extract_first().strip()
+                item["gender"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-man-woman")]]/span/text()').extract_first().strip()     
+                item["workplace"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-map-marker")]]/span/div/text()').extract_first().strip()
+                item["img"] = ""
+                content = response.xpath('//div[@class="mw-box-item"]')
+                item["description"] = '\n'.join([x.replace("\n", " ") for x in content[0].xpath('.//text()').extract() if x != "\n" and x != ""])
+                item["job_benefits"] = '\n'.join([x.replace("\n", " ") for x in content[1].xpath('.//text()').extract() if x != "\n" and x != ""])
+                item["extra_requirements"] = '\n'.join([x.replace("\n", " ") for x in content[2].xpath('.//text()').extract() if x != "\n" and x != ""])
+                item["majors"] = [x.strip() for x in response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-hammer-wrench")]]/span//div/text()').extract_first().strip().split(',')]
+                item["qualification"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-library2")]]/span/text()').extract_first().strip()
+                company_url = BASE_URL + response.xpath('//*[@id="box_info_job_detail"]/div/div[1]/a/@href').extract_first()
+                item["company_url"] = company_url.replace("www.", "")
+                item["post_url"] = response.url.replace("www.", "")
+                item["contact_name"] = response.xpath('//*[@id="footer"]/div/div/div[2]/div[2]/span/text()').extract_first().strip()
 
-        yield item
-        if company_url not in self.company_url_list:
-            self.company_url_list.append(company_url)
-            yield Request(url=company_url, callback=self.get_company, dont_filter=True)
+                yield item
+                if company_url not in self.company_url_list:
+                    self.company_url_list.append(company_url)
+                    yield Request(url=company_url, callback=self.get_company, dont_filter=True)
+
+        else:
+            item["valid_through"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-clock")]]/span/span[2]/text()').extract_first().strip()
+            item["title"] = ' '.join([x for x in response.xpath('//h1[@class="main-title"]/span/text()').extract() if x not in ['hot', '\xa0']])
+            item["company_title"] = response.xpath('//h4[contains(@class, "desc-for-title")]/span/text()').extract_first().strip()
+            item["address"] = response.xpath('//*[@id="footer"]/div/div/div[3]/div[2]/span/text()').extract_first().strip()
+            item["salary"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-cash-dollar")]]/span/text()').extract_first().strip()
+            item["job_type"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-store")]]/span/text()').extract_first().strip()
+            item["num_hiring"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-users")]]/span/text()').extract_first().strip()
+            item["position"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-clipboard-user")]]/span/text()').extract_first().strip()
+            item["experience"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-briefcase")]]/span/text()').extract_first().strip()
+            item["gender"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-man-woman")]]/span/text()').extract_first().strip()     
+            item["workplace"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-map-marker")]]/span/div/text()').extract_first().strip()
+            item["img"] = ""
+            content = response.xpath('//div[@class="mw-box-item"]')
+            item["description"] = '\n'.join([x.replace("\n", " ") for x in content[0].xpath('.//text()').extract() if x != "\n" and x != ""])
+            item["job_benefits"] = '\n'.join([x.replace("\n", " ") for x in content[1].xpath('.//text()').extract() if x != "\n" and x != ""])
+            item["extra_requirements"] = '\n'.join([x.replace("\n", " ") for x in content[2].xpath('.//text()').extract() if x != "\n" and x != ""])
+            item["majors"] = [x.strip() for x in response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-hammer-wrench")]]/span//div/text()').extract_first().strip().split(',')]
+            item["qualification"] = response.xpath('//div[@class="box_main_info_job_left"]/div/div/div[descendant::i[contains(@class, "li-library2")]]/span/text()').extract_first().strip()
+            company_url = BASE_URL + response.xpath('//*[@id="box_info_job_detail"]/div/div[1]/a/@href').extract_first()
+            item["company_url"] = company_url.replace("www.", "")
+            item["post_url"] = response.url.replace("www.", "")
+            item["contact_name"] = response.xpath('//*[@id="footer"]/div/div/div[2]/div[2]/span/text()').extract_first().strip()
+
+            yield item
+            if company_url not in self.company_url_list:
+                self.company_url_list.append(company_url)
+                yield Request(url=company_url, callback=self.get_company, dont_filter=True)
 
     def get_company(self, response):
         item = MyWorkCompanyItem()
