@@ -119,7 +119,7 @@ class CompanyDetails extends Component {
         resultPosts.posts.map((post) => {
           return (
             <div className="col-xs-12">
-              <a className="item-block" href={`/post/${post.post_url}`}>
+              <a className="item-block" href={`/post/${post.postId}`}>
                 <header>
                 {post.Companies[0].img_url || post.Companies[0].img_url !== "" ? <img src={post.Companies[0].img_url} alt="" /> : <img src={TheJobs} alt="" />}
                   <div className="hgroup">

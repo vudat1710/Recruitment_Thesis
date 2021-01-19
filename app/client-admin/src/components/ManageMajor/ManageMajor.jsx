@@ -108,24 +108,24 @@ class ManageMajor extends Component {
 
               <footer>
                 <ul className="details cols-3">
-                  <div class="action-btn">
-                    <a
-                      class="btn btn-xs btn-gray"
-                      href={`/editMajor/${major.majorId}`}
-                    >
-                      Edit
-                    </a>
-                    {majors.includes(major.name) ? (
-                      <></>
-                    ) : (
+                  {majors.includes(major.name) ? (
+                    <div class="action-btn"></div>
+                  ) : (
+                    <div class="action-btn">
+                      <a
+                        class="btn btn-xs btn-gray"
+                        href={`/editMajor/${major.majorId}`}
+                      >
+                        Edit
+                      </a>
                       <a
                         class="btn btn-xs btn-danger"
                         onClick={() => this.onDeleteClick(major.majorId)}
                       >
                         Delete
                       </a>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </ul>
               </footer>
             </a>

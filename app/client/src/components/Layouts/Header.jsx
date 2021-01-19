@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import { Link, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
-import { logoutUser } from "../../actions/auth.action";
+import { logoutUser, setCurrentUser } from "../../actions/auth.action";
+import { clearCurrentProfile } from "../../actions/user.action";
 import Logo from "../../assets/img/logo.png";
 import CompareComp from "./CompareComp";
 import "./Header.scss";
@@ -23,6 +24,7 @@ class Header extends Component {
     e.preventDefault();
     this.props.logoutUser();
   }
+
   render() {
     const { isShow } = this.state;
     const { isAuthenticated, user } = this.props.auth;
@@ -72,10 +74,7 @@ class Header extends Component {
           <Link className="links" to="/recommend">
             Việc làm phù hợp
           </Link>
-          {!isAuthenticated ? (
-            <></>
-          ) : <CompareComp/>
-          }
+          {!isAuthenticated ? <></> : <CompareComp />}
         </div>
         <div
           style={{

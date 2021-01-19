@@ -61,8 +61,9 @@ class EditableWorkPlace extends Component {
     const { name, type } = this.state;
 
     let newInfo = {
-      name: name,
+      name: name.trim().split(" ").map(x => x[0].toUpperCase() + x.slice(1)).join(" "),
     };
+    // console.log(newInfo.name)
     if (type !== "/addWorkPlace") {
       newInfo.workPlaceId = this.state.workPlaceId;
       await this.props.updateWorkPlace(newInfo);
@@ -91,6 +92,7 @@ class EditableWorkPlace extends Component {
         workPlaceAdd: false,
       });
     }
+    window.location.href = "/manageWorkPlace";
   }
 
   render() {

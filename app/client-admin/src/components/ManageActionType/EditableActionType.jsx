@@ -91,6 +91,8 @@ class EditableActionType extends Component {
         actionTypeAdd: false,
       });
     }
+
+    window.location.href = "/manageActionType";
   }
 
   render() {

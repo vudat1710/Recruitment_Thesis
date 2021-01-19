@@ -1,10 +1,11 @@
 import Index from "./components/Index/Index";
 import { store, persistor } from "./store";
+import jwt_decode from 'jwt-decode';
 import { Provider } from "react-redux";
 import React, { Component } from "react";
 import { Route, BrowserRouter } from "react-router-dom";
 import setAuthToken from "./utils/setAuthTokens";
-import { setCurrentUser } from "./actions/auth.action";
+import { logoutUser, setCurrentUser } from "./actions/auth.action";
 import "./assets/css/thejobs.css";
 import "./assets/css/thejobs.css.map";
 import "./assets/css/custom.css";
@@ -48,10 +49,15 @@ if (localStorage.jwtToken) {
   store.dispatch(setCurrentUser(localStorage.jwtToken));
   // Check for expried token
   const currentTime = Date.now() / 1000;
+  if (jwt_decode(localStorage.jwtToken).exp < currentTime) {
+    store.dispatch(logoutUser());
+    window.location.href = '/login';
+  }
 }
 
 class App extends Component {
   render() {
+
     return (
       <div>
         <Provider store={store}>

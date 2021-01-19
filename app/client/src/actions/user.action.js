@@ -6,6 +6,7 @@ import {
   UPDATE_USER,
   GET_CLICK_POST_EVENT,
 } from "./actionTypes";
+import { handleUnauthorizedError } from "./auth.action";
 
 // Clear profile
 export const clearCurrentProfile = () => {
@@ -36,7 +37,6 @@ export const getUserByUserId = (attributes) => async (dispatch) => {
 
 export const autoUpdateUser = (params) => async (dispatch) => {
   const res = await axios.post(`/api2/recommender/autoUpdateProfile`, params);
-  console.log(res.data.data)
   if (Object.keys(res.data.data).length !== 0) {
     const res2 = await axios.post(`/api/user/updateUser`, res.data.data);
     if (res2.data.status !== 400) {
@@ -55,7 +55,7 @@ export const autoUpdateUser = (params) => async (dispatch) => {
       });
     }
   }
-}
+};
 
 export const updateUser = (params) => async (dispatch) => {
   const res = await axios.post(`/api/user/updateUser`, params);
@@ -74,20 +74,27 @@ export const updateUser = (params) => async (dispatch) => {
       payload: res.data.errors,
     });
   }
-}
+};
 
 export const getClickPostEvent = (params) => async (dispatch) => {
-  const res = await axios.post(`/api/action/getClick`, params);
-
-  if (res.data.status !== 400) {
-    dispatch({
-      type: GET_CLICK_POST_EVENT,
-      payload: "success",
+  await axios
+    .post(`/api/action/getClick`, params)
+    .then(function (res) {
+      if (res.data.status !== 400) {
+        dispatch({
+          type: GET_CLICK_POST_EVENT,
+          payload: "success",
+        });
+      } else {
+        dispatch({
+          type: GET_ERRORS,
+          payload: res.data.errors,
+        });
+      }
+    })
+    .catch(function (err) {
+      if (err.response.status === 401) {
+        dispatch(handleUnauthorizedError());
+      } 
     });
-  } else {
-    dispatch({
-      type: GET_ERRORS,
-      payload: res.data.errors,
-    });
-  }
-}
+};

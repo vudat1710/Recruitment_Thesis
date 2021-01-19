@@ -13,6 +13,7 @@ import {
   GET_LIKED_POSTS,
   GET_ERRORS,
 } from "./actionTypes";
+import { handleUnauthorizedError } from "./auth.action";
 import axios from "axios";
 
 export const getPosts = (params) => async (dispatch) => {
@@ -56,19 +57,29 @@ export const getDataAutoComplete = () => async (dispatch) => {
 };
 
 export const getLikedPosts = () => async (dispatch) => {
-  const res = await axios.post(`/api/post/getLikedPosts`, { userId: localStorage.userId });
-  if (res.data.status !== 400) {
-    dispatch({
-      type: GET_LIKED_POSTS,
-      payload: res.data.posts,
+  await axios
+    .post(`/api/post/getLikedPosts`, {
+      userId: localStorage.userId,
+    })
+    .then(function (res) {
+      if (res.data.status !== 400) {
+        dispatch({
+          type: GET_LIKED_POSTS,
+          payload: res.data.posts,
+        });
+      } else {
+        dispatch({
+          type: GET_ERRORS,
+          payload: res.message,
+        });
+      }
+    })
+    .catch(function (err) {
+      if (err.response.status === 401) {
+        dispatch(handleUnauthorizedError());
+      }
     });
-  } else {
-    dispatch({
-      type: GET_ERRORS,
-      payload: res.message,
-    });
-  }
-}
+};
 
 export const searchPosts = (searchParams) => async (dispatch) => {
   const res = await axios.post(`/api/post/searchPosts`, searchParams);
@@ -80,6 +91,7 @@ export const searchPosts = (searchParams) => async (dispatch) => {
 
 export const getPostById = (postId) => async (dispatch) => {
   const res = await axios.post(`/api/post/getPostById`, { postId });
+
   if (res.data.status !== 400) {
     dispatch({
       type: GET_POST_BY_ID,
@@ -94,63 +106,95 @@ export const getPostById = (postId) => async (dispatch) => {
 };
 
 export const postComment = (params) => async (dispatch) => {
-  const res = await axios.post(`/api/post/comment`, params);
-  if (res.data.status !== 400) {
-    dispatch({
-      type: POST_COMMENT,
-      payload: "success",
+  await axios
+    .post(`/api/post/comment`, params)
+    .then(function (res) {
+      if (res.data.status !== 400) {
+        dispatch({
+          type: POST_COMMENT,
+          payload: "success",
+        });
+      } else {
+        dispatch({
+          type: GET_ERRORS,
+          payload: res.message,
+        });
+      }
+    })
+    .catch(function (err) {
+      if (err.response.status === 401) {
+        dispatch(handleUnauthorizedError());
+      }
     });
-  } else {
-    dispatch({
-      type: GET_ERRORS,
-      payload: res.message,
-    });
-  }
 };
 
 export const ratePost = (params) => async (dispatch) => {
-  const res = await axios.post(`/api/post/rate`, params);
-  if (res.data.status !== 400) {
-    dispatch({
-      type: RATE_POST,
-      payload: "success",
+  await axios
+    .post(`/api/post/rate`, params)
+    .then(function (res) {
+      if (res.data.status !== 400) {
+        dispatch({
+          type: RATE_POST,
+          payload: "success",
+        });
+      } else {
+        dispatch({
+          type: GET_ERRORS,
+          payload: res.message,
+        });
+      }
+    })
+    .catch(function (err) {
+      if (err.response.status === 401) {
+        dispatch(handleUnauthorizedError());
+      }
     });
-  } else {
-    dispatch({
-      type: GET_ERRORS,
-      payload: res.message,
-    });
-  }
 };
 
 export const getRateByUserIdPostId = (params) => async (dispatch) => {
-  const res = await axios.post(`/api/post/getRateByUserIdPostId`, params);
-  if (res.data.status !== 400) {
-    dispatch({
-      type: GET_RATE_BY_USER_ID_POST_ID,
-      payload: res.data,
+  await axios
+    .post(`/api/post/getRateByUserIdPostId`, params)
+    .then(function (res) {
+      if (res.data.status !== 400) {
+        dispatch({
+          type: GET_RATE_BY_USER_ID_POST_ID,
+          payload: res.data,
+        });
+      } else {
+        dispatch({
+          type: GET_ERRORS,
+          payload: res.message,
+        });
+      }
+    })
+    .catch(function (err) {
+      if (err.response.status === 401) {
+        dispatch(handleUnauthorizedError());
+      }
     });
-  } else {
-    dispatch({
-      type: GET_ERRORS,
-      payload: res.message,
-    });
-  }
 };
 
 export const deleteComment = (params) => async (dispatch) => {
-  const res = await axios.post(`/api/post/deleteComment`, params);
-  if (res.data.status !== 400) {
-    dispatch({
-      type: DELETE_COMMENT,
-      payload: "success",
+  await axios
+    .post(`/api/post/deleteComment`, params)
+    .then(function (res) {
+      if (res.data.status !== 400) {
+        dispatch({
+          type: DELETE_COMMENT,
+          payload: "success",
+        });
+      } else {
+        dispatch({
+          type: GET_ERRORS,
+          payload: res.message,
+        });
+      }
+    })
+    .catch(function (err) {
+      if (err.response.status === 401) {
+        dispatch(handleUnauthorizedError());
+      }
     });
-  } else {
-    dispatch({
-      type: GET_ERRORS,
-      payload: res.message,
-    });
-  }
 };
 
 export const getCommentByPostId = (postId) => async (dispatch) => {
@@ -169,16 +213,24 @@ export const getCommentByPostId = (postId) => async (dispatch) => {
 };
 
 export const compare = (params) => async (dispatch) => {
-  const res = await axios.post(`/api/post/compare`, params);
-  if (res.data.status !== 400) {
-    dispatch({
-      type: COMPARE,
-      payload: res.data.data,
+  await axios
+    .post(`/api/post/compare`, params)
+    .then(function (res) {
+      if (res.data.status !== 400) {
+        dispatch({
+          type: COMPARE,
+          payload: res.data.data,
+        });
+      } else {
+        dispatch({
+          type: GET_ERRORS,
+          payload: res.message,
+        });
+      }
+    })
+    .catch(function (err) {
+      if (err.response.status === 401) {
+        dispatch(handleUnauthorizedError());
+      }
     });
-  } else {
-    dispatch({
-      type: GET_ERRORS,
-      payload: res.message,
-    });
-  }
 };

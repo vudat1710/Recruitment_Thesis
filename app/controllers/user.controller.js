@@ -143,7 +143,7 @@ exports.findUserById = (req, res) => {
   conditions["include"] = [
     { model: db.WorkPlace, attributes: ["name"] },
     { model: db.Major, attributes: ["name"] },
-    { model: db.RatePost, attributes: ["postId", "rate"] }
+    { model: db.RatePost, attributes: ["postId", "rate"] },
   ];
   User.findOne(conditions, { subQuery: false })
     .then((user) => {
@@ -170,8 +170,8 @@ exports.updateUser = (req, res) => {
     return res.json({ status: 400, errors: errors });
   }
   let { majors, workplaces, user_name } = req.body;
-  majors = majors.split(",").map(a => a.trim());
-  workplaces = workplaces.split(",").map(a => a.trim());
+  majors = majors.split(",").map((a) => a.trim());
+  workplaces = workplaces.split(",").map((a) => a.trim());
   User.findOne({
     where: { user_name: user_name },
     include: [
@@ -245,7 +245,7 @@ exports.updateUser = (req, res) => {
         const addWorkPlaceIds = newWorkPlaceIds.filter(
           (e) => !workPlaceIdsExist.includes(e)
         );
-        
+
         const c = WorkPlaceUser.bulkCreate(
           convertToObject(addWorkPlaceIds, "userId", user.userId, "workPlaceId")
         );
@@ -329,6 +329,24 @@ exports.unlockAccount = (req, res) => {
           errors: { user_name: "Tài khoản đã được mở khóa từ trước" },
         });
       }
+    })
+    .catch((err) => {
+      res.send({
+        status: 400,
+        message: err.message || "Tài khoản không tồn tại",
+      });
+    });
+};
+
+exports.isLock = (req, res) => {
+  const { userId } = req.body;
+  let conditions = { where: { userId: userId } };
+  User.findOne(conditions)
+    .then((user) => {
+      const is_lock = user.is_lock;
+      return res.json({
+        isLocked: is_lock
+      })
     })
     .catch((err) => {
       res.send({

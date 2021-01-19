@@ -196,6 +196,7 @@ class EditablePost extends Component {
         postAdd: false,
       });
     }
+    window.location.href = "/managePost";
   }
 
   render() {

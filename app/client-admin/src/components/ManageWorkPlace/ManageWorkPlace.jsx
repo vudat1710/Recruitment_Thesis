@@ -113,16 +113,16 @@ class ManageWorkPlace extends Component {
 
               <footer>
                 <ul className="details cols-3">
-                  <div class="action-btn">
-                    <a
-                      class="btn btn-xs btn-gray"
-                      href={`/editWorkPlace/${workPlace.workPlaceId}`}
-                    >
-                      Edit
-                    </a>
-                    {workPlaces.includes(workPlace.name) ? (
-                      <></>
-                    ) : (
+                  {workPlaces.includes(workPlace.name) ? (
+                    <div class="action-btn"></div>
+                  ) : (
+                    <div class="action-btn">
+                      <a
+                        class="btn btn-xs btn-gray"
+                        href={`/editWorkPlace/${workPlace.workPlaceId}`}
+                      >
+                        Edit
+                      </a>
                       <a
                         class="btn btn-xs btn-danger"
                         onClick={() =>
@@ -131,8 +131,8 @@ class ManageWorkPlace extends Component {
                       >
                         Delete
                       </a>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </ul>
               </footer>
             </a>

@@ -63,7 +63,7 @@ class EditableMajor extends Component {
     const { name, type } = this.state;
 
     let newInfo = {
-      name: name,
+      name: name.trim().split(" ").map(x => x[0].toUpperCase() + x.slice(1)).join(" "),
     };
     if (type !== "/addMajor") {
       newInfo.majorId = this.state.majorId;
@@ -93,6 +93,8 @@ class EditableMajor extends Component {
         majorAdd: false,
       });
     }
+
+    window.location.href = "/manageMajor";
   }
 
   render() {

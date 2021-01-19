@@ -1,6 +1,6 @@
 cd .
 wait
-cd $2/crawler
+cd ./crawler
 wait
 python -m crawler.spiders.crawl $1
 wait

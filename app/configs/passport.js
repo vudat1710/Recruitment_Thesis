@@ -15,7 +15,12 @@ module.exports = passport => {
         User.findOne({where: {userId: jwtPayload.userId}})
           .then((user) => {
             if (user) {
-              return done(null, user);
+              console.log(user.is_lock)
+              if (user.is_lock === 0) {
+                return done(null, user);
+              } else {
+                return done(null, false);
+              }
             }
             return done(null, false);
           })

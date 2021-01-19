@@ -302,7 +302,12 @@ class PostDetails extends Component {
             Bạn cần{" "}
             <Link
               to={{ pathname: `/login`, postId: this.props.match.params.id }}
-              style={{ color: "red", all: "initial", fontFamily: "Helvetica Neue,Helvetica,Arial,sans-serif", fontSize: "14px" }}
+              style={{
+                color: "red",
+                all: "initial",
+                fontFamily: "Helvetica Neue,Helvetica,Arial,sans-serif",
+                fontSize: "14px",
+              }}
             >
               ĐĂNG NHẬP
             </Link>{" "}
@@ -447,13 +452,13 @@ class PostDetails extends Component {
                   <h1>{postDetails.title}</h1>
                   <h3>
                     {postDetails.Companies[0].is_deleted !== 0 ? (
+                      <a>{postDetails.Companies[0].name} (Đã xóa)</a>
+                    ) : (
                       <a
                         href={`/company/${postDetails.Companies[0].companyId}`}
                       >
-                        {postDetails.Companies[0].name} (Đã xóa)
+                        {postDetails.Companies[0].name}
                       </a>
-                    ) : (
-                      <a>{postDetails.Companies[0].name}</a>
                     )}
                   </h3>
                   <div>

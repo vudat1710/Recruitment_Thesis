@@ -112,6 +112,8 @@ class EditableCompany extends Component {
         companyAdd: false,
       });
     }
+
+    window.location.href = "/manageCompany";
   }
 
   render() {

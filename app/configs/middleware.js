@@ -11,11 +11,11 @@ const withAuth = (req, res, next) => {
   if (!token) {
     return res.status(401).send('Unauthorized: No token provided');
   }
-  jwt.verify(token, secret, (err, decoded) => {
+  jwt.verify(token, secret, (err, user) => {
     if (err) {
       return res.status(401).send('Unauthorized: Invalid token');
     }
-    req.email = decoded.email;
+    req.user = user;
     return next();
   });
 };

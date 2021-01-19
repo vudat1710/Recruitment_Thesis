@@ -20,6 +20,19 @@ export const registerUser = (userData, history) => async (dispatch) => {
   } else history.push("/login");
 };
 
+export const handleUnauthorizedError = () => async (dispatch) => {
+  localStorage.removeItem("jwtToken");
+  localStorage.removeItem("userId");
+  localStorage.removeItem("userName");
+  // Remove auth header for future requests
+  setAuthToken(false);
+  // Set current user to {} which will set isAuthenticated to false
+  dispatch(setCurrentUser({}));
+  //Remove user profile
+  dispatch(clearCurrentProfile());
+  window.location.href = "/login";
+}
+
 export const loginUser = (userData) => async (dispatch) => {
   const res = await axios.post(`api/user/login`, userData);
   if (res.data.status !== 400) {
