@@ -20,6 +20,10 @@ export const registerUser = (userData, history) => async (dispatch) => {
   } else history.push("/login");
 };
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export const handleUnauthorizedError = () => async (dispatch) => {
   localStorage.removeItem("jwtToken");
   localStorage.removeItem("userId");
@@ -30,7 +34,10 @@ export const handleUnauthorizedError = () => async (dispatch) => {
   dispatch(setCurrentUser({}));
   //Remove user profile
   dispatch(clearCurrentProfile());
+
+  await sleep(200);
   window.location.href = "/login";
+  await sleep(200);
 }
 
 export const loginUser = (userData) => async (dispatch) => {

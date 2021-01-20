@@ -57,7 +57,7 @@ if (localStorage.jwtToken) {
 
 class App extends Component {
   render() {
-
+    console.log(localStorage)
     return (
       <div>
         <Provider store={store}>

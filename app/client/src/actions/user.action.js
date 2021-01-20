@@ -17,22 +17,29 @@ export const clearCurrentProfile = () => {
 
 export const getUserByUserId = (attributes) => async (dispatch) => {
   const userId = localStorage.userId;
-  const res = await axios.post(`/api/user/findUserById`, {
-    userId,
-    attributes,
-  });
-
-  if (res.data.status !== 400) {
-    dispatch({
-      type: GET_USER_BY_USER_ID,
-      payload: res.data,
+  await axios
+    .post(`/api/user/findUserById`, {
+      userId,
+      attributes,
+    })
+    .then(function (res) {
+      if (res.data.status !== 400) {
+        dispatch({
+          type: GET_USER_BY_USER_ID,
+          payload: res.data,
+        });
+      } else {
+        dispatch({
+          type: GET_ERRORS,
+          payload: res.data.errors,
+        });
+      }
+    })
+    .catch(function (err) {
+      if (err.response.status === 401) {
+        dispatch(handleUnauthorizedError());
+      }
     });
-  } else {
-    dispatch({
-      type: GET_ERRORS,
-      payload: res.data.errors,
-    });
-  }
 };
 
 export const autoUpdateUser = (params) => async (dispatch) => {
@@ -95,6 +102,6 @@ export const getClickPostEvent = (params) => async (dispatch) => {
     .catch(function (err) {
       if (err.response.status === 401) {
         dispatch(handleUnauthorizedError());
-      } 
+      }
     });
 };

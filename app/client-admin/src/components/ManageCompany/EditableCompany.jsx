@@ -79,7 +79,7 @@ class EditableCompany extends Component {
 
     let newInfo = {
       description: description,
-      name: name,
+      name: name.trim(),
       address: address,
       img_url: img_url,
     };

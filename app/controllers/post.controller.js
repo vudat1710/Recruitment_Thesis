@@ -589,6 +589,8 @@ exports.addPost = (req, res) => {
   conditions["createdAt"] = x[2] + "-" + x[0] + "-" + x[1];
   conditions.Companies[0]["is_deleted"] = 0;
   otherConditions["createdAt"] = x[2] + "-" + x[0] + "-" + x[1];
+  let majors = req.body.majors.split(",").map(a => a.trim());
+  let workplaces = req.body.workplaces.split(",").map(a => a.trim());
 
   Company.findOne({ where: { name: req.body.name } }).then((company) => {
     if (company === null) { 
@@ -597,13 +599,13 @@ exports.addPost = (req, res) => {
           const postId = x.postId;
           const a = Major.findAll({
             where: {
-              name: req.body.majors,
+              name: majors,
             },
             attributes: ["majorId"],
           });
           const b = WorkPlace.findAll({
             where: {
-              name: req.body.workplaces,
+              name: workplaces,
             },
             attributes: ["workPlaceId"],
           });
@@ -664,13 +666,13 @@ exports.addPost = (req, res) => {
           const postId = x.postId;
           const a = Major.findAll({
             where: {
-              name: req.body.majors,
+              name: majors,
             },
             attributes: ["majorId"],
           });
           const b = WorkPlace.findAll({
             where: {
-              name: req.body.workplaces,
+              name: workplaces,
             },
             attributes: ["workPlaceId"],
           });
