@@ -26,7 +26,7 @@ $ crontab -e > press o > 0 0 * * * sh path_to_recruitment_thesis_dir/run.sh $1 $
 ```
 > with $1 (either "daily" or other string) is the param to decide whether the crawler will do a daily type of crawling or not (In the first case, $1 could be any string except for "daily". In the second case, $1 should be "daily"), and $2 is the path to our recruitment thesis directory (without the "/" at the end of $2). For example:
 ```sh
-$ sh run.sh all /home/vudat1710/Download/Thesis/Recruitment_Thesis
+$ sh run.sh all /home/vudat1710/Downloads/Thesis/Recruitment_Thesis
 ```
 - Now we are good to go
 

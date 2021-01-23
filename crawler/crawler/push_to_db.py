@@ -197,7 +197,7 @@ if __name__ == "__main__":
         for post in merged:
             if post:
                 merged_data.append(post)
-        dbp = DBPushing(merged_data[0:500], sys.argv[1])
+        dbp = DBPushing(merged_data, sys.argv[1])
         dbp.push_chunks()
         json.dump(dbp.all_posts, open('{}/all_posts.json'.format(sys.argv[1]), 'w'))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
         dbp.connection.close()
