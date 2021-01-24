@@ -84,7 +84,7 @@ class ForgotPassword extends Component {
                     className="form-control form-control-lg fs-13 px-3 rounded"
                     placeholder="Nhập username"
                     title="Nhập username"
-                    type="password"
+                    type="text"
                     onChange={(e) => this.onChange(e)}
                     value={user_name}
                     error={errors.user_name}

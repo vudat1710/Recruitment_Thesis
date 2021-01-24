@@ -294,7 +294,7 @@ class Index extends Component {
                   <form action="#" onSubmit={(e) => this.onSubmit(e)}>
                     <div className="row">
                       <div className="form-group col-xs-12 col-sm-2">
-                        <label>Tên tiêu đề: </label>
+                        <label>Tên ngành nghề: </label>
                       </div>
                       <div className="form-group col-xs-12 col-sm-10">
                         <AutoCompleteText

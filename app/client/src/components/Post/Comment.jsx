@@ -27,7 +27,12 @@ class Comment extends Component {
 
   async componentDidMount() {
     await this.props.getCommentByPostId(this.props.postId);
-    await this.props.getUserByUserId(localStorage.userId);
+    if (this.props.auth.isAuthenticated) {
+      if (this.props.user == {}) {
+        await this.props.getUserByUserId(localStorage.userId);
+      }
+    }
+
     let temp = [];
     for (let i = 0; i < this.props.posts.comments.length; i++) {
       const x = this.props.posts.comments[i];

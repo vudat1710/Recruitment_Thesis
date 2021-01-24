@@ -465,14 +465,14 @@ class EditablePost extends Component {
 
                   <hr className="hr-lg" />
 
-                  <h5>Ngành nghề mong muốn</h5>
+                  <h5>Ngành nghề</h5>
                   <div className="form-group">
                     <AutoGenTag
                       name="majors"
                       items={dataAuto.majors}
                       value={majors}
                       getChildState={this.getChildState}
-                      placeholder="Ngành nghề mong muốn"
+                      placeholder="Ngành nghề"
                     />
                     <span className="help-block">
                       Viết và lựa chọn trong danh sách gợi ý
@@ -489,14 +489,14 @@ class EditablePost extends Component {
 
                   <hr className="hr-lg" />
 
-                  <h5>Địa điểm làm việc mong muốn</h5>
+                  <h5>Địa điểm làm việc</h5>
                   <div className="form-group">
                     <AutoGenTag
                       name="workplaces"
                       items={dataAuto.workplaces}
                       value={workplaces}
                       getChildState={this.getChildState}
-                      placeholder="Địa điểm làm việc mong muốn"
+                      placeholder="Địa điểm làm việc"
                     />
                     <span className="help-block">
                       Viết và lựa chọn trong danh sách gợi ý

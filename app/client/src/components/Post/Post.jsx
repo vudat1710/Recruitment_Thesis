@@ -80,9 +80,7 @@ class PostDetails extends Component {
       if (this.props.user == {}) {
         await this.props.getUserByUserId(localStorage.userId);
       }
-      if (this.state.isAdded) {
-        await this.props.getRelatedItems(this.props.posts.postDetails);
-      }
+      await this.props.getRelatedItems(this.props.posts.postDetails);
     }
 
     const userRate =

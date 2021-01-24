@@ -363,14 +363,14 @@ class Stats extends Component {
             </header>
             <div className="row">
             <h4>
-                Nhập tên ngành nghề để xem số bài đăng tương ứng với ngành nghề
+                Nhập tên địa điểm làm việc để xem số bài đăng tương ứng với địa điểm làm việc
                 bạn vừa nhập: {workPlaces[this.state.workPlaceText]}
                 <AutoCompleteText
                   name="workplaces"
                   items={dataAuto.workplaces}
                   value=""
                   getChildState={this.getChildState}
-                  placeholder="Ngành nghề"
+                  placeholder="Địa điểm làm việc"
                 />
               </h4>
               <div style={{height: 30}}/>
